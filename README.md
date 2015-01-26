@@ -22,7 +22,7 @@ Generate an HTTP redirect depending on your authentication provider to:
  * **Microsoft Azure AD (Office 365):** `https://login.windows.net/example.com/.well-known/openid-configuration`
  * **Google Apps:** `https://accounts.google.com/.well-known/openid-configuration`
 
-If you do not, you will need to inspect your authentication provider URLs manually, extract the `authorization_endpoint` and `token_endpoint` entries, and add them to the configuration.
+If you do not have a secure main website, then you will need to inspect your authentication provider URLs manually, extracting the `authorization_endpoint` and `token_endpoint` entries, and add them to the configuration.
 
 FIXME adding manual endpoints
 
@@ -37,8 +37,8 @@ FIXME adding manual endpoints
 1. click on 'Applications' at the top
 1. click on 'Add' located at the centre of the bottom of the page
 1. a window will open asking 'What do you want to do?', click on 'Add an application my organization is developing'
-1. enter in the application name 'freeradius-oauth2-perl', click on 'Native client application', and click on the next arrow
-1. as a redirect URI, enter in 'http://localhost:8000/code.html', then click on the complete arrow
+1. enter in the application name `freeradius-oauth2-perl`, click on 'Native client application', and click on the next arrow
+1. as a redirect URI, enter in `http://localhost:8000/code.html`, then click on the complete arrow
 1. the application will now be added and you will be shown a preview page
 1. before we leave, you will need the 'Client ID' (a long hex GUID), which you can find located under both 'Configure' (at the top of the page) or 'Update your Code' (under the 'Getting Started' title)
 
@@ -48,7 +48,7 @@ Using this Client ID, we now need to create an authorisation code, to do this, r
 
 Now in your web browser go to (replacing `CLIENTID` with your client ID):
 
-    https://login.windows.net/common/oauth2/authorize?response_type=code&client_id=CLIENTID&prompt=admin_consent"
+    https://login.windows.net/common/oauth2/authorize?response_type=code&prompt=admin_consent&client_id=CLIENTID
 
 You will be taken to a page asking you to permit freeradius-oauth2-perl access to enable sign-on and read users' profiles.  When you click on 'Accept' you will be redirected to a page that provides you with the authorisation code.  Take a copy of this, either via cut'n'paste or using the 'Export to File' link on that page.
 
