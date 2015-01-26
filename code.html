@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=us-ascii">
+<title>OAuth2 Authorisation Code Extractor</title>
+<script>
+// http://stackoverflow.com/a/21152762
+var qd = {};
+location.search.substr(1).split("&").forEach(function(item) {var k = item.split("=")[0], v = decodeURIComponent(item.split("=")[1]); (k in qd) ? qd[k].push(v) : qd[k] = [v,]});
+</script>
+</head>
+<body>
+<h1>OAuth2 Authorisation Code Extractor</h1>
+<p>
+Your authorisation code is:
+</p>
+<pre>
+<script>document.write(qd.code[0]);</script>
+</pre>
+<div id="export">
+<script>
+var a = document.createElement("a");
+a.innerHTML = "Export as File";
+a.setAttribute("href", "data:text/plain;charset=us-ascii,"+encodeURIComponent(qd.code[0]));
+a.setAttribute("download", "freeradius-perl-oauth.cfg");
+document.getElementById("export").appendChild(a);
+</script>
+</div>
+</body>
+</html>
