@@ -9,7 +9,7 @@ This is a [FreeRADIUS](http://freeradius.org/) [OAuth2 (OpenID Connect)](http://
 
 ## Debian
 
-    sudo apt-get install -yy --no-install-recommends freeradius libwww-perl python
+    sudo apt-get install -yy --no-install-recommends freeradius freeradius-utils libwww-perl python
 
 # Configuration
 
@@ -22,7 +22,7 @@ If you run a *secure* HTTPS website at `https://example.com` then you can make u
 Generate an HTTP redirect depending on your authentication provider to:
 
  * **Microsoft Azure AD (Office 365):** `https://login.windows.net/example.com/.well-known/openid-configuration`
- * **Google Apps:** `https://accounts.google.com/.well-known/openid-configuration`
+ * **Google Apps [not supported]:** `https://accounts.google.com/.well-known/openid-configuration`
 
 If you do not have a secure main website, then you will need to inspect your authentication provider URLs manually, extracting the `authorization_endpoint` and `token_endpoint` entries, and add them to the configuration.
 
