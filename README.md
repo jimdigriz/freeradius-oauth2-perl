@@ -4,12 +4,30 @@ This is a [FreeRADIUS](http://freeradius.org/) [OAuth2 (OpenID Connect)](http://
 
 # Preflight
 
+You will need to [have git installed on your workstation](http://git-scm.com/book/en/Getting-Started-Installing-Git) and , and your 'target' RADIUS server (preferably running Debian `wheezy` 7.x) should have an already working *default* installation of FreeRADIUS 2.2.x.
+
+## Workstation
+
+You will need to [have git installed on your workstation](http://git-scm.com/book/en/Getting-Started-Installing-Git) and a copy of python to hand; python is just used to run a quick standalone webserver.
+
+So we start off by fetching a copy of the project:
+
     git clone https://github.com/jimdigriz/freeradius-oauth2-perl.git
     cd freeradius-oauth2-perl
 
-## Debian
+## Target RADIUS Server
 
-    sudo apt-get install -yy --no-install-recommends freeradius freeradius-utils libwww-perl python
+Preferably running Debian `wheezy` 7.x, you should set up a working *default* installation of FreeRADIUS 2.2.x.  This can be done with:
+
+    sudo apt-get install -yy --no-install-recommends freeradius freeradius-utils libwww-perl
+
+**N.B.** if someone wants to step forward to help get this working on another UNIX system (*BSD, another Linux, Mac OS X, etc) and/or a later version of FreeRADIUS, then do get in touch
+
+On the server, run:
+
+    mkdir /opt/freeradius-perl-oauth2
+
+From the project directory on your workstation, copy `main.pl` and `module` to `/opt/freeradius-perl-oauth2`:
 
 # Configuration
 
@@ -63,6 +81,40 @@ FIXME what to do with this file
 **N.B.** works in progress
 
 ## FreeRADIUS
+
+On the server run as root:
+
+    ln -T -f -s /opt/freeradius-perl-oauth2/module /etc/freeradius/modules/freeradius-perl-oauth2
+
+Amend `/etc/freeradius/sites-available/default` to add `freeradius-perl-oauth2` at the right sections:
+
+    authorize {
+      ...
+    
+      files
+    
+      # after 'files'
+      freeradius-perl-oauth2
+    
+      expiration
+    
+      ...
+    }
+    
+    authenticate {
+      ...
+    
+      eap
+      
+      # after 'eap'
+      Auth-Type freeradius-perl-oauth2 {
+        freeradius-perl-oauth2
+      }
+    }
+
+# Testing
+
+    radtest moo cow localhost 0 testing123 IGNORED 127.0.0.1
 
 # Related Links
 
