@@ -1,4 +1,6 @@
-This is a [FreeRADIUS](http://freeradius.org/) [OAuth2 (OpenID Connect)](http://en.wikipedia.org/wiki/OpenID_Connect) perl module to handle authentication.
+This is a [FreeRADIUS](http://freeradius.org/) [OAuth2 (OpenID Connect)](http://en.wikipedia.org/wiki/OpenID_Connect) perl module to handle authentication.  It was created to allow the users of a wireless 802.1X (WPA Enterprise) network to connect.
+
+**N.B.** this module relies on [`grant_type=password`](https://tools.ietf.org/html/rfc6749#section-4.3) being supported by your OAuth2 provider
 
 # Preflight
 
@@ -7,7 +9,7 @@ This is a [FreeRADIUS](http://freeradius.org/) [OAuth2 (OpenID Connect)](http://
 
 ## Debian
 
-    sudo apt-get install -yy --no-install-recommends freeradius libwww-perl
+    sudo apt-get install -yy --no-install-recommends freeradius libwww-perl python
 
 # Configuration
 
@@ -66,5 +68,4 @@ FIXME what to do with this file
 
  * [Microsoft Azure REST API + OAuth 2.0](https://ahmetalpbalkan.com/blog/azure-rest-api-with-oauth2/)
  * [Authorization Code Grant Flow](https://msdn.microsoft.com/en-us/library/azure/dn645542.aspx)
- * [RFC6749: Resource Owner Password Credentials Grant](https://tools.ietf.org/html/rfc6749#section-4.3)
  * [Configuring a Web Page Redirect](http://docs.aws.amazon.com/AmazonS3/latest/dev/how-to-page-redirect.html) - S3->Cloudfront redirects
