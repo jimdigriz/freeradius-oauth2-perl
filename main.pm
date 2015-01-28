@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use Config::Tiny;
+use LWP::UserAgent;
 use JSON::PP;
 
 # http://wiki.freeradius.org/modules/Rlm_perl#Return-Codes

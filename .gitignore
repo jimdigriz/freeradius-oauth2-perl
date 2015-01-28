@@ -1,2 +1,8 @@
 .*
 !.gitignore
+
+config
+clientid
+code
+username
+password
