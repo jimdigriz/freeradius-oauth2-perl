@@ -84,6 +84,11 @@ You will be taken to a page asking you to permit freeradius-oauth2-perl access t
 
 Now `Ctrl-C` the python webserver as we have finished with it.
 
+#### Related Links
+
+ * [Authorization Code Grant Flow](https://msdn.microsoft.com/en-us/library/azure/dn645542.aspx)
+ * [Microsoft Azure REST API + OAuth 2.0](https://ahmetalpbalkan.com/blog/azure-rest-api-with-oauth2/)
+
 ### Google Apps
 
 **N.B.** works in progress
@@ -151,10 +156,6 @@ If this works you will get a HTTP 200, otherwise you will see a 400 error.  If s
 
 ## RADIUS
 
-    radtest moo cow localhost 0 testing123 IGNORED 127.0.0.1
+On your RADIUS server, you can test everything is working by typing:
 
-# Related Links
-
- * [Microsoft Azure REST API + OAuth 2.0](https://ahmetalpbalkan.com/blog/azure-rest-api-with-oauth2/)
- * [Authorization Code Grant Flow](https://msdn.microsoft.com/en-us/library/azure/dn645542.aspx)
- * [Configuring a Web Page Redirect](http://docs.aws.amazon.com/AmazonS3/latest/dev/how-to-page-redirect.html) - S3->Cloudfront redirects
+    radtest <USER>@example.com <PASSWORD> localhost 0 testing123 IGNORED 127.0.0.1
