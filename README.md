@@ -17,7 +17,7 @@ So we start off by fetching a copy of the project:
 
 ## Target RADIUS Server
 
-Preferably running Debian `wheezy` 7.x, you should set up a working *default* installation of FreeRADIUS 2.2.x.  This can be done with:
+Preferably running Debian 'wheezy' 7.x, you should set up a working *default* installation of FreeRADIUS 2.2.x.  This can be done with:
 
     sudo apt-get install -yy --no-install-recommends freeradius freeradius-utils libwww-perl libconfig-ini-perl
 
