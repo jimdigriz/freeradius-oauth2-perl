@@ -4,11 +4,11 @@ This is a [FreeRADIUS](http://freeradius.org/) [OAuth2 (OpenID Connect)](http://
 
 # Preflight
 
-You will need to [have git installed on your workstation](http://git-scm.com/book/en/Getting-Started-Installing-Git) and , and your 'target' RADIUS server (preferably running Debian `wheezy` 7.x) should have an already working *default* installation of FreeRADIUS 2.2.x.
-
 ## Workstation
 
-You will need to [have git installed on your workstation](http://git-scm.com/book/en/Getting-Started-Installing-Git) and a copy of python to hand; python is just used to run a quick standalone webserver.
+You will need to [have git installed on your workstation](http://git-scm.com/book/en/Getting-Started-Installing-Git), [cURL](http://curl.haxx.se/) and python.
+
+**N.B.** Debian/Redhat users should be able to just type `sudo {apt-get,yum} install git curl python` whilst Mac OS X users should already have these tools present.
 
 So we start off by fetching a copy of the project:
 
@@ -19,7 +19,7 @@ So we start off by fetching a copy of the project:
 
 Preferably running Debian `wheezy` 7.x, you should set up a working *default* installation of FreeRADIUS 2.2.x.  This can be done with:
 
-    sudo apt-get install -yy --no-install-recommends freeradius freeradius-utils libwww-perl
+    sudo apt-get install -yy --no-install-recommends freeradius freeradius-utils libwww-perl libconfig-ini-perl
 
 **N.B.** if someone wants to step forward to help get this working on another UNIX system (*BSD, another Linux, Mac OS X, etc) and/or a later version of FreeRADIUS, then do get in touch
 
