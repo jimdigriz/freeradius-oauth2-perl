@@ -19,6 +19,8 @@ Now make a copy of the example configuration which is an [INI](http://en.wikiped
 
     cp example.config config
 
+**N.B.** although you usually only have a single OAuth2 realm, the configuration does support multiple sections
+
 ## Target RADIUS Server
 
 Preferably running Debian 'wheezy' 7.x, you should set up a working *default* installation of FreeRADIUS 2.2.x.  This can be done with:
@@ -51,10 +53,7 @@ If you do not have a *secure* website at the apex of your realm, then you will n
 1. in a terminal run the following amending the `.well-known/openid-configuration` URL appropiately to point at your authentication provider
     curl -s -L https://.../.well-known/openid-configuration | python -m json.tool
 1. extract the `authorization_endpoint` and `token_endpoint` entries (which *must* be HTTPS)
-1. edit `config` and add an entry for your realm, for example
-    [example.com]
-    authorization_endpoint=https://foobar.com/oauth2/authorize
-    token_endpoint=https://foobar.com/oauth2/token
+1. edit `config` and add `authorization_endpoint` and `token_endpoint` entries for your realm
 
 ## Cloud
 
@@ -71,9 +70,7 @@ If you do not have a *secure* website at the apex of your realm, then you will n
 1. as a redirect URI, enter in `http://localhost:8000/code.html`, then click on the complete arrow
 1. the application will now be added and you will be shown a preview page
 1. before we leave, you will need the 'Client ID' (a [long hex GUID](http://en.wikipedia.org/wiki/Globally_unique_identifier#Text_encoding)), which you can find located under both 'Configure' (at the top of the page) or 'Update your Code' (under the 'Getting Started' title)
-1. place this Client ID in the `config` file under your realm as `clientid`, for example:
-    [example.com]
-    clientid=12345678-abcd-abcd-abcd-1234567890ab
+1. place this Client ID in the `config` file under your realm as `clientid`
 
 Using this Client ID, we now need to create an authorisation code, to do this, run a webserver from a terminal, inside the project with:
 
@@ -83,10 +80,7 @@ Now in your web browser go to (replacing `<CLIENTID>` with your Client ID from a
 
     https://login.windows.net/common/oauth2/authorize?response_type=code&prompt=admin_consent&client_id=<CLIENTID>
 
-You will be taken to a page asking you to permit freeradius-oauth2-perl access to enable sign-on and read users' profiles.  When you click on 'Accept' you will be redirected to a page that provides you with the authorisation code.  Take a copy of this, either via cut'n'paste or using the 'Export to File' link on that page and place it in the `config` file under your realm as `cdode`, for example:
-
-    [example.com]
-    code=AAAAdsahjkdda......
+You will be taken to a page asking you to permit freeradius-oauth2-perl access to enable sign-on and read users' profiles.  When you click on 'Accept' you will be redirected to a page that provides you with the authorisation code.  Take a copy of this, either via cut'n'paste or using the 'Export to File' link on that page and place it in the `config` file under your realm as `cdode`.
 
 Now `Ctrl-C` the python webserver as we have finished with it.
 
@@ -95,6 +89,14 @@ Now `Ctrl-C` the python webserver as we have finished with it.
 **N.B.** works in progress
 
 ## FreeRADIUS
+
+By now your `config` file should look something like:
+
+    [example.com]
+    clientid=12345678-abcd-abcd-abcd-1234567890ab
+    code=AAAB....
+    authorization_endpoint=https://.../oauth2/authorize
+    token_endpoint=https://.../oauth2/token
 
 Copy `config` on your workstation to `/opt/freeradius-perl-oauth2` on the target RADIUS server, and then on the server run as root:
 
