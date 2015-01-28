@@ -51,6 +51,7 @@ Generate an HTTP redirect depending on your authentication provider to:
 If you do not have a *secure* website at the apex of your realm, then you will need to:
 
 1. in a terminal run the following amending the `.well-known/openid-configuration` URL appropiately to point at your authentication provider
+
     curl -s -L https://.../.well-known/openid-configuration | python -m json.tool
 1. extract the `authorization_endpoint` and `token_endpoint` entries (which *must* be HTTPS)
 1. edit `config` and add `authorization_endpoint` and `token_endpoint` entries for your realm
