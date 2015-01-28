@@ -19,7 +19,7 @@ So we start off by fetching a copy of the project:
 
 Preferably running Debian 'wheezy' 7.x, you should set up a working *default* installation of FreeRADIUS 2.2.x.  This can be done with:
 
-    sudo apt-get install -yy --no-install-recommends freeradius freeradius-utils libwww-perl libconfig-ini-perl
+    sudo apt-get install -yy --no-install-recommends freeradius freeradius-utils libwww-perl libconfig-tiny-perl
 
 **N.B.** if someone wants to step forward to help get this working on another UNIX system (*BSD, another Linux, Mac OS X, etc) and/or a later version of FreeRADIUS, then do get in touch
 

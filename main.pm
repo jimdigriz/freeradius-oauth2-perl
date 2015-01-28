@@ -3,8 +3,7 @@
 use strict;
 use warnings;
 
-use 5.014;
-
+use Config::Tiny;
 use JSON::PP;
 
 # http://wiki.freeradius.org/modules/Rlm_perl#Return-Codes
