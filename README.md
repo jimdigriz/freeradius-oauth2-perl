@@ -143,6 +143,8 @@ Put a copy of your username in a file called `username`, and your password in `p
     		-F password=\<password \
     	$(awk -F= '/^token_endpoint=/ { print $2 }' config)
 
+**N.B.** if you have multiple realms enabled in your `config`, then you will need to comment out *all* the ones you are not testing
+
 If this works you will get a HTTP 200, otherwise you will see a 400 error.  If successful, type the following to remove your credentials:
 
     shred -f -u username password
