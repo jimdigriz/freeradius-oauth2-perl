@@ -24,8 +24,13 @@ use constant {
 use vars qw/%RAD_REQUEST %RAD_REPLY %RAD_CHECK/;
 
 sub authorize {
-	$RAD_CHECK{'Auth-Type'} = 'freeradius-perl-oauth2';
-	return RLM_MODULE_UPDATED;
+	unless (defined($RAD_CHECK{'Auth-Type'}) || !defined($RAD_REQUEST{'Realm'})) {
+		$RAD_CHECK{'Auth-Type'} = 'freeradius-perl-oauth2';
+		delete $RAD_CHECK{'Proxy-To-Realm'};
+		return RLM_MODULE_UPDATED;
+	}
+
+	return RLM_MODULE_NOOP;
 }
 
 sub authenticate {

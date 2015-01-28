@@ -134,6 +134,11 @@ Amend `/etc/freeradius/sites-available/default` to add `freeradius-perl-oauth2` 
       }
     }
 
+Now add to `/etc/freeradius/proxy.conf`:
+
+    realm example.com {
+    }
+
 # Testing
 
 ## OAuth2
