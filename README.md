@@ -106,6 +106,8 @@ By now your `config` file should look something like:
 
 Copy `config` on your workstation to `/opt/freeradius-perl-oauth2` on the target RADIUS server, and then on the server run as root:
 
+    chown root:freerad /opt/freeradius-perl-oauth2/config
+    chmod 640 /opt/freeradius-perl-oauth2/config
     ln -T -f -s /opt/freeradius-perl-oauth2/module /etc/freeradius/modules/freeradius-perl-oauth2
 
 Amend `/etc/freeradius/sites-available/default` to add `freeradius-perl-oauth2` at the right sections:

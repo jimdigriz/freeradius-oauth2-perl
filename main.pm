@@ -3,9 +3,30 @@
 use strict;
 use warnings;
 
+use threads;
+use threads::shared;
+
 use Config::Tiny;
 use LWP::UserAgent;
 use JSON::PP;
+#use Data::Dumper;
+
+my $cfg = Config::Tiny->read('/opt/freeradius-perl-oauth2/config');
+
+# http://lists.freeradius.org/pipermail/freeradius-users/2012-December/064155.html
+my %credentials :shared;
+sub put($$$) {
+	my ($hash, $key, $value) = @_;
+	lock(%$hash);
+	$hash->{$key} = share($value);
+	return;
+}
+sub get($$) {
+	my ($hash, $key) = @_;
+	lock(%$hash);
+	my $value = $hash->{$key};
+	return $value;
+}
 
 # http://wiki.freeradius.org/modules/Rlm_perl#Return-Codes
 use constant {
@@ -34,6 +55,7 @@ sub authorize {
 }
 
 sub authenticate {
+	$RAD_REPLY{'Reply-Message'} = join ',', map { $cfg->{$_}->{'clientid'} } keys %$cfg;
 	return RLM_MODULE_OK;
 }
 
