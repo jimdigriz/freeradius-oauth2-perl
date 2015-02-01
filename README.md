@@ -190,7 +190,7 @@ Now add to `/etc/freeradius/proxy.conf`:
     realm example.com {
     }
 
-## Heartbleed
+### Heartbleed
 
 FreeRADIUS actively checks for the Heartbleed vulnerability](http://freeradius.org/security.html#heartbleed) and will refuse to fire up if it thinks you are running a too old a version.  To bypass this check you *must* confirme that you have installed at least version `1.0.1e-2+deb7u**7**` (note the '7' on the end there) of [libssl1.0.0](https://packages.debian.org/wheezy/libssl1.0.0) which you can do with:
 
