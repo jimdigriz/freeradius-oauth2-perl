@@ -114,12 +114,17 @@ Now `Ctrl-C` the python webserver as we have finished with it.
 
 #### Related Links
 
- * [Authorization Code Grant Flow](https://msdn.microsoft.com/en-us/library/azure/dn645542.aspx)
+ * [OAuth 2.0 in Azure AD](https://msdn.microsoft.com/en-us/library/azure/dn645545.aspx)
  * [Microsoft Azure REST API + OAuth 2.0](https://ahmetalpbalkan.com/blog/azure-rest-api-with-oauth2/)
 
 ### Google Apps
 
 **N.B.** works in progress
+
+#### Related Links
+
+ * [OpenID Connect (OAuth 2.0 for Login)](https://developers.google.com/accounts/docs/OpenIDConnect)
+ * [Using OAuth 2.0 for Devices](https://developers.google.com/accounts/docs/OAuth2ForDevices) - via SMS or email maybe?
 
 ## FreeRADIUS
 
