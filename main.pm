@@ -12,6 +12,7 @@ use HTTP::Status qw/is_client_error is_server_error/;
 use JSON;
 use Date::Parse qw/str2time/;
 use Storable qw/freeze thaw/;
+use URI;
 
 my $VERSION = '0.1';
 
@@ -50,7 +51,7 @@ BEGIN {
 		exit 1;
 	}
 
-	&radiusd::radlog(RADIUS_LOG_INFO, "no realms configured, this module will always noop")
+	&radiusd::radlog(RADIUS_LOG_INFO, 'no realms configured, this module will always noop')
 		unless (scalar(grep { $_ ne '_' } keys %$cfg) > 0);
 
 	foreach my $realm (grep { $_ ne '_' } keys %$cfg) {
@@ -85,14 +86,14 @@ $ua->from($cfg->{'_'}->{'from'})
 	if (defined($cfg->{'_'}->{'from'}));
 
 if (defined($cfg->{'_'}->{'secure'}) && $cfg->{'_'}->{'secure'} == 0) {
-	&radiusd::radlog(RADIUS_LOG_INFO, "secure set to zero, SSL is effectively disabled!");
+	&radiusd::radlog(RADIUS_LOG_INFO, 'secure set to zero, SSL is effectively disabled!');
 
 	$ua->ssl_opts(verify_hostname => 0);
 }
 
 # debugging
 if (defined($cfg->{'_'}->{'debug'}) && $cfg->{'_'}->{'debug'} == 1) {
-	&radiusd::radlog(RADIUS_LOG_INFO, "debugging enabled, you will see the HTTPS requests in the clear!");
+	&radiusd::radlog(RADIUS_LOG_INFO, 'debugging enabled, you will see the HTTPS requests in the clear!');
 
 	$ua->add_handler('request_send',  sub { shift->dump; return });
 	$ua->add_handler('response_done', sub { shift->dump; return });
@@ -214,7 +215,7 @@ sub _discovery ($) {
 	if ($c->{'discovery'}) {
 		my $r = $ua->get('https://' . lc $RAD_REQUEST{'Realm'} . '/.well-known/openid-configuration');
 		if (is_server_error($r->code)) {
-			&radiusd::radlog(RADIUS_LOG_ERROR, "unable to perform discovery: " . $r->status_line);
+			&radiusd::radlog(RADIUS_LOG_ERROR, 'unable to perform discovery: ' . $r->status_line);
 			return;
 		}
 
@@ -255,13 +256,13 @@ sub _fetch_token ($$) {
 		@$f,
 	]);
 	if (is_server_error($r->code)) {
-		&radiusd::radlog(RADIUS_LOG_INFO, "authentication request failed: " . $r->status_line);
+		&radiusd::radlog(RADIUS_LOG_INFO, 'authentication request failed: ' . $r->status_line);
 		return RLM_MODULE_REJECT;
 	}
 
 	my $j = decode_json $r->decoded_content;
 	unless (defined($j)) {
-		&radiusd::radlog(RADIUS_LOG_INFO, "non-JSON reponse to authentication request");
+		&radiusd::radlog(RADIUS_LOG_INFO, 'non-JSON reponse to authentication request');
 		return RLM_MODULE_REJECT;
 	}
 
@@ -281,7 +282,7 @@ sub _fetch_token ($$) {
 	}
 
 	unless (defined($j->{'access_token'} && $j->{'token_type'})) {
-		&radiusd::radlog(RADIUS_LOG_ERROR, "missing access_token/token_type in JSON response");
+		&radiusd::radlog(RADIUS_LOG_ERROR, 'missing access_token/token_type in JSON response');
 		return RLM_MODULE_REJECT;
 	}
 
