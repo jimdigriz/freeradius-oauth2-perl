@@ -5,9 +5,11 @@ use warnings;
 
 use Config::Tiny;
 use LWP::UserAgent;
-use JSON::PP;
+use JSON;
 
 use Data::Dumper;
+
+my $VERSION = '0.1';
 
 # http://wiki.freeradius.org/modules/Rlm_perl#Logging
 use constant {
@@ -59,12 +61,31 @@ BEGIN {
 			&radiusd::radlog(RADIUS_LOG_ERROR, "realm '$realm' has partially configured manual endpoints");
 			exit 1;
 		}
+
+		$cfg->{$realm}->{'discovery'} = (defined($cfg->{$realm}->{'authorization_endpoint'})) ? 0 : 1;
 	}
 }
 
 my $ua = LWP::UserAgent->new;
 $ua->timeout(10);
 $ua->env_proxy;
+$ua->agent("freeradius-oauth2-perl/$VERSION (+https://github.com/jimdigriz/freeradius-oauth2-perl; " . $ua->_agent . ')');
+$ua->from($cfg->{'_'}->{'from'})
+	if (defined($cfg->{'_'}->{'from'}));
+
+if (defined($cfg->{'_'}->{'secure'}) && $cfg->{'_'}->{'secure'} == 0) {
+	&radiusd::radlog(RADIUS_LOG_INFO, "secure set to zero, SSL is effectively disabled!");
+
+	$ua->ssl_opts(verify_hostname => 0);
+}
+
+# debugging
+if (defined($cfg->{'_'}->{'debug'}) && $cfg->{'_'}->{'debug'} == 1) {
+	&radiusd::radlog(RADIUS_LOG_INFO, "debugging enabled, you will see the HTTPS requests in the clear!");
+
+	$ua->add_handler('request_send',  sub { shift->dump; return });
+	$ua->add_handler('response_done', sub { shift->dump; return });
+}
 
 sub authorize {
 	return RLM_MODULE_NOOP
@@ -82,7 +103,31 @@ sub authorize {
 }
 
 sub authenticate {
-	$RAD_REPLY{'Reply-Message'} = join ',', map { $cfg->{$_}->{'clientid'} } grep { $_ ne '_' } keys %$cfg;
+	my $c = $cfg->{lc $RAD_REQUEST{'Realm'}};
+
+	my $auth_endpoint;
+	my $token_endpoint;
+	if ($c->{'discovery'}) {
+		my $r = $ua->get('https://' . lc $RAD_REQUEST{'Realm'} . '/.well-known/openid-configuration');
+		if ($r->is_error) {
+			&radiusd::radlog(RADIUS_LOG_ERROR, "unable to perform discovery: " . $r->status_line);
+			return RLM_MODULE_FAIL;
+		}
+
+		my $j = decode_json $r->decoded_content;
+		unless (defined($j) && defined($j->{'authorization_endpoint'})) {
+			&radiusd::radlog(RADIUS_LOG_ERROR, "non-JSON reponse or missing 'authorization_endpoint' element");
+			return RLM_MODULE_FAIL;
+		}
+
+		$auth_endpoint = $j->{'authorization_endpoint'};
+		$token_endpoint = $j->{'token_endpoint'};
+	} else {
+		$auth_endpoint = $c->{'authorization_endpoint'};
+		$token_endpoint = $c->{'token_endpoint'};
+	}
+
+	$RAD_REPLY{'Reply-Message'} = $token_endpoint;
 	return RLM_MODULE_OK;
 }
 

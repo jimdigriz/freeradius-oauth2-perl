@@ -21,6 +21,12 @@ Now make a copy of the example configuration which is an [INI](http://en.wikiped
 
 **N.B.** although you usually only have a single OAuth2 realm, the configuration does support multiple sections
 
+Optionally, you can edit the following elemts in the global section of `config`:
+
+ * **`debug` (default: 0):** set to `1` to have verbose output, such as the HTTPS communications (note that you will see passwords in the clear!)
+ * **`from` (default: [unset]):** set to a suitable contact email address for your organisation
+ * **`secure` (default: 1):** set to `0` if you wish to turn off all the benefits of SSL (strongly *not* recommended)
+
 ## Target RADIUS Server
 
 You require a Debian 'wheezy' 7.x server that is plumbed into [Debian Backports](http://backports.debian.org/), which if you have not done already is just a case of running:
@@ -35,7 +41,7 @@ You require a Debian 'wheezy' 7.x server that is plumbed into [Debian Backports]
 Afterwards, you can get everything you need with:
 
     sudo apt-get install -yy --no-install-recommends \
-    	libwww-perl libconfig-tiny-perl
+    	libwww-perl libconfig-tiny-perl libjson-perl libjson-xs-perl
     sudo apt-get install -yy --no-install-recommends -t wheezy-backports \
     	freeradius freeradius-utils
 
