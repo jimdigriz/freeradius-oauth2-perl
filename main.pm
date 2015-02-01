@@ -54,6 +54,11 @@ BEGIN {
 				exit 1;
 			}
 		}
+
+		if (defined($cfg->{$realm}->{'authorization_endpoint'}) ^ defined($cfg->{$realm}->{'token_endpoint'})) {
+			&radiusd::radlog(RADIUS_LOG_ERROR, "realm '$realm' has partially configured manual endpoints");
+			exit 1;
+		}
 	}
 }
 
