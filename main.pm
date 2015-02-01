@@ -44,6 +44,9 @@ BEGIN {
 		exit 1;
 	}
 
+	&radiusd::radlog(RADIUS_LOG_INFO, "no realms configured, this module will always noop")
+		unless (scalar(grep { $_ ne '_' } keys %$cfg) > 0);
+
 	foreach my $realm (grep { $_ ne '_' } keys %$cfg) {
 		foreach my $key ('clientid', 'code') {
 			unless (defined($cfg->{$realm}->{$key})) {
