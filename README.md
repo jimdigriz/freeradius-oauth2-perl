@@ -190,9 +190,23 @@ Amend `/etc/freeradius/sites-available/default` to add `freeradius-oauth2-perl` 
       ...
     }
 
-Now add to `/etc/freeradius/proxy.conf`:
+Add to you `/etc/freeradius/proxy.conf`:
 
     realm example.com {
+    }
+
+Now edit `/etc/freeradius/eap.conf`:
+
+    ...
+    
+    ttls {
+      ...
+    
+      copy_request_to_tunnel = yes
+    
+      use_tunneled_reply = yes
+    
+      ...
     }
 
 ### Heartbleed

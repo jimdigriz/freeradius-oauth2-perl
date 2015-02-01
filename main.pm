@@ -291,6 +291,8 @@ sub _gen_id {
 	$i .= '|' . $RAD_REQUEST{'NAS-Port'} || $RAD_REQUEST{'NAS-Port-Id'}
 		if (defined($RAD_REQUEST{'NAS-Port'}) || defined($RAD_REQUEST{'NAS-Port-Id'}));
 	$i .= '|' . $RAD_REQUEST{'User-Name'};
+	$i .= '|' . $RAD_REQUEST{'Calling-Station-Id'};
+		if (defined($RAD_REQUEST{'Calling-Station-Id'}));
 
 	return $i;
 }
