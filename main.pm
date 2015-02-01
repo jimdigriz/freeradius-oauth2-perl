@@ -35,12 +35,21 @@ use constant {
 
 use vars qw/%RAD_REQUEST %RAD_REPLY %RAD_CHECK/;
 
-my $cfg = Config::Tiny->read('/opt/freeradius-perl-oauth2/config');
-foreach my $realm (grep { $_ ne '_' } keys %$cfg) {
-	foreach my $key ('clientid', 'code') {
-		unless (defined($cfg->{$realm}->{$key})) {
-			print STDERR "config: no '$key' set for '$realm'\n";
-			die "honk";
+my $cfg;
+
+BEGIN {
+	$cfg = Config::Tiny->read('/opt/freeradius-perl-oauth2/config');
+	unless (defined($cfg)) {
+		&radiusd::radlog(RADIUS_LOG_ERROR, "unable to open 'config': " . Config::Tiny->errstr);
+		exit 1;
+	}
+
+	foreach my $realm (grep { $_ ne '_' } keys %$cfg) {
+		foreach my $key ('clientid', 'code') {
+			unless (defined($cfg->{$realm}->{$key})) {
+				&radiusd::radlog(RADIUS_LOG_ERROR, "no '$key' set for '$realm'");
+				exit 1;
+			}
 		}
 	}
 }
