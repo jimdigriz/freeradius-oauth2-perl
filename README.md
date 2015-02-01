@@ -336,7 +336,7 @@ There is some basic xlat functionality in the module that lets you extract some 
 
 Calling the function with the following argument will return:
  * **`timestamp`:** epoch of when the authorization token was created
- * **`expires_in`:** time in seconds from `timestamp` that the [authorization token is valid](https://tools.ietf.org/html/rfc6749#section-5.1) for; this is *not* how long the `refresh_token` is valid for which is typically significantly longer
+ * **`expires_in`:** time in seconds from `timestamp` that the [authorization token is valid](https://tools.ietf.org/html/rfc6749#section-5.1) for or `-1` if there is not one; this is *not* how long the `refresh_token` is valid for which is typically significantly longer
 
 For example:
 
