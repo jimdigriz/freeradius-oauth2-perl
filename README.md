@@ -2,6 +2,11 @@ This is a [FreeRADIUS](http://freeradius.org/) [OAuth2 (OpenID Connect)](http://
 
 **N.B.** this module relies on [`grant_type=password`](https://tools.ietf.org/html/rfc6749#section-4.3) being supported by your OAuth2 provider
 
+## Related Links
+
+ * [RFC6749: The OAuth 2.0 Authorization Framework](https://tools.ietf.org/html/rfc6749)
+ * [OpenID Connect Core 1.0](http://openid.net/specs/openid-connect-core-1_0.html)
+
 # Preflight
 
 ## Workstation

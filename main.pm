@@ -5,6 +5,7 @@ use warnings;
 
 use Config::Tiny;
 use LWP::UserAgent;
+use HTTP::Status qw/is_client_error is_server_error/;
 use JSON;
 
 my $VERSION = '0.1';
@@ -114,15 +115,15 @@ sub authenticate {
 	my $token_endpoint;
 	if ($c->{'discovery'}) {
 		my $r = $ua->get('https://' . lc $RAD_REQUEST{'Realm'} . '/.well-known/openid-configuration');
-		if ($r->is_error) {
+		if (is_server_error($r->code)) {
 			&radiusd::radlog(RADIUS_LOG_ERROR, "unable to perform discovery: " . $r->status_line);
-			return RLM_MODULE_FAIL;
+			return RLM_MODULE_REJECT;
 		}
 
 		my $j = decode_json $r->decoded_content;
 		unless (defined($j) && defined($j->{'authorization_endpoint'})) {
 			&radiusd::radlog(RADIUS_LOG_ERROR, "non-JSON reponse or missing 'authorization_endpoint' element");
-			return RLM_MODULE_FAIL;
+			return RLM_MODULE_REJECT;
 		}
 
 		$auth_endpoint = $j->{'authorization_endpoint'};
@@ -134,11 +135,51 @@ sub authenticate {
 
 	unless (URI->new($auth_endpoint)->canonical->scheme eq 'https') {
 		&radiusd::radlog(RADIUS_LOG_ERROR, "'authorization_endpoint' is not 'https' scheme");
+		return RLM_MODULE_REJECT;
+	}
+	unless (URI->new($token_endpoint)->canonical->scheme eq 'https') {
+		&radiusd::radlog(RADIUS_LOG_ERROR, "'token_endpoint' is not 'https' scheme");
+		return RLM_MODULE_REJECT;
+	}
+
+	my $r = $ua->post($token_endpoint, [
+		scope		=> 'openid',
+		client_id	=> $c->{'clientid'},
+		code		=> $c->{'code'},
+		resource	=> '00000002-0000-0000-c000-000000000000',
+		grant_type	=> 'password',
+		username	=> $RAD_REQUEST{'User-Name'},
+		password	=> $RAD_REQUEST{'User-Password'},
+	]);
+	if (is_server_error($r->code)) {
+		&radiusd::radlog(RADIUS_LOG_INFO, "authentication request failed: " . $r->status_line);
+		return RLM_MODULE_REJECT;
+	}
+
+	my $j = decode_json $r->decoded_content;
+	unless (defined($j)) {
+		&radiusd::radlog(RADIUS_LOG_INFO, "non-JSON reponse to authentication request");
+		return RLM_MODULE_REJECT;
+	}
+
+	if (is_client_error($r->code)) {
+		my $message = [];
+
+		push @$message, $RAD_REPLY{'Reply-Message'}
+			if (defined($RAD_REPLY{'Reply-Message'}));
+
+		push @$message, 'Error: ' . $j->{'error'};
+		push @$message, split(/\r\n/ms, $j->{'error_description'})
+			if (defined($j->{'error_description'}));
+
+		$RAD_REPLY{'Reply-Message'} = $message;
+
 		return RLM_MODULE_FAIL;
 	}
-	unless (URI->new($token_endpoint)->canonical->scheme eq 'http') {
-		&radiusd::radlog(RADIUS_LOG_ERROR, "'token_endpoint' is not 'https' scheme");
-		return RLM_MODULE_FAIL;
+
+	unless (defined($j->{'access_token'} && $j->{'token_type'})) {
+		&radiusd::radlog(RADIUS_LOG_ERROR, "missing access_token/token_type in JSON response");
+		return RLM_MODULE_REJECT;
 	}
 
 	return RLM_MODULE_OK;
