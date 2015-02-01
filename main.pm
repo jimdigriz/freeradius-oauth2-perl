@@ -136,7 +136,7 @@ sub authenticate {
 		password	=> $RAD_REQUEST{'User-Password'},
 	]);
 	return $r
-		if (ref($r) eq 'SCALAR');
+		if (ref($r) eq '');
 
 	my $id = _gen_id(%RAD_REQUEST);
 	my $data = {
@@ -179,7 +179,7 @@ sub accounting {
 		refresh_token	=> $data->{'refresh_token'},
 	]);
 	return $r
-		if (ref($r) eq 'SCALAR');
+		if (ref($r) eq '');
 
 	$data->{'timestamp'}			= str2time($r->header('Date'));
 	$data->{'token_type'}			= $j->{'token_type'};
