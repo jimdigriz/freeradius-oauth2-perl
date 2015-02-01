@@ -1,3 +1,3 @@
-perl freeradius-perl-oauth2 {
-	module = /opt/freeradius-perl-oauth2/main.pm
+perl freeradius-oauth2-perl {
+	module = /opt/freeradius-oauth2-perl/main.pm
 }

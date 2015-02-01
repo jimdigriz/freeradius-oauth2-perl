@@ -56,11 +56,11 @@ You should now have set up a working *default* installation of FreeRADIUS 2.2.x.
 
 On the server, run:
 
-    mkdir /opt/freeradius-perl-oauth2
+    mkdir /opt/freeradius-oauth2-perl
 
-From the project directory on your workstation, copy `main.pl` and `module` to `/opt/freeradius-perl-oauth2` and run on the server:
+From the project directory on your workstation, copy `main.pl` and `module` to `/opt/freeradius-oauth2-perl` and run on the server:
 
-    chown -R root:root /opt/freeradius-perl-oauth2
+    chown -R root:root /opt/freeradius-oauth2-perl
 
 # Configuration
 
@@ -131,13 +131,13 @@ By now your `config` file should look something like:
     authorization_endpoint=https://.../oauth2/authorize
     token_endpoint=https://.../oauth2/token
 
-Copy `config` on your workstation to `/opt/freeradius-perl-oauth2` on the target RADIUS server, and then on the server run as root:
+Copy `config` on your workstation to `/opt/freeradius-oauth2-perl` on the target RADIUS server, and then on the server run as root:
 
-    chown root:freerad /opt/freeradius-perl-oauth2/config
-    chmod 640 /opt/freeradius-perl-oauth2/config
-    ln -T -f -s /opt/freeradius-perl-oauth2/module /etc/freeradius/modules/freeradius-perl-oauth2
+    chown root:freerad /opt/freeradius-oauth2-perl/config
+    chmod 640 /opt/freeradius-oauth2-perl/config
+    ln -T -f -s /opt/freeradius-oauth2-perl/module /etc/freeradius/modules/freeradius-oauth2-perl
 
-Amend `/etc/freeradius/sites-available/default` to add `freeradius-perl-oauth2` at the right sections:
+Amend `/etc/freeradius/sites-available/default` to add `freeradius-oauth2-perl` at the right sections:
 
     authorize {
       ...
@@ -145,7 +145,7 @@ Amend `/etc/freeradius/sites-available/default` to add `freeradius-perl-oauth2` 
       files
     
       # after 'files'
-      freeradius-perl-oauth2
+      freeradius-oauth2-perl
     
       expiration
     
@@ -158,8 +158,8 @@ Amend `/etc/freeradius/sites-available/default` to add `freeradius-perl-oauth2` 
       eap
       
       # after 'eap'
-      Auth-Type freeradius-perl-oauth2 {
-        freeradius-perl-oauth2
+      Auth-Type freeradius-oauth2-perl {
+        freeradius-oauth2-perl
       }
     }
     
@@ -169,7 +169,7 @@ Amend `/etc/freeradius/sites-available/default` to add `freeradius-perl-oauth2` 
       exec
       
       # after 'exec'
-      freeradius-perl-oauth2
+      freeradius-oauth2-perl
     
       ...
     }
@@ -180,7 +180,7 @@ Amend `/etc/freeradius/sites-available/default` to add `freeradius-perl-oauth2` 
       exec
       
       # after 'exec'
-      freeradius-perl-oauth2
+      freeradius-oauth2-perl
     
       ...
     }
@@ -245,7 +245,7 @@ The interaction of this module in FreeRADIUS is as described to aid you when rea
  1. if `Realm` is not present or not set to a realm in `config`
   * return `noop`
  1. decides the request is for it
-  * sets `Auth-Type` to `freeradius-perl-oauth2`
+  * sets `Auth-Type` to `freeradius-oauth2-perl`
   * deletes `Proxy-To-Realm` to force the request to not be proxied
   * return `updated`
 

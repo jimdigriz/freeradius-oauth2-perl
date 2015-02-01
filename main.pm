@@ -44,7 +44,7 @@ use vars qw/%RAD_REQUEST %RAD_REPLY %RAD_CHECK/;
 my $cfg;
 
 BEGIN {
-	$cfg = Config::Tiny->read('/opt/freeradius-perl-oauth2/config');
+	$cfg = Config::Tiny->read('/opt/freeradius-oauth2-perl/config');
 	unless (defined($cfg)) {
 		&radiusd::radlog(RADIUS_LOG_ERROR, "unable to open 'config': " . Config::Tiny->errstr);
 		exit 1;
@@ -117,7 +117,7 @@ sub authorize {
 				|| defined($RAD_REQUEST{'NAS-IP-Address'})
 				|| defined($RAD_REQUEST{'NAS-IPv6-Address'}));
 
-	$RAD_CHECK{'Auth-Type'} = 'freeradius-perl-oauth2';
+	$RAD_CHECK{'Auth-Type'} = 'freeradius-oauth2-perl';
 	delete $RAD_CHECK{'Proxy-To-Realm'};
 	return RLM_MODULE_UPDATED;
 }
