@@ -138,7 +138,7 @@ sub authenticate {
 	return $r
 		if (ref($r) eq '');
 
-	my $id = _gen_id(%RAD_REQUEST);
+	my $id = _gen_id();
 	my $data = {
 		timestamp				=> str2time($r->header('Date')),
 		token_endpoint				=> $token_endpoint,
@@ -159,7 +159,7 @@ sub authenticate {
 }
 
 sub accounting {
-	my $id = _gen_id(%RAD_REQUEST);
+	my $id = _gen_id();
 
 	my $data;
 	{
