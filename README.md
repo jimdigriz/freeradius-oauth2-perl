@@ -1,4 +1,4 @@
-This is a [FreeRADIUS](http://freeradius.org/) [OAuth2 (OpenID Connect)](http://en.wikipedia.org/wiki/OpenID_Connect) Perl module to handle authentication.  It was created to allow the users of a wireless 802.1X (WPA Enterprise) network to connect.
+This is a [FreeRADIUS](http://freeradius.org/) [OAuth2 (OpenID Connect)](http://en.wikipedia.org/wiki/OpenID_Connect) [Perl module](http://wiki.freeradius.org/modules/Rlm_perl) to handle authentication.  It was created to allow the users of a wireless 802.1X (WPA Enterprise) network to connect.
 
 **N.B.** this module relies on [`grant_type=password`](https://tools.ietf.org/html/rfc6749#section-4.3) being supported by your OAuth2 provider
 
