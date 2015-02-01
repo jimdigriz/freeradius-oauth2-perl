@@ -3,39 +3,29 @@
 use strict;
 use warnings;
 
-use threads;
-use threads::shared;
-
 use Config::Tiny;
 use LWP::UserAgent;
 use JSON::PP;
 
-#use Data::Dumper;
+use Data::Dumper;
 
-my $cfg = Config::Tiny->read('/opt/freeradius-perl-oauth2/config');
-
-# http://lists.freeradius.org/pipermail/freeradius-users/2012-December/064155.html
-my %credentials :shared;
-sub put($$$) {
-	my ($hash, $key, $value) = @_;
-	lock(%$hash);
-	$hash->{$key} = share($value);
-	return;
-}
-sub get($$) {
-	my ($hash, $key) = @_;
-	lock(%$hash);
-	my $value = $hash->{$key};
-	return $value;
-}
+# http://wiki.freeradius.org/modules/Rlm_perl#Logging
+use constant {
+	RADIUS_LOG_DEBUG	=> 1,
+	RADIUS_LOG_AUTH		=> 2,
+	RADIUS_LOG_INFO		=> 3,
+	RADIUS_LOG_ERROR	=> 4,
+	RADIUS_LOG_PROXY	=> 5,
+	RADIUS_LOG_ACCT		=> 6,
+};
 
 # http://wiki.freeradius.org/modules/Rlm_perl#Return-Codes
 use constant {
 	RLM_MODULE_REJECT	=>  0,	# immediately reject the request
 	RLM_MODULE_FAIL		=>  1,	# module failed, don't reply
 	RLM_MODULE_OK		=>  2,	# the module is OK, continue
-	RLM_MODULE_HANDLED	=>  3,	# the module handled the request, so stop.
-	RLM_MODULE_INVALID	=>  4,	# the module considers the request invalid.
+	RLM_MODULE_HANDLED	=>  3,	# the module handled the request, so stop
+	RLM_MODULE_INVALID	=>  4,	# the module considers the request invalid
 	RLM_MODULE_USERLOCK	=>  5,	# reject the request (user is locked out)
 	RLM_MODULE_NOTFOUND	=>  6,	# user not found
 	RLM_MODULE_NOOP		=>  7,	# module succeeded without doing anything
@@ -45,14 +35,33 @@ use constant {
 
 use vars qw/%RAD_REQUEST %RAD_REPLY %RAD_CHECK/;
 
-sub authorize {
-	unless (defined($RAD_CHECK{'Auth-Type'}) || !defined($RAD_REQUEST{'Realm'})) {
-		$RAD_CHECK{'Auth-Type'} = 'freeradius-perl-oauth2';
-		delete $RAD_CHECK{'Proxy-To-Realm'};
-		return RLM_MODULE_UPDATED;
+my $cfg = Config::Tiny->read('/opt/freeradius-perl-oauth2/config');
+foreach my $realm (grep { $_ ne '_' } keys %$cfg) {
+	foreach my $key ('clientid', 'code') {
+		unless (defined($cfg->{$realm}->{$key})) {
+			print STDERR "config: no '$key' set for '$realm'\n";
+			die "honk";
+		}
 	}
+}
 
-	return RLM_MODULE_NOOP;
+my $ua = LWP::UserAgent->new;
+$ua->timeout(10);
+$ua->env_proxy;
+
+sub authorize {
+	return RLM_MODULE_NOOP
+		if (defined($RAD_CHECK{'Auth-Type'}));
+
+	return RLM_MODULE_NOOP
+		unless (defined($RAD_REQUEST{'Realm'}));
+
+	return RLM_MODULE_NOOP
+		unless (defined($cfg->{lc $RAD_REQUEST{'Realm'}}));
+
+	$RAD_CHECK{'Auth-Type'} = 'freeradius-perl-oauth2';
+	delete $RAD_CHECK{'Proxy-To-Realm'};
+	return RLM_MODULE_UPDATED;
 }
 
 sub authenticate {

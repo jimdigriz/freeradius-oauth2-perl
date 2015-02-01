@@ -23,9 +23,23 @@ Now make a copy of the example configuration which is an [INI](http://en.wikiped
 
 ## Target RADIUS Server
 
-Preferably running Debian 'wheezy' 7.x, you should set up a working *default* installation of FreeRADIUS 2.2.x.  This can be done with:
+You require a Debian 'wheezy' 7.x server that is plumbed into [Debian Backports](http://backports.debian.org/), which if you have not done already is just a case of running:
 
-    sudo apt-get install -yy --no-install-recommends freeradius freeradius-utils libwww-perl libconfig-tiny-perl
+    sudo cat <<'EOF' > /etc/apt/sources.list.d/debian-backports.list
+    deb http://http.debian.net/debian wheezy-backports main
+    #deb-src http://http.debian.net/debian wheezy-backports main
+    EOF
+
+    sudo apt-get update
+
+Afterwards, you can get everything you need with:
+
+    sudo apt-get install -yy --no-install-recommends \
+    	libwww-perl libconfig-tiny-perl
+    sudo apt-get install -yy --no-install-recommends -t wheezy-backports \
+    	freeradius freeradius-utils
+
+You should now have set up a working *default* installation of FreeRADIUS 2.2.x.
 
 **N.B.** if someone wants to step forward to help get this working on another UNIX system (*BSD, another Linux, Mac OS X, etc) and/or a later version of FreeRADIUS, then do get in touch
 
@@ -143,6 +157,21 @@ Now add to `/etc/freeradius/proxy.conf`:
     realm example.com {
     }
 
+## Heartbleed
+
+FreeRADIUS actively checks for the Heartbleed vulnerability](http://freeradius.org/security.html#heartbleed) and will refuse to fire up if it thinks you are running a too old a version.  To bypass this check you *must* confirme that you have installed at least version `1.0.1e-2+deb7u**7**` (note the '7' on the end there) of [libssl1.0.0](https://packages.debian.org/wheezy/libssl1.0.0) which you can do with:
+
+    $ dpkg -s libssl1.0.0 | grep Version
+    Version: 1.0.1e-2+deb7u14
+
+Once confirmed, amend the `security` section of `/etc/freeradius/radiusd.conf` like so:
+
+    security {
+      ...
+    
+      allow_vulnerable_openssl = yes
+    }
+
 # Testing
 
 ## OAuth2
@@ -169,3 +198,24 @@ If this works you will get a HTTP 200, otherwise you will see a 400 error.  If s
 On your RADIUS server, you can test everything is working by typing:
 
     radtest <USER>@example.com <PASSWORD> localhost 0 testing123 IGNORED 127.0.0.1
+
+**N.B.** this will *not* work if the [OAuth2 test](#OAuth2) above fails to work
+
+# Debugging
+
+The interaction of this module in FreeRADIUS is as described to aid you when reading the [debugging output](http://wiki.freeradius.org/guide/Troubleshooting).
+
+## `authorize`
+
+ 1. if `Auth-Type` is already set
+  * return `noop`
+ 1. if `Realm` is not present or not set to a realm in `config`
+  * return `noop`
+ 1. decides the request is for it
+  * sets `Auth-Type` to `freeradius-perl-oauth2`
+  * deletes `Proxy-To-Realm` to force the request to not be proxied
+  * return `updated`
+
+## `authenticate`
+
+ 1. ...
