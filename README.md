@@ -46,7 +46,7 @@ You require a Debian 'wheezy' 7.x server that is plumbed into [Debian Backports]
 Afterwards, you can get everything you need with:
 
     sudo apt-get install -yy --no-install-recommends \
-    	libwww-perl libconfig-tiny-perl libjson-perl libjson-xs-perl
+    	libwww-perl libconfig-tiny-perl libjson-perl libjson-xs-perl libtimedate-perl
     sudo apt-get install -yy --no-install-recommends -t wheezy-backports \
     	freeradius freeradius-utils
 
@@ -161,6 +161,28 @@ Amend `/etc/freeradius/sites-available/default` to add `freeradius-perl-oauth2` 
       Auth-Type freeradius-perl-oauth2 {
         freeradius-perl-oauth2
       }
+    }
+    
+    accounting {
+      ...
+    
+      exec
+      
+      # after 'exec'
+      freeradius-perl-oauth2
+    
+      ...
+    }
+    
+    post-auth {
+      ...
+    
+      exec
+      
+      # after 'exec'
+      freeradius-perl-oauth2
+    
+      ...
     }
 
 Now add to `/etc/freeradius/proxy.conf`:

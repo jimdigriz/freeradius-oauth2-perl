@@ -3,10 +3,15 @@
 use strict;
 use warnings;
 
+use threads;
+use threads::shared;
+
 use Config::Tiny;
 use LWP::UserAgent;
 use HTTP::Status qw/is_client_error is_server_error/;
 use JSON;
+use Date::Parse qw/str2time/;
+use Storable qw/freeze thaw/;
 
 my $VERSION = '0.1';
 
@@ -93,6 +98,8 @@ if (defined($cfg->{'_'}->{'debug'}) && $cfg->{'_'}->{'debug'} == 1) {
 	$ua->add_handler('response_done', sub { shift->dump; return });
 }
 
+my %tokens :shared;
+
 sub authorize {
 	return RLM_MODULE_NOOP
 		if (defined($RAD_CHECK{'Auth-Type'}));
@@ -103,6 +110,13 @@ sub authorize {
 	return RLM_MODULE_NOOP
 		unless (defined($cfg->{lc $RAD_REQUEST{'Realm'}}));
 
+	return RLM_MODULE_INVALID
+		unless (defined($RAD_REQUEST{'User-Name'}));
+	return RLM_MODULE_INVALID
+		unless (defined($RAD_REQUEST{'NAS-Identifier'}) 
+				|| defined($RAD_REQUEST{'NAS-IP-Address'})
+				|| defined($RAD_REQUEST{'NAS-IPv6-Address'}));
+
 	$RAD_CHECK{'Auth-Type'} = 'freeradius-perl-oauth2';
 	delete $RAD_CHECK{'Proxy-To-Realm'};
 	return RLM_MODULE_UPDATED;
@@ -111,19 +125,103 @@ sub authorize {
 sub authenticate {
 	my $c = $cfg->{lc $RAD_REQUEST{'Realm'}};
 
-	my $auth_endpoint;
-	my $token_endpoint;
+	my ($auth_endpoint, $token_endpoint) = _discovery($c);
+	return RLM_MODULE_REJECT
+		unless (defined($auth_endpoint));
+
+	my ($r, $j) = _fetch_token($c, $token_endpoint, [
+		resource	=> '00000002-0000-0000-c000-000000000000',
+		grant_type	=> 'password',
+		username	=> $RAD_REQUEST{'User-Name'},
+		password	=> $RAD_REQUEST{'User-Password'},
+	]);
+	return $r
+		if (ref($r) eq 'SCALAR');
+
+	my $id = _gen_id(%RAD_REQUEST);
+	my $data = {
+		timestamp				=> str2time($r->header('Date')),
+		token_endpoint				=> $token_endpoint,
+		token_type				=> $j->{'token_type'},
+		access_token				=> $j->{'access_token'},
+	};
+	if (defined($j->{'expires_in'})) {
+		$data->{'expires_in'}			= $j->{'expires_in'};
+		$RAD_REPLY{'Acct-Interim-Interval'}	= int($j->{'expires_in'} * (0.7 + (rand(20)/100)));
+	}
+	$data->{'refresh_token'}			= $j->{'refresh_token'}
+			if (defined($j->{'refresh_token'}));
+
+	lock(%tokens);
+	$tokens{$id} = freeze $data;
+
+	return RLM_MODULE_OK;
+}
+
+sub accounting {
+	my $id = _gen_id(%RAD_REQUEST);
+
+	my $data;
+	{
+		lock(%tokens);
+		$data = thaw $tokens{$id};
+		delete $tokens{$id};
+	}
+
+	my $c = $cfg->{lc $RAD_REQUEST{'Realm'}};
+
+	my ($auth_endpoint, $token_endpoint) = _discovery($c);
+	return RLM_MODULE_REJECT
+		unless (defined($auth_endpoint));
+
+	my ($r, $j) = _fetch_token($c, $token_endpoint, [
+		grant_type	=> 'refresh_token',
+		refresh_token	=> $data->{'refresh_token'},
+	]);
+	return $r
+		if (ref($r) eq 'SCALAR');
+
+	$data->{'timestamp'}			= str2time($r->header('Date'));
+	$data->{'token_type'}			= $j->{'token_type'};
+	$data->{'access_token'}			= $j->{'access_token'};
+	$data->{'expires_in'}			= $j->{'expires_in'}
+		if (defined($j->{'expires_in'}));
+	if (defined($j->{'refresh_token'})) {
+		$data->{'refresh_token'}	= $j->{'refresh_token'}
+	} else {
+		delete $data->{'refresh_token'};
+	}
+
+	lock(%tokens);
+	$tokens{$id} = freeze $data;
+
+	return RLM_MODULE_OK;
+}
+
+sub post_auth {
+	return RLM_MODULE_OK;
+}
+
+sub detach {
+	return RLM_MODULE_OK;
+}
+
+sub _discovery ($) {
+	my $c = shift;
+
+	my ($auth_endpoint, $token_endpoint);
+
 	if ($c->{'discovery'}) {
 		my $r = $ua->get('https://' . lc $RAD_REQUEST{'Realm'} . '/.well-known/openid-configuration');
 		if (is_server_error($r->code)) {
 			&radiusd::radlog(RADIUS_LOG_ERROR, "unable to perform discovery: " . $r->status_line);
-			return RLM_MODULE_REJECT;
+			return;
 		}
 
 		my $j = decode_json $r->decoded_content;
 		unless (defined($j) && defined($j->{'authorization_endpoint'})) {
 			&radiusd::radlog(RADIUS_LOG_ERROR, "non-JSON reponse or missing 'authorization_endpoint' element");
-			return RLM_MODULE_REJECT;
+			return;
 		}
 
 		$auth_endpoint = $j->{'authorization_endpoint'};
@@ -135,21 +233,26 @@ sub authenticate {
 
 	unless (URI->new($auth_endpoint)->canonical->scheme eq 'https') {
 		&radiusd::radlog(RADIUS_LOG_ERROR, "'authorization_endpoint' is not 'https' scheme");
-		return RLM_MODULE_REJECT;
+		return;
 	}
 	unless (URI->new($token_endpoint)->canonical->scheme eq 'https') {
 		&radiusd::radlog(RADIUS_LOG_ERROR, "'token_endpoint' is not 'https' scheme");
-		return RLM_MODULE_REJECT;
+		return;
 	}
 
-	my $r = $ua->post($token_endpoint, [
+	return ($auth_endpoint, $token_endpoint);
+}
+
+sub _fetch_token ($$) {
+	my $c = shift;
+	my $t = shift;
+	my $f = shift;
+
+	my $r = $ua->post($t, [
 		scope		=> 'openid',
 		client_id	=> $c->{'clientid'},
 		code		=> $c->{'code'},
-		resource	=> '00000002-0000-0000-c000-000000000000',
-		grant_type	=> 'password',
-		username	=> $RAD_REQUEST{'User-Name'},
-		password	=> $RAD_REQUEST{'User-Password'},
+		@$f,
 	]);
 	if (is_server_error($r->code)) {
 		&radiusd::radlog(RADIUS_LOG_INFO, "authentication request failed: " . $r->status_line);
@@ -163,16 +266,16 @@ sub authenticate {
 	}
 
 	if (is_client_error($r->code)) {
-		my $message = [];
+		my $m = [];
 
-		push @$message, $RAD_REPLY{'Reply-Message'}
+		push @$m, $RAD_REPLY{'Reply-Message'}
 			if (defined($RAD_REPLY{'Reply-Message'}));
 
-		push @$message, 'Error: ' . $j->{'error'};
-		push @$message, split(/\r\n/ms, $j->{'error_description'})
+		push @$m, 'Error: ' . $j->{'error'};
+		push @$m, split(/\r\n/ms, $j->{'error_description'})
 			if (defined($j->{'error_description'}));
 
-		$RAD_REPLY{'Reply-Message'} = $message;
+		$RAD_REPLY{'Reply-Message'} = $m;
 
 		return RLM_MODULE_FAIL;
 	}
@@ -182,31 +285,16 @@ sub authenticate {
 		return RLM_MODULE_REJECT;
 	}
 
-	return RLM_MODULE_OK;
+	return ($r, $j);
 }
 
-sub preacct {
-	return RLM_MODULE_OK;
-}
+sub _gen_id {
+	my $i = $RAD_REQUEST{'NAS-Identifier'} || $RAD_REQUEST{'NAS-IP-Address'} || $RAD_REQUEST{'NAS-IPv6-Address'};
+	$i .= '|' . $RAD_REQUEST{'NAS-Port'} || $RAD_REQUEST{'NAS-Port-Id'}
+		if (defined($RAD_REQUEST{'NAS-Port'}) || defined($RAD_REQUEST{'NAS-Port-Id'}));
+	$i .= '|' . $RAD_REQUEST{'User-Name'};
 
-sub accounting {
-	return RLM_MODULE_OK;
-}
-
-sub checksimul {
-	return RLM_MODULE_OK;
-}
-
-sub pre_proxy {
-	return RLM_MODULE_OK;
-}
-
-sub post_auth {
-	return RLM_MODULE_OK;
-}
-
-sub detach {
-	return RLM_MODULE_OK;
+	return $i;
 }
 
 exit 0;
