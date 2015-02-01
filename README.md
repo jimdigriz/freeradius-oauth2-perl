@@ -33,7 +33,9 @@ On the server, run:
 
     mkdir /opt/freeradius-perl-oauth2
 
-From the project directory on your workstation, copy `main.pl` and `module` to `/opt/freeradius-perl-oauth2`.
+From the project directory on your workstation, copy `main.pl` and `module` to `/opt/freeradius-perl-oauth2` and run on the server:
+
+    chown -R root:root /opt/freeradius-perl-oauth2
 
 # Configuration
 
