@@ -46,7 +46,7 @@ You require a Debian 'wheezy' 7.x server that is plumbed into [Debian Backports]
 Afterwards, you can get everything you need with:
 
     sudo apt-get install -yy --no-install-recommends \
-    	libwww-perl libconfig-tiny-perl libjson-perl libjson-xs-perl libtimedate-perl
+    	libwww-perl libconfig-tiny-perl libjson-perl libjson-xs-perl libtimedate-perl liburi-perl
     sudo apt-get install -yy --no-install-recommends -t wheezy-backports \
     	freeradius freeradius-utils
 
