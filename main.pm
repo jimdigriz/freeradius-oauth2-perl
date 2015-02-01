@@ -9,6 +9,7 @@ use threads::shared;
 use Config::Tiny;
 use LWP::UserAgent;
 use JSON::PP;
+
 #use Data::Dumper;
 
 my $cfg = Config::Tiny->read('/opt/freeradius-perl-oauth2/config');
@@ -55,7 +56,7 @@ sub authorize {
 }
 
 sub authenticate {
-	$RAD_REPLY{'Reply-Message'} = join ',', map { $cfg->{$_}->{'clientid'} } keys %$cfg;
+	$RAD_REPLY{'Reply-Message'} = join ',', map { $cfg->{$_}->{'clientid'} } grep { $_ ne '_' } keys %$cfg;
 	return RLM_MODULE_OK;
 }
 
