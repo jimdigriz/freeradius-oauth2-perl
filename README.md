@@ -87,7 +87,7 @@ If you do not have a *secure* website at the apex of your realm, then you will n
 
 ### Microsoft Azure AD (Office 365)
 
-1. go to https://portal.office.com and log in as an administrator
+1. go to https://portal.office.com/ and log in as an administrator
 1. click on 'Admin' in the top right and select 'Azure AD' from the drop down menu
 1. once the Azure page loads, click on 'Active Directory' from the left hand panel
 1. highlight your main directory, and click on the arrow pointing right located to the right of its name
@@ -97,7 +97,7 @@ If you do not have a *secure* website at the apex of your realm, then you will n
 1. enter in the application name `freeradius-oauth2-perl`, click on 'Native client application', and click on the next arrow
 1. as a redirect URI, enter in `http://localhost:8000/code.html`, then click on the complete arrow
 1. the application will now be added and you will be shown a preview page
-1. before we leave, you will need the 'Client ID' (a [long hex GUID](http://en.wikipedia.org/wiki/Globally_unique_identifier#Text_encoding)), which you can find located under both 'Configure' (at the top of the page) or 'Update your Code' (under the 'Getting Started' title)
+1. before we leave, you will need the 'Client ID' (the long formatted hex string known as a [GUID](http://en.wikipedia.org/wiki/Globally_unique_identifier#Text_encoding)), which you can find located under both 'Configure' (at the top of the page) or 'Update your Code' (under the 'Getting Started' title)
 1. place this Client ID in the `config` file under your realm as `clientid`
 
 Using this Client ID, we now need to create an authorisation code, to do this, run a web server from a terminal, inside the project with:
@@ -184,7 +184,7 @@ Add to your `/etc/freeradius/proxy.conf`:
 
 ### Heartbleed
 
-FreeRADIUS actively checks for the Heartbleed vulnerability](http://freeradius.org/security.html#heartbleed) and will refuse to fire up if it thinks you are running a too old a version.  To bypass this check you *must* confirm that you have installed at least version `1.0.1e-2+deb7u**7**` (note the '7' on the end there) of [libssl1.0.0](https://packages.debian.org/wheezy/libssl1.0.0) which you can do with:
+FreeRADIUS actively checks for the [Heartbleed vulnerability](http://freeradius.org/security.html#heartbleed) and will refuse to fire up if it thinks you are running a too old a version.  To bypass this check you *must* confirm that you have installed at least version `1.0.1e-2+deb7u7` (note the '7' on the end there) of [libssl1.0.0](https://packages.debian.org/wheezy/libssl1.0.0) which you can do with:
 
     $ dpkg -s libssl1.0.0 | grep Version
     Version: 1.0.1e-2+deb7u14
@@ -280,7 +280,7 @@ On your RADIUS server, you can test everything is working by typing:
 
 For 802.1X authentication, only EAP-TTLS/PAP is supported, so Linux, Mac OS X and [Microsoft Windows 8](https://adamsync.wordpress.com/2012/05/08/eap-ttls-on-windows-2012-build-8250/) based devices will have no problems.  However, for Microsoft Windows 7 and earlier, you will need to use a supplicant extension such as [SecureW2 Enterprise Client](http://www.securew2.com/enterpriseclient).
 
-You will require a copy of [`eapol_test`](http://deployingradius.com/scripts/eapol_test/) which has to be built from source; [unless you are feeling daring](http://www.eduroam.cz/rad_eap_test/eapol_test/).  To build it on your target RADIUS server run:
+You will require a copy of [`eapol_test`](http://deployingradius.com/scripts/eapol_test/) which to build from source on your target RADIUS server you type:
 
     sudo apt-get install -yy --no-install-recommends curl build-essential libssl-dev libnl-dev
     curl -O -J -L http://w1.fi/releases/wpa_supplicant-2.3.tar.gz
@@ -335,7 +335,7 @@ The interaction of this module in FreeRADIUS is as described to aid you when rea
 There is some basic xlat functionality in the module that lets you extract some state data about the current user where possible.
 
 Calling the function with the following argument will return:
- * **`timestamp`:** epoch of when the request was made
+ * **`timestamp`:** epoch of when the authorization token was created
  * **`expires_in`:** time in seconds from `timestamp` that the [authorization token is valid](https://tools.ietf.org/html/rfc6749#section-5.1) for; this is *not* how long the `refresh_token` is valid for which is typically significantly longer
 
 For example:
@@ -348,4 +348,4 @@ For example:
       }
 
       ...
-   }
+    }
