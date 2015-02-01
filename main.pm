@@ -7,8 +7,6 @@ use Config::Tiny;
 use LWP::UserAgent;
 use JSON;
 
-use Data::Dumper;
-
 my $VERSION = '0.1';
 
 # http://wiki.freeradius.org/modules/Rlm_perl#Logging
@@ -127,7 +125,6 @@ sub authenticate {
 		$token_endpoint = $c->{'token_endpoint'};
 	}
 
-	$RAD_REPLY{'Reply-Message'} = $token_endpoint;
 	return RLM_MODULE_OK;
 }
 
