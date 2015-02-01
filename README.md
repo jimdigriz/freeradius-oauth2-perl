@@ -239,6 +239,40 @@ On your RADIUS server, you can test everything is working by typing:
 
 **N.B.** this will *not* work if the [OAuth2 test](#OAuth2) above fails to work
 
+### 802.1X
+
+For 802.1X authentication, only EAP-TTLS/PAP is supported, so Linux, Mac OS X and [Microsoft Windows 8](https://adamsync.wordpress.com/2012/05/08/eap-ttls-on-windows-2012-build-8250/) based devices will have no problems.  Howver, for Microsoft Windows 7 and earlier, you will need to use a supplicant extension such as [SecureW2 Enterprise Client](http://www.securew2.com/enterpriseclient).
+
+You will require a copy of [`eapol_test`](http://deployingradius.com/scripts/eapol_test/) which has to be built from source; [unless you are feeling daring](http://www.eduroam.cz/rad_eap_test/eapol_test/).  To build it on your target RADIUS server run:
+
+    sudo apt-get install -yy --no-install-recommends curl build-essential libssl-dev libnl-dev
+    curl -O -J -L http://w1.fi/releases/wpa_supplicant-2.3.tar.gz
+    tar zxf wpa_supplicant-2.3.tar.gz
+    sed -e 's/^#CONFIG_EAPOL_TEST=y/CONFIG_EAPOL_TEST=y/' wpa_supplicant-2.3/wpa_supplicant/defconfig > wpa_supplicant-2.3/wpa_supplicant/.config
+    make -C wpa_supplicant-2.3/wpa_supplicant -j$(($(getconf _NPROCESSORS_ONLN)+1)) eapol_test
+
+Once built, you will need a configuration file (amending `USERNAME`, `PASSWORD` and `example.com`):
+
+    cat <<'EOF' > eapol_test.conf
+    network={
+      ssid="ssid"
+
+      key_mgmt=WPA-EAP
+      eap=TTLS
+      phase2="auth=PAP"
+      identity="USERNAME@example.com"
+      anonymous_identity="@example.com"
+      password="PASSWORD"
+    
+      #ca_path=/etc/ssl/certs
+      #ca_file=/etc/ssl/certs/ca-certificates.crt
+    }
+    EOF
+
+To test it works run:
+
+    $ ./wpa_supplicant-2.3/wpa_supplicant/eapol_test -s testing123 -c eapol_test.conf
+
 # Debugging
 
 The interaction of this module in FreeRADIUS is as described to aid you when reading the [debugging output](http://wiki.freeradius.org/guide/Troubleshooting).
