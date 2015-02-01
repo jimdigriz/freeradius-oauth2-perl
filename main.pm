@@ -140,7 +140,6 @@ sub authenticate {
 	my $id = _gen_id();
 	my $data = {
 		timestamp				=> str2time($r->header('Date')),
-		token_endpoint				=> $token_endpoint,
 		token_type				=> $j->{'token_type'},
 		access_token				=> $j->{'access_token'},
 	};
