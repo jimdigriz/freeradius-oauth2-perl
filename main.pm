@@ -106,13 +106,11 @@ sub authorize {
 		if (defined($RAD_CHECK{'Auth-Type'}));
 
 	return RLM_MODULE_NOOP
-		unless (defined($RAD_REQUEST{'Realm'}));
+		unless (defined($RAD_REQUEST{'User-Name'}) && defined($RAD_REQUEST{'User-Password'}));
 
 	return RLM_MODULE_NOOP
-		unless (defined($cfg->{lc $RAD_REQUEST{'Realm'}}));
+		unless (defined($RAD_REQUEST{'Realm'}) && defined($cfg->{lc $RAD_REQUEST{'Realm'}}));
 
-	return RLM_MODULE_INVALID
-		unless (defined($RAD_REQUEST{'User-Name'}));
 	return RLM_MODULE_INVALID
 		unless (defined($RAD_REQUEST{'NAS-Identifier'}) 
 				|| defined($RAD_REQUEST{'NAS-IP-Address'})
