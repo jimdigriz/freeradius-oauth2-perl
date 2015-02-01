@@ -1,4 +1,4 @@
-This is a [FreeRADIUS](http://freeradius.org/) [OAuth2 (OpenID Connect)](http://en.wikipedia.org/wiki/OpenID_Connect) perl module to handle authentication.  It was created to allow the users of a wireless 802.1X (WPA Enterprise) network to connect.
+This is a [FreeRADIUS](http://freeradius.org/) [OAuth2 (OpenID Connect)](http://en.wikipedia.org/wiki/OpenID_Connect) Perl module to handle authentication.  It was created to allow the users of a wireless 802.1X (WPA Enterprise) network to connect.
 
 **N.B.** this module relies on [`grant_type=password`](https://tools.ietf.org/html/rfc6749#section-4.3) being supported by your OAuth2 provider
 
@@ -26,7 +26,7 @@ Now make a copy of the example configuration which is an [INI](http://en.wikiped
 
 **N.B.** although you usually only have a single OAuth2 realm, the configuration does support multiple sections
 
-Optionally, you can edit the following elemts in the global section of `config`:
+Optionally, you can edit the following elements in the global section of `config`:
 
  * **`debug` (default: 0):** set to `1` to have verbose output, such as the HTTPS communications (note that you will see passwords in the clear!)
  * **`from` (default: [unset]):** set to a suitable contact email address for your organisation
@@ -77,7 +77,7 @@ Generate an HTTP redirect depending on your authentication provider to:
 
 If you do not have a *secure* website at the apex of your realm, then you will need to:
 
-1. in a terminal run the following amending the `.well-known/openid-configuration` URL appropiately to point at your authentication provider
+1. in a terminal run the following amending the `.well-known/openid-configuration` URL appropriately to point at your authentication provider
 
         curl -s -L https://.../.well-known/openid-configuration | python -m json.tool
 1. extract the `authorization_endpoint` and `token_endpoint` entries (which *must* be HTTPS)
@@ -100,7 +100,7 @@ If you do not have a *secure* website at the apex of your realm, then you will n
 1. before we leave, you will need the 'Client ID' (a [long hex GUID](http://en.wikipedia.org/wiki/Globally_unique_identifier#Text_encoding)), which you can find located under both 'Configure' (at the top of the page) or 'Update your Code' (under the 'Getting Started' title)
 1. place this Client ID in the `config` file under your realm as `clientid`
 
-Using this Client ID, we now need to create an authorisation code, to do this, run a webserver from a terminal, inside the project with:
+Using this Client ID, we now need to create an authorisation code, to do this, run a web server from a terminal, inside the project with:
 
     python -m SimpleHTTPServer
 
@@ -108,9 +108,9 @@ Now in your web browser go to (replacing `<CLIENTID>` with your Client ID from a
 
     https://login.windows.net/common/oauth2/authorize?response_type=code&prompt=admin_consent&client_id=<CLIENTID>
 
-You will be taken to a page asking you to permit freeradius-oauth2-perl access to enable sign-on and read users' profiles.  When you click on 'Accept' you will be redirected to a page that provides you with the authorisation code.  Take a copy of this, either via cut'n'paste or using the 'Export to File' link on that page and place it in the `config` file under your realm as `cdode`.
+You will be taken to a page asking you to permit freeradius-oauth2-perl access to enable sign-on and read users' profiles.  When you click on 'Accept' you will be redirected to a page that provides you with the authorisation code.  Take a copy of this, either with cut and paste or using the 'Export to File' link on that page and place it in the `config` file under your realm as `code`.
 
-Now `Ctrl-C` the python webserver as we have finished with it.
+Now `Ctrl-C` the python web server as we have finished with it.
 
 #### Related Links
 
@@ -197,7 +197,7 @@ Now add to `/etc/freeradius/proxy.conf`:
 
 ### Heartbleed
 
-FreeRADIUS actively checks for the Heartbleed vulnerability](http://freeradius.org/security.html#heartbleed) and will refuse to fire up if it thinks you are running a too old a version.  To bypass this check you *must* confirme that you have installed at least version `1.0.1e-2+deb7u**7**` (note the '7' on the end there) of [libssl1.0.0](https://packages.debian.org/wheezy/libssl1.0.0) which you can do with:
+FreeRADIUS actively checks for the Heartbleed vulnerability](http://freeradius.org/security.html#heartbleed) and will refuse to fire up if it thinks you are running a too old a version.  To bypass this check you *must* confirm that you have installed at least version `1.0.1e-2+deb7u**7**` (note the '7' on the end there) of [libssl1.0.0](https://packages.debian.org/wheezy/libssl1.0.0) which you can do with:
 
     $ dpkg -s libssl1.0.0 | grep Version
     Version: 1.0.1e-2+deb7u14
@@ -214,7 +214,7 @@ Once confirmed, amend the `security` section of `/etc/freeradius/radiusd.conf` l
 
 ## OAuth2
 
-Put a copy of your username in a file called `username`, and your password in `password`.  Now type:
+Put a copy of your user name in a file called `username`, and your password in `password`.  Now type:
 
     curl -i	-F scope=openid \
     		-F client_id=$(awk -F= '/^clientid=/ { print $2 }' config) \
@@ -241,7 +241,7 @@ On your RADIUS server, you can test everything is working by typing:
 
 ### 802.1X
 
-For 802.1X authentication, only EAP-TTLS/PAP is supported, so Linux, Mac OS X and [Microsoft Windows 8](https://adamsync.wordpress.com/2012/05/08/eap-ttls-on-windows-2012-build-8250/) based devices will have no problems.  Howver, for Microsoft Windows 7 and earlier, you will need to use a supplicant extension such as [SecureW2 Enterprise Client](http://www.securew2.com/enterpriseclient).
+For 802.1X authentication, only EAP-TTLS/PAP is supported, so Linux, Mac OS X and [Microsoft Windows 8](https://adamsync.wordpress.com/2012/05/08/eap-ttls-on-windows-2012-build-8250/) based devices will have no problems.  However, for Microsoft Windows 7 and earlier, you will need to use a supplicant extension such as [SecureW2 Enterprise Client](http://www.securew2.com/enterpriseclient).
 
 You will require a copy of [`eapol_test`](http://deployingradius.com/scripts/eapol_test/) which has to be built from source; [unless you are feeling daring](http://www.eduroam.cz/rad_eap_test/eapol_test/).  To build it on your target RADIUS server run:
 
