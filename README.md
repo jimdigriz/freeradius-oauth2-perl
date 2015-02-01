@@ -142,7 +142,7 @@ Copy `config` on your workstation to `/opt/freeradius-oauth2-perl` on the target
     chmod 640 /opt/freeradius-oauth2-perl/config
     ln -T -f -s /opt/freeradius-oauth2-perl/module /etc/freeradius/modules/freeradius-oauth2-perl
 
-Amend `/etc/freeradius/sites-available/default` to add `freeradius-oauth2-perl` at the right sections:
+Amend `/etc/freeradius/sites-available/default` like so:
 
     authorize {
       ...
@@ -151,8 +151,6 @@ Amend `/etc/freeradius/sites-available/default` to add `freeradius-oauth2-perl` 
     
       # after 'files'
       freeradius-oauth2-perl
-    
-      expiration
     
       ...
     }
@@ -178,35 +176,10 @@ Amend `/etc/freeradius/sites-available/default` to add `freeradius-oauth2-perl` 
     
       ...
     }
-    
-    post-auth {
-      ...
-    
-      exec
-      
-      # after 'exec'
-      freeradius-oauth2-perl
-    
-      ...
-    }
 
-Add to you `/etc/freeradius/proxy.conf`:
+Add to your `/etc/freeradius/proxy.conf`:
 
     realm example.com {
-    }
-
-Now edit `/etc/freeradius/eap.conf`:
-
-    ...
-    
-    ttls {
-      ...
-    
-      copy_request_to_tunnel = yes
-    
-      use_tunneled_reply = yes
-    
-      ...
     }
 
 ### Heartbleed
@@ -224,6 +197,56 @@ Once confirmed, amend the `security` section of `/etc/freeradius/radiusd.conf` l
       allow_vulnerable_openssl = yes
     }
 
+### 802.1X
+
+For 802.1X support, you will need to amend `/etc/freeradius/sites-available/inner-tunnel`:
+
+    authorize {
+      ...
+    
+      files
+    
+      # after 'files'
+      freeradius-oauth2-perl
+    
+      ...
+    }
+    
+    authenticate {
+      ...
+    
+      eap
+      
+      # after 'eap'
+      Auth-Type freeradius-oauth2-perl {
+        freeradius-oauth2-perl
+      }
+    }
+    
+    post-auth {
+      ...
+    
+      #ldap
+      
+      # after '#ldap'
+      update outer.reply {
+        User-Name := "%{User-Name}"
+      }
+    
+      ...
+    }
+
+
+And finally edit the `ttls` section in `/etc/freeradius/eap.conf`:
+
+    ttls {
+      ...
+    
+      copy_request_to_tunnel = yes
+    
+      ...
+    }
+    
 # Testing
 
 ## OAuth2
@@ -301,7 +324,28 @@ The interaction of this module in FreeRADIUS is as described to aid you when rea
   * sets `Auth-Type` to `freeradius-oauth2-perl`
   * deletes `Proxy-To-Realm` to force the request to not be proxied
   * return `updated`
+ 1. ...
 
 ## `authenticate`
 
  1. ...
+
+# xlat
+
+There is some basic xlat functionality in the module that lets you extract some state data about the current user where possible.
+
+Calling the function with the following argument will return:
+ * **`timestamp`:** epoch of when the request was made
+ * **`expires_in`:** time in seconds from `timestamp` that the [authorization token is valid](https://tools.ietf.org/html/rfc6749#section-5.1) for; this is *not* how long the `refresh_token` is valid for which is typically significantly longer
+
+For example:
+
+    post-auth {
+      ...
+    
+      update reply {
+        Acct-Interim-Interval := "%{freeradius-oauth2-perl: expires_in}"
+      }
+
+      ...
+   }

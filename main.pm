@@ -3,6 +3,8 @@
 use strict;
 use warnings;
 
+use 5.010_01;
+
 use threads;
 use threads::shared;
 
@@ -106,15 +108,13 @@ sub authorize {
 		if (defined($RAD_CHECK{'Auth-Type'}));
 
 	return RLM_MODULE_NOOP
-		unless (defined($RAD_REQUEST{'User-Name'}) && defined($RAD_REQUEST{'User-Password'}));
-
-	return RLM_MODULE_NOOP
 		unless (defined($RAD_REQUEST{'Realm'}) && defined($cfg->{lc $RAD_REQUEST{'Realm'}}));
 
-	return RLM_MODULE_INVALID
-		unless (defined($RAD_REQUEST{'NAS-Identifier'}) 
-				|| defined($RAD_REQUEST{'NAS-IP-Address'})
-				|| defined($RAD_REQUEST{'NAS-IPv6-Address'}));
+	return RLM_MODULE_NOOP
+		unless (defined(_gen_id()));
+
+	return RLM_MODULE_NOOP
+		unless (defined($RAD_REQUEST{'User-Password'}));
 
 	$RAD_CHECK{'Auth-Type'} = 'freeradius-oauth2-perl';
 	delete $RAD_CHECK{'Proxy-To-Realm'};
@@ -138,14 +138,18 @@ sub authenticate {
 		if (ref($r) eq '');
 
 	my $id = _gen_id();
+	unless (defined($id)) {
+		&radiusd::radlog(RADIUS_LOG_ERROR, 'attributes vanished in the request');
+		return RLM_MODULE_REJECT;
+	}
+
 	my $data = {
-		timestamp				=> str2time($r->header('Date')),
+		timestamp				=> str2time($r->header('Date')) || time,
 		token_type				=> $j->{'token_type'},
 		access_token				=> $j->{'access_token'},
 	};
 	if (defined($j->{'expires_in'})) {
 		$data->{'expires_in'}			= $j->{'expires_in'};
-		$RAD_REPLY{'Acct-Interim-Interval'}	= int($j->{'expires_in'} * (0.7 + (rand(20)/100)));
 	}
 	$data->{'refresh_token'}			= $j->{'refresh_token'}
 			if (defined($j->{'refresh_token'}));
@@ -158,6 +162,8 @@ sub authenticate {
 
 sub accounting {
 	my $id = _gen_id();
+	return RLM_MODULE_NOOP
+		unless (defined($id));
 
 	my $data;
 	{
@@ -179,7 +185,7 @@ sub accounting {
 	return $r
 		if (ref($r) eq '');
 
-	$data->{'timestamp'}			= str2time($r->header('Date'));
+	$data->{'timestamp'}			= str2time($r->header('Date')) || time;
 	$data->{'token_type'}			= $j->{'token_type'};
 	$data->{'access_token'}			= $j->{'access_token'};
 	$data->{'expires_in'}			= $j->{'expires_in'}
@@ -196,12 +202,28 @@ sub accounting {
 	return RLM_MODULE_OK;
 }
 
-sub post_auth {
+sub detach {
 	return RLM_MODULE_OK;
 }
 
-sub detach {
-	return RLM_MODULE_OK;
+sub xlat {
+	my ($type, @args) = @_;
+
+	my $id = _gen_id();
+	unless (defined($id)) {
+		&radiusd::radlog(RADIUS_LOG_INFO, 'not handled by freeradius-oauth2-perl');
+		return RLM_MODULE_REJECT;
+	}
+
+	lock(%tokens);
+	my $data = thaw $tokens{$id};
+
+	given ($type) {
+	when ('timestamp')	{ return $data->{'timestamp'} }
+	when ('expires_in')	{ return $data->{'expires_in'} || -1; }
+	}
+
+	return;
 }
 
 sub _discovery ($) {
@@ -287,9 +309,16 @@ sub _fetch_token ($$) {
 }
 
 sub _gen_id {
-	my $i = $RAD_REQUEST{'NAS-Identifier'} || $RAD_REQUEST{'NAS-IP-Address'} || $RAD_REQUEST{'NAS-IPv6-Address'};
-	$i .= '|' . $RAD_REQUEST{'NAS-Port'} || $RAD_REQUEST{'NAS-Port-Id'}
-		if (defined($RAD_REQUEST{'NAS-Port'}) || defined($RAD_REQUEST{'NAS-Port-Id'}));
+	unless ((defined($RAD_REQUEST{'NAS-Identifier'}) 
+				|| defined($RAD_REQUEST{'NAS-IPv6-Address'})
+				|| defined($RAD_REQUEST{'NAS-IP-Address'}))
+			&& (defined($RAD_REQUEST{'User-Name'}))) {
+		return;
+	}
+
+	my $i = $RAD_REQUEST{'NAS-Identifier'} || $RAD_REQUEST{'NAS-IPv6-Address'} || $RAD_REQUEST{'NAS-IP-Address'};
+	$i .= '|' . $RAD_REQUEST{'NAS-Port-Id'} || $RAD_REQUEST{'NAS-Port'}
+		if (defined($RAD_REQUEST{'NAS-Port-Id'}) || defined($RAD_REQUEST{'NAS-Port'}));
 	$i .= '|' . $RAD_REQUEST{'User-Name'};
 	$i .= '|' . $RAD_REQUEST{'Calling-Station-Id'}
 		if (defined($RAD_REQUEST{'Calling-Station-Id'}));
