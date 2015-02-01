@@ -48,19 +48,26 @@ BEGIN {
 		unless (scalar(grep { $_ ne '_' } keys %$cfg) > 0);
 
 	foreach my $realm (grep { $_ ne '_' } keys %$cfg) {
+		unless ($realm eq lc $realm) {
+			&radiusd::radlog(RADIUS_LOG_ERROR, "realm '$realm' has to be all lowercase");
+			exit 1;
+		}
+
+		my $c = $cfg->{$realm};
+
 		foreach my $key ('clientid', 'code') {
-			unless (defined($cfg->{$realm}->{$key})) {
+			unless (defined($c->{$key})) {
 				&radiusd::radlog(RADIUS_LOG_ERROR, "no '$key' set for '$realm'");
 				exit 1;
 			}
 		}
 
-		if (defined($cfg->{$realm}->{'authorization_endpoint'}) ^ defined($cfg->{$realm}->{'token_endpoint'})) {
+		if (defined($c->{'authorization_endpoint'}) ^ defined($c->{'token_endpoint'})) {
 			&radiusd::radlog(RADIUS_LOG_ERROR, "realm '$realm' has partially configured manual endpoints");
 			exit 1;
 		}
 
-		$cfg->{$realm}->{'discovery'} = (defined($cfg->{$realm}->{'authorization_endpoint'})) ? 0 : 1;
+		$c->{'discovery'} = (defined($c->{'authorization_endpoint'})) ? 0 : 1;
 	}
 }
 
@@ -123,6 +130,15 @@ sub authenticate {
 	} else {
 		$auth_endpoint = $c->{'authorization_endpoint'};
 		$token_endpoint = $c->{'token_endpoint'};
+	}
+
+	unless (URI->new($auth_endpoint)->canonical->scheme eq 'https') {
+		&radiusd::radlog(RADIUS_LOG_ERROR, "'authorization_endpoint' is not 'https' scheme");
+		return RLM_MODULE_FAIL;
+	}
+	unless (URI->new($token_endpoint)->canonical->scheme eq 'http') {
+		&radiusd::radlog(RADIUS_LOG_ERROR, "'token_endpoint' is not 'https' scheme");
+		return RLM_MODULE_FAIL;
 	}
 
 	return RLM_MODULE_OK;
