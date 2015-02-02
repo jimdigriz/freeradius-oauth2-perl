@@ -122,18 +122,12 @@ sub authorize {
 }
 
 sub authenticate {
-	my $c = $cfg->{lc $RAD_REQUEST{'Realm'}};
-
-	my ($auth_endpoint, $token_endpoint) = _discovery($c);
-	return RLM_MODULE_FAIL
-		unless (defined($auth_endpoint));
-
-	my ($r, $j) = _fetch_token($c, $token_endpoint, [
+	my ($r, $j) = _fetch_token(
 		resource	=> '00000002-0000-0000-c000-000000000000',
 		grant_type	=> 'password',
 		username	=> $RAD_REQUEST{'User-Name'},
 		password	=> $RAD_REQUEST{'User-Password'},
-	]);
+	);
 	return $r
 		if (ref($r) eq '');
 
@@ -172,16 +166,10 @@ sub accounting {
 		delete $tokens{$id};
 	}
 
-	my $c = $cfg->{lc $RAD_REQUEST{'Realm'}};
-
-	my ($auth_endpoint, $token_endpoint) = _discovery($c);
-	return RLM_MODULE_REJECT
-		unless (defined($auth_endpoint));
-
-	my ($r, $j) = _fetch_token($c, $token_endpoint, [
+	my ($r, $j) = _fetch_token(
 		grant_type	=> 'refresh_token',
 		refresh_token	=> $data->{'refresh_token'},
-	]);
+	);
 	return $r
 		if (ref($r) eq '');
 
@@ -226,13 +214,13 @@ sub xlat {
 	return;
 }
 
-sub _discovery ($) {
-	my $c = shift;
-
+sub _discovery {
 	my ($auth_endpoint, $token_endpoint);
 
-	if ($c->{'discovery'}) {
-		my $r = $ua->get('https://' . lc $RAD_REQUEST{'Realm'} . '/.well-known/openid-configuration');
+	my $realm = lc $RAD_REQUEST{'Realm'};
+
+	if ($cfg->{$realm}->{'discovery'}) {
+		my $r = $ua->get('https://$realm/.well-known/openid-configuration');
 		if (is_server_error($r->code)) {
 			&radiusd::radlog(RADIUS_LOG_ERROR, 'unable to perform discovery: ' . $r->status_line);
 			return;
@@ -247,8 +235,8 @@ sub _discovery ($) {
 		$auth_endpoint = $j->{'authorization_endpoint'};
 		$token_endpoint = $j->{'token_endpoint'};
 	} else {
-		$auth_endpoint = $c->{'authorization_endpoint'};
-		$token_endpoint = $c->{'token_endpoint'};
+		$auth_endpoint = $cfg->{$realm}->{'authorization_endpoint'};
+		$token_endpoint = $cfg->{$realm}->{'token_endpoint'};
 	}
 
 	unless (URI->new($auth_endpoint)->canonical->scheme eq 'https') {
@@ -263,16 +251,20 @@ sub _discovery ($) {
 	return ($auth_endpoint, $token_endpoint);
 }
 
-sub _fetch_token ($$) {
-	my $c = shift;
-	my $t = shift;
-	my $f = shift;
+sub _fetch_token (@) {
+	my (@args) = @_;
 
-	my $r = $ua->post($t, [
+	my ($auth_endpoint, $token_endpoint) = _discovery();
+	return RLM_MODULE_FAIL
+		unless (defined($auth_endpoint));
+
+	my $realm = lc $RAD_REQUEST{'Realm'};
+
+	my $r = $ua->post($token_endpoint, [
 		scope		=> 'openid',
-		client_id	=> $c->{'client_id'},
-		code		=> $c->{'code'},
-		@$f,
+		client_id	=> $cfg->{$realm}->{'client_id'},
+		code		=> $cfg->{$realm}->{'code'},
+		@args,
 	]);
 	if (is_server_error($r->code)) {
 		&radiusd::radlog(RADIUS_LOG_INFO, 'authentication request failed: ' . $r->status_line);
