@@ -290,7 +290,7 @@ Now run (replacing `USERNAME`, `PASSWORD`, `example.com` and `AUTHORIZATION_ENDP
 	    	-F grant_type=password \
 	    	-F username=USERNAME@example.com \
     		-F password=PASSWORD \
-	AUTHORIZATION_ENDPOINT
+    	AUTHORIZATION_ENDPOINT
 
 **N.B.** Microsoft Azure users will need to also add `-F resource=https://graph.windows.net` as an parameter
 
