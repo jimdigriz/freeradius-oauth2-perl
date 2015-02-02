@@ -275,7 +275,7 @@ If this works you will get a HTTP 200, otherwise you will see a 400 error.  If s
 
 ## RADIUS
 
-Before you test freeradius-oauth2-perl is working, you must make sure that the [OAuth2 test method](#OAuth2) above works first.  If it does not, the RADIUS test below will definately not work.
+Before you test freeradius-oauth2-perl is working, you must make sure that the [OAuth2 test method](#OAuth2) above works first.  If it does not, the RADIUS test below will definitely not work.
 
 To test freeradius-oauth2-perl is working, you need to have a copy of [`radtest`](http://wiki.freeradius.org/guide/Radtest).  To install it type
 
@@ -288,7 +288,7 @@ Whilst testing, it helps a lot to first stop freeradius and run in a separate te
 
 You may also want to edit `/opt/freeradius-oauth2-perl/config` to have `debug=1` in the global section to provide more information; but do not leave this enabled for production!
 
-To see if everything is working, type in a terminal on the target RADIUS server:
+To see if everything is working, type in a terminal on the target RADIUS server (amending `USERNAME`, `PASSWORD` and `example.com`):
 
     radtest USERNAME@example.com PASSWORD localhost 0 testing123 IGNORED 127.0.0.1
 
@@ -364,7 +364,7 @@ A successful test will have again an `Access-Accept` towards the end of the outp
           Value: 34468e4556b...c5c2230c
     STA 02:00:00:00:00:01: Received RADIUS packet matched with a pending request, round trip time 0.72 sec
 
-**N.B.** in the case of a failure you will *not* get a set of `Reply-Message` attributes in the `Access-Reject` as [EAP does nto allow this](https://tools.ietf.org/html/rfc3579#section-2.6.5)
+**N.B.** in the case of a failure you will *not* get a set of `Reply-Message` attributes in the `Access-Reject` as [EAP does not allow this](https://tools.ietf.org/html/rfc3579#section-2.6.5)
 
 # Debugging
 
