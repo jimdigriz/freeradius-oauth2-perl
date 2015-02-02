@@ -44,17 +44,9 @@ use constant {
 
 use vars qw/%RAD_REQUEST %RAD_REPLY %RAD_CHECK/;
 
-my @endpoints;
 my $cfg;
 
 BEGIN {
-	@endpoints = (
-		'authorization',
-		'token',
-		'userinfo',
-		'end_session',
-	);
-
 	$cfg = Config::Tiny->read('/opt/freeradius-oauth2-perl/config');
 	unless (defined($cfg)) {
 		&radiusd::radlog(RADIUS_LOG_ERROR, "unable to open 'config': " . Config::Tiny->errstr);
@@ -70,22 +62,27 @@ BEGIN {
 			exit 1;
 		}
 
-		my $c = $cfg->{$realm};
+		if (defined($cfg->{$realm}->{'vendor'})) {
+			unless (grep { $_ eq $cfg->{$realm}->{'vendor'} } ('microsoft-azure', 'google-apps')) {
+				&radiusd::radlog(RADIUS_LOG_ERROR, "unsupported vendor for '$realm'");
+				exit 1;
+			}
+		} else {
+			$cfg->{$realm}->{'vendor'} = 'ietf';
+		}
+
+		if (defined($cfg->{$realm}->{'discovery'})
+				&& URI->new($cfg->{$realm}->{'discovery'})->canonical->scheme ne 'https') {
+			&radiusd::radlog(RADIUS_LOG_ERROR, "discovery for '$realm' is not 'https' scheme");
+			return;
+		}
 
 		foreach my $key ('client_id', 'code') {
-			unless (defined($c->{$key})) {
+			unless (defined($cfg->{$realm}->{$key})) {
 				&radiusd::radlog(RADIUS_LOG_ERROR, "no '$key' set for '$realm'");
 				exit 1;
 			}
 		}
-
-		my $count = grep { $_ ~~ [ map { "${_}_endpoint" } @endpoints ] } keys %$c;
-		if ($count != 0 && $count != scalar(@endpoints)) {
-			&radiusd::radlog(RADIUS_LOG_ERROR, "realm '$realm' has partially configured manual endpoints");
-			exit 1;
-		}
-
-		$c->{'discovery'} = ($count == 0) ? 1 : 0;
 	}
 }
 
@@ -95,12 +92,6 @@ $ua->env_proxy;
 $ua->agent("freeradius-oauth2-perl/$VERSION (+https://github.com/jimdigriz/freeradius-oauth2-perl; " . $ua->_agent . ')');
 $ua->from($cfg->{'_'}->{'from'})
 	if (defined($cfg->{'_'}->{'from'}));
-
-if (defined($cfg->{'_'}->{'secure'}) && $cfg->{'_'}->{'secure'} == 0) {
-	&radiusd::radlog(RADIUS_LOG_INFO, 'secure set to zero, SSL is effectively disabled!');
-
-	$ua->ssl_opts(verify_hostname => 0);
-}
 
 # debugging
 if (defined($cfg->{'_'}->{'debug'}) && $cfg->{'_'}->{'debug'} == 1) {
@@ -131,12 +122,17 @@ sub authorize {
 }
 
 sub authenticate {
-	my ($r, $j) = _fetch_token(
-		resource	=> '00000002-0000-0000-c000-000000000000',
+	my $realm = lc $RAD_REQUEST{'Realm'};
+
+	my @opts = (
 		grant_type	=> 'password',
 		username	=> $RAD_REQUEST{'User-Name'},
 		password	=> $RAD_REQUEST{'User-Password'},
 	);
+	push @opts, resource => 'https://graph.windows.net'
+		if ($cfg->{$realm}->{'vendor'} eq 'microsoft-azure');
+
+	my ($r, $j) = _fetch_token(@opts);
 	return $r
 		if (ref($r) eq '');
 
@@ -231,32 +227,27 @@ sub _gen_id {
 }
 
 sub _discovery {
-	my $endpoint;
-
 	my $realm = lc $RAD_REQUEST{'Realm'};
 
-	my $j;
-	if ($cfg->{$realm}->{'discovery'}) {
-		my $r = $ua->get('https://$realm/.well-known/openid-configuration');
-		if (is_server_error($r->code)) {
-			&radiusd::radlog(RADIUS_LOG_ERROR, 'unable to perform discovery: ' . $r->status_line);
-			return;
-		}
+	my $url = (defined($cfg->{$realm}->{'discovery'})) 
+		? $cfg->{$realm}->{'discovery'}
+		: 'https://$realm/.well-known/openid-configuration';
 
-		$j = decode_json $r->decoded_content;
-		unless (defined($j) && defined($j->{'authorization_endpoint'})) {
-			&radiusd::radlog(RADIUS_LOG_ERROR, "non-JSON reponse or missing 'authorization_endpoint' element");
-			return;
-		}
-	} else {
-		$j = $cfg->{$realm};
+	my $r = $ua->get($url);
+	if (is_server_error($r->code)) {
+		&radiusd::radlog(RADIUS_LOG_ERROR, 'unable to perform discovery: ' . $r->status_line);
+		return;
 	}
 
-	for my $t (@endpoints) {
-		my $v = $j->{"${t}_endpoint"};
+	my $j = decode_json $r->decoded_content;
+	unless (defined($j) && defined($j->{'authorization_endpoint'})) {
+		&radiusd::radlog(RADIUS_LOG_ERROR, "non-JSON reponse or missing 'authorization_endpoint' element");
+		return;
+	}
 
-		$v = $j->{'revocation_endpoint'}
-			unless (defined($v) || $t ne 'end_session' );
+	my $endpoint;
+	for my $t ('token') {
+		my $v = $j->{"${t}_endpoint"};
 
 		unless (defined($v)) {
 			&radiusd::radlog(RADIUS_LOG_ERROR, "missing '${t}_endpoint' element");
@@ -277,11 +268,11 @@ sub _discovery {
 sub _fetch_token (@) {
 	my (@args) = @_;
 
+	my $realm = lc $RAD_REQUEST{'Realm'};
+
 	my $endpoint = _discovery();
 	return RLM_MODULE_FAIL
 		unless (defined($endpoint));
-
-	my $realm = lc $RAD_REQUEST{'Realm'};
 
 	my $r = $ua->post($endpoint->{'token'}, [
 		scope		=> 'openid',

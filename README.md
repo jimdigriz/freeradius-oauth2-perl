@@ -11,13 +11,27 @@ This is a [FreeRADIUS](http://freeradius.org/) [OAuth2 (OpenID Connect)](http://
   * [Connect Discovery](http://openid.net/specs/openid-connect-discovery-1_0.html)
   * [Connect Session Management](http://openid.net/specs/openid-connect-session-1_0.html)
 
+## TODO
+
+ * xlat for user attributes (eg. groups, email, name)
+ * add some garbage collector to the token stash
+ * xlat method to utilise token (but *not* to provide them) and construct adhoc HTTP requests
+ * HTTP keep-alive
+ * TLS optimisations - https://bjornjohansen.no/optimizing-https-nginx
+  * SSL_session_cache/SSL_session_cache_size/set_default_session_cache from IO::Socket::SSL
+  * SSL_cipher_list/SSL_version
+  * enable OCSP
+ * caching of endpoints when discovery is enabled
+ * Google Apps integration
+ * on accounting stop, call either end_session_endpoint or revocation_endpoint
+
 # Preflight
 
 ## Workstation
 
-You will need to [have git installed on your workstation](http://git-scm.com/book/en/Getting-Started-Installing-Git), [cURL](http://curl.haxx.se/) and python.
+You will need to [have git installed on your workstation](http://git-scm.com/book/en/Getting-Started-Installing-Git).
 
-**N.B.** Debian/Redhat users should be able to just type `sudo {apt-get,yum} install git curl python` whilst Mac OS X users should already have these tools present.
+**N.B.** Debian/Redhat users should be able to just type `sudo {apt-get,yum} install git` whilst Mac OS X users will need to install the [Command Line Tools](http://osxdaily.com/2014/02/12/install-command-line-tools-mac-os-x/).
 
 So we start off by fetching a copy of the project:
 
@@ -34,7 +48,6 @@ Optionally, you can edit the following elements in the global section of `config
 
  * **`debug` (default: 0):** set to `1` to have verbose output, such as the HTTPS communications (note that you will see passwords in the clear!)
  * **`from` (default: [unset]):** set to a suitable contact email address for your organisation
- * **`secure` (default: 1):** set to `0` if you wish to turn off all the benefits of SSL (strongly *not* recommended)
 
 ## Target RADIUS Server
 
@@ -69,26 +82,25 @@ From the project directory on your workstation, copy `main.pm` and `module` to `
 
 ## OAuth2 Discovery
 
-If you run a *secure* HTTPS website at `https://example.com` then you can make use of the auto-discovery mechanism, by making:
+If you run a *secure* HTTPS website at `https://example.com` then you can make use of the [auto-discovery mechanism](http://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig):
 
     https://example.com/.well-known/openid-configuration
 
-Generate an HTTP redirect depending on your authentication provider to:
+Alternatively you can generate an HTTP redirect to your authentication provider's discovery address:
 
- * **Microsoft Azure AD (Office 365):** `https://login.windows.net/example.com/.well-known/openid-configuration`
- * **Google Apps [not supported]:** `https://accounts.google.com/.well-known/openid-configuration`
+ * **IEFT:** this is the default
+  * **Vendor:** `ietf`
+  * **Discovery:** `https://example.com/.well-known/openid-configuration`
+ * **Microsoft Azure AD (Office 365):**
+  * **Vendor:** `microsoft-azure`
+  * **Discovery:** `https://login.windows.net/example.com/.well-known/openid-configuration`
+ * **Google Apps [not supported]:**
+  * **Vendor:** `google-apps`
+  * **Discovery:** `https://accounts.google.com/.well-known/openid-configuration`
 
-If you do not have a *secure* website at the apex of your realm, then you will need to:
+If you do not have a secure website at the apex of your realm, then you will need to edit `config` and add your authentication provider's discovery address under your realm as `discovery`.
 
-1. in a terminal run the following amending the `.well-known/openid-configuration` URL appropriately to point at your authentication provider
-
-        curl -s -L https://.../.well-known/openid-configuration | python -m json.tool
-1. extract the following elements (all of which *must* be HTTPS):
- * `authorization_endpoint`
- * `token_endpoint`
- * `userinfo_endpoint`
- * `end_session_endpoint` (Google call this `revocation_endpoint`, but put in `config` as `end_session_endpoint`)
-1. edit `config` and add those extracted elements to your realm
+Also add to `config` under your realm a `vendor` attribute if you use one of the authentication providers above.
 
 ## Cloud
 
@@ -123,10 +135,11 @@ Now `Ctrl-C` the python web server as we have finished with it.
 
  * [OAuth 2.0 in Azure AD](https://msdn.microsoft.com/en-us/library/azure/dn645545.aspx)
  * [Microsoft Azure REST API + OAuth 2.0](https://ahmetalpbalkan.com/blog/azure-rest-api-with-oauth2/)
+ * [Azure AD Graph REST API Reference](https://msdn.microsoft.com/en-us/library/azure/hh974478.aspx)
 
 ### Google Apps
 
-**N.B.** works in progress
+**N.B.** not supported
 
 #### Related Links
 
@@ -139,10 +152,9 @@ Now `Ctrl-C` the python web server as we have finished with it.
 By now your `config` file should look something like:
 
     [example.com]
+    vendor=microsoft-azure
     client_id=12345678-abcd-abcd-abcd-1234567890ab
     code=AAAB....
-    authorization_endpoint=https://.../oauth2/authorize
-    token_endpoint=https://.../oauth2/token
 
 Copy `config` on your workstation to `/opt/freeradius-oauth2-perl` on the target RADIUS server, and then on the server run as root:
 
@@ -265,22 +277,25 @@ On the target RADIUS server make sure you have a copy of curl available with:
 
     sudo apt-get install -yy --no-install-recommends curl
 
-Put a copy of your user name in a file called `username`, and your password in `password`.  Now type:
+Run the following, pointing at your OAuth2 discovery address, and extract `authorization_endpoint`:
+
+    curl -s -L https://.../.well-known/openid-configuration | python -m json.tool
+
+Now run (replacing `USERNAME`, `PASSWORD`, `example.com` and `AUTHORIZATION_ENDPOINT`):
 
     curl -i	-F scope=openid \
     		-F client_id=$(awk -F= '/^client_id=/ { print $2 }' /opt/freeradius-oauth2-perl/config) \
     		-F code=$(awk -F= '/^code=/ { print $2 }' /opt/freeradius-oauth2-perl/config) \
-	    	-F resource=00000002-0000-0000-c000-000000000000 \
 	    	-F grant_type=password \
-	    	-F username=\<username \
-    		-F password=\<password \
-    	$(awk -F= '/^token_endpoint=/ { print $2 }' /opt/freeradius-oauth2-perl/config)
+	    	-F username=USERNAME@example.com \
+    		-F password=PASSWORD \
+	AUTHORIZATION_ENDPOINT
 
-**N.B.** if you have multiple realms enabled in your `config`, then you will need to comment out *all* the ones you are not testing
+**N.B.** Microsoft Azure users will need to also add `-F resource=https://graph.windows.net` as an parameter
 
-If this works you will get a HTTP 200, otherwise you will see a 400 error.  If successful, type the following to remove your credentials:
+If this works you will get a HTTP 200, otherwise you will see a 400 error.
 
-    shred -f -u username password
+**N.B.** if you have multiple realms enabled in your `config`, then you will need to comment out the realms you do not wish to test.
 
 ## RADIUS
 
