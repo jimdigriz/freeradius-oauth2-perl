@@ -131,6 +131,7 @@ Now `Ctrl-C` the python web server as we have finished with it.
 #### Related Links
 
  * [OpenID Connect (OAuth 2.0 for Login)](https://developers.google.com/accounts/docs/OpenIDConnect)
+  * [People: getOpenIdConnect (aka `userinfo`)](https://developers.google.com/+/api/openidconnect/getOpenIdConnect)
  * [Using OAuth 2.0 for Devices](https://developers.google.com/accounts/docs/OAuth2ForDevices) - via SMS or email maybe?
 
 ## FreeRADIUS
