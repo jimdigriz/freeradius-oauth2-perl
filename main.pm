@@ -255,7 +255,6 @@ sub _discovery {
 	for my $t (@endpoints) {
 		my $v = $j->{"${t}_endpoint"};
 
-		# I hate Google
 		$v = $j->{'revocation_endpoint'}
 			unless (defined($v) || $t ne 'end_session' );
 

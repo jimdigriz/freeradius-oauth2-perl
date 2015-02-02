@@ -5,6 +5,7 @@ This is a [FreeRADIUS](http://freeradius.org/) [OAuth2 (OpenID Connect)](http://
 ## Related Links
 
  * [RFC6749: The OAuth 2.0 Authorization Framework](https://tools.ietf.org/html/rfc6749)
+ * [RFC7009: OAuth 2.0 Token Revocation](https://tools.ietf.org/html/rfc7009)
  * [OpenID Specifications](http://openid.net/developers/specs/)
   * [Connect Core](http://openid.net/specs/openid-connect-core-1_0.html)
   * [Connect Discovery][http://openid.net/specs/openid-connect-discovery-1_0.html]
