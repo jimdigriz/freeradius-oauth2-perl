@@ -153,6 +153,7 @@ By now your `config` file should look something like:
 
     [example.com]
     vendor=microsoft-azure
+    discovery=https://login.windows.net/example.com/.well-known/openid-configuration
     client_id=12345678-abcd-abcd-abcd-1234567890ab
     code=AAAB....
 
