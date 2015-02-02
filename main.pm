@@ -310,6 +310,8 @@ sub _handle_acct_update($) {
 	my $data;
 	{
 		lock(%tokens);
+		return RLM_MODULE_INVALID
+			unless (defined($tokens{$id}));
 		$data = thaw $tokens{$id};
 		delete $tokens{$id};
 	}
