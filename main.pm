@@ -240,8 +240,8 @@ sub _discovery {
 	}
 
 	my $j = decode_json $r->decoded_content;
-	unless (defined($j) && defined($j->{'authorization_endpoint'})) {
-		&radiusd::radlog(RADIUS_LOG_ERROR, "non-JSON reponse or missing 'authorization_endpoint' element");
+	unless (defined($j)) {
+		&radiusd::radlog(RADIUS_LOG_ERROR, 'non-JSON reponse');
 		return;
 	}
 
