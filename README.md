@@ -199,7 +199,9 @@ Once confirmed, amend the `security` section of `/etc/freeradius/radiusd.conf` l
 
 ### 802.1X
 
-For 802.1X support, you will need to amend `/etc/freeradius/sites-available/inner-tunnel`:
+For 802.1X authentication, only EAP-TTLS/PAP is supported, so Linux, Mac OS X and [Microsoft Windows 8](https://adamsync.wordpress.com/2012/05/08/eap-ttls-on-windows-2012-build-8250/) based devices will have no problems.  However, for Microsoft Windows 7 and earlier, you will need to use a supplicant extension such as [SecureW2 Enterprise Client](http://www.securew2.com/enterpriseclient).
+
+To enable this functionality, you will need to amend `/etc/freeradius/sites-available/inner-tunnel`:
 
     authorize {
       ...
@@ -277,8 +279,6 @@ On your RADIUS server, you can test everything is working by typing:
 **N.B.** this will *not* work if the [OAuth2 test](#OAuth2) above fails to work
 
 ### 802.1X
-
-For 802.1X authentication, only EAP-TTLS/PAP is supported, so Linux, Mac OS X and [Microsoft Windows 8](https://adamsync.wordpress.com/2012/05/08/eap-ttls-on-windows-2012-build-8250/) based devices will have no problems.  However, for Microsoft Windows 7 and earlier, you will need to use a supplicant extension such as [SecureW2 Enterprise Client](http://www.securew2.com/enterpriseclient).
 
 You will require a copy of [`eapol_test`](http://deployingradius.com/scripts/eapol_test/) which to build from source on your target RADIUS server you type:
 
