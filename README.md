@@ -97,7 +97,7 @@ If you do not have a *secure* website at the apex of your realm, then you will n
 1. as a redirect URI, enter in `http://localhost:8000/code.html`, then click on the complete arrow
 1. the application will now be added and you will be shown a preview page
 1. before we leave, you will need the 'Client ID' (the long formatted hex string known as a [GUID](http://en.wikipedia.org/wiki/Globally_unique_identifier#Text_encoding)), which you can find located under both 'Configure' (at the top of the page) or 'Update your Code' (under the 'Getting Started' title)
-1. place this Client ID in the `config` file under your realm as `clientid`
+1. place this Client ID in the `config` file under your realm as `client_id`
 
 Using this Client ID, we now need to create an authorisation code, to do this, run a web server from a terminal, inside the project with:
 
@@ -130,7 +130,7 @@ Now `Ctrl-C` the python web server as we have finished with it.
 By now your `config` file should look something like:
 
     [example.com]
-    clientid=12345678-abcd-abcd-abcd-1234567890ab
+    client_id=12345678-abcd-abcd-abcd-1234567890ab
     code=AAAB....
     authorization_endpoint=https://.../oauth2/authorize
     token_endpoint=https://.../oauth2/token
@@ -259,7 +259,7 @@ On the target RADIUS server make sure you have a copy of curl available with:
 Put a copy of your user name in a file called `username`, and your password in `password`.  Now type:
 
     curl -i	-F scope=openid \
-    		-F client_id=$(awk -F= '/^clientid=/ { print $2 }' /opt/freeradius-oauth2-perl/config) \
+    		-F client_id=$(awk -F= '/^client_id=/ { print $2 }' /opt/freeradius-oauth2-perl/config) \
     		-F code=$(awk -F= '/^code=/ { print $2 }' /opt/freeradius-oauth2-perl/config) \
 	    	-F resource=00000002-0000-0000-c000-000000000000 \
 	    	-F grant_type=password \

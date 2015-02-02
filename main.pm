@@ -64,7 +64,7 @@ BEGIN {
 
 		my $c = $cfg->{$realm};
 
-		foreach my $key ('clientid', 'code') {
+		foreach my $key ('client_id', 'code') {
 			unless (defined($c->{$key})) {
 				&radiusd::radlog(RADIUS_LOG_ERROR, "no '$key' set for '$realm'");
 				exit 1;
@@ -270,7 +270,7 @@ sub _fetch_token ($$) {
 
 	my $r = $ua->post($t, [
 		scope		=> 'openid',
-		client_id	=> $c->{'clientid'},
+		client_id	=> $c->{'client_id'},
 		code		=> $c->{'code'},
 		@$f,
 	]);
