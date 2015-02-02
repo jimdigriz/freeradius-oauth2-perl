@@ -5,7 +5,10 @@ This is a [FreeRADIUS](http://freeradius.org/) [OAuth2 (OpenID Connect)](http://
 ## Related Links
 
  * [RFC6749: The OAuth 2.0 Authorization Framework](https://tools.ietf.org/html/rfc6749)
- * [OpenID Connect Core 1.0](http://openid.net/specs/openid-connect-core-1_0.html)
+ * [OpenID Specifications](http://openid.net/developers/specs/)
+  * [Connect Core](http://openid.net/specs/openid-connect-core-1_0.html)
+  * [Connect Discovery][http://openid.net/specs/openid-connect-discovery-1_0.html]
+  * [Connect Session Management](http://openid.net/specs/openid-connect-session-1_0.html)
 
 # Preflight
 
@@ -79,8 +82,12 @@ If you do not have a *secure* website at the apex of your realm, then you will n
 1. in a terminal run the following amending the `.well-known/openid-configuration` URL appropriately to point at your authentication provider
 
         curl -s -L https://.../.well-known/openid-configuration | python -m json.tool
-1. extract the `authorization_endpoint` and `token_endpoint` entries (which *must* be HTTPS)
-1. edit `config` and add `authorization_endpoint` and `token_endpoint` entries for your realm
+1. extract the following elements (all of which *must* be HTTPS):
+ * `authorization_endpoint`
+ * `token_endpoint`
+ * `userinfo_endpoint`
+ * `end_session_endpoint` (Google call this `revocation_endpoint`, but put in `config` as `end_session_endpoint`)
+1. edit `config` and add those extracted elements to your realm
 
 ## Cloud
 

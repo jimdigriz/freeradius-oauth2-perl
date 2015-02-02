@@ -44,9 +44,17 @@ use constant {
 
 use vars qw/%RAD_REQUEST %RAD_REPLY %RAD_CHECK/;
 
+my @endpoints;
 my $cfg;
 
 BEGIN {
+	@endpoints = (
+		'authorization',
+		'token',
+		'userinfo',
+		'end_session',
+	);
+
 	$cfg = Config::Tiny->read('/opt/freeradius-oauth2-perl/config');
 	unless (defined($cfg)) {
 		&radiusd::radlog(RADIUS_LOG_ERROR, "unable to open 'config': " . Config::Tiny->errstr);
@@ -71,12 +79,13 @@ BEGIN {
 			}
 		}
 
-		if (defined($c->{'authorization_endpoint'}) ^ defined($c->{'token_endpoint'})) {
+		my $count = grep { $_ ~~ [ map { "${_}_endpoint" } @endpoints ] } keys %$c;
+		if ($count != 0 && $count != scalar(@endpoints)) {
 			&radiusd::radlog(RADIUS_LOG_ERROR, "realm '$realm' has partially configured manual endpoints");
 			exit 1;
 		}
 
-		$c->{'discovery'} = (defined($c->{'authorization_endpoint'})) ? 0 : 1;
+		$c->{'discovery'} = ($count == 0) ? 1 : 0;
 	}
 }
 
@@ -222,10 +231,11 @@ sub _gen_id {
 }
 
 sub _discovery {
-	my ($auth_endpoint, $token_endpoint);
+	my $endpoint;
 
 	my $realm = lc $RAD_REQUEST{'Realm'};
 
+	my $j;
 	if ($cfg->{$realm}->{'discovery'}) {
 		my $r = $ua->get('https://$realm/.well-known/openid-configuration');
 		if (is_server_error($r->code)) {
@@ -233,41 +243,48 @@ sub _discovery {
 			return;
 		}
 
-		my $j = decode_json $r->decoded_content;
+		$j = decode_json $r->decoded_content;
 		unless (defined($j) && defined($j->{'authorization_endpoint'})) {
 			&radiusd::radlog(RADIUS_LOG_ERROR, "non-JSON reponse or missing 'authorization_endpoint' element");
 			return;
 		}
-
-		$auth_endpoint = $j->{'authorization_endpoint'};
-		$token_endpoint = $j->{'token_endpoint'};
 	} else {
-		$auth_endpoint = $cfg->{$realm}->{'authorization_endpoint'};
-		$token_endpoint = $cfg->{$realm}->{'token_endpoint'};
+		$j = $cfg->{$realm};
 	}
 
-	unless (URI->new($auth_endpoint)->canonical->scheme eq 'https') {
-		&radiusd::radlog(RADIUS_LOG_ERROR, "'authorization_endpoint' is not 'https' scheme");
-		return;
-	}
-	unless (URI->new($token_endpoint)->canonical->scheme eq 'https') {
-		&radiusd::radlog(RADIUS_LOG_ERROR, "'token_endpoint' is not 'https' scheme");
-		return;
+	for my $t (@endpoints) {
+		my $v = $j->{"${t}_endpoint"};
+
+		# I hate Google
+		$v = $j->{'revocation_endpoint'}
+			unless (defined($v) || $t ne 'end_session' );
+
+		unless (defined($v)) {
+			&radiusd::radlog(RADIUS_LOG_ERROR, "missing '${t}_endpoint' element");
+			return;
+		}
+
+		unless (URI->new($v)->canonical->scheme eq 'https') {
+			&radiusd::radlog(RADIUS_LOG_ERROR, "'${t}_endpoint' is not 'https' scheme");
+			return;
+		}
+
+		$endpoint->{$t} = $v;
 	}
 
-	return ($auth_endpoint, $token_endpoint);
+	return $endpoint;
 }
 
 sub _fetch_token (@) {
 	my (@args) = @_;
 
-	my ($auth_endpoint, $token_endpoint) = _discovery();
+	my $endpoint = _discovery();
 	return RLM_MODULE_FAIL
-		unless (defined($auth_endpoint));
+		unless (defined($endpoint));
 
 	my $realm = lc $RAD_REQUEST{'Realm'};
 
-	my $r = $ua->post($token_endpoint, [
+	my $r = $ua->post($endpoint->{'token'}, [
 		scope		=> 'openid',
 		client_id	=> $cfg->{$realm}->{'client_id'},
 		code		=> $cfg->{$realm}->{'code'},
