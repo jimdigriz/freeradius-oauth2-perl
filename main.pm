@@ -125,7 +125,7 @@ sub authenticate {
 	my $c = $cfg->{lc $RAD_REQUEST{'Realm'}};
 
 	my ($auth_endpoint, $token_endpoint) = _discovery($c);
-	return RLM_MODULE_REJECT
+	return RLM_MODULE_FAIL
 		unless (defined($auth_endpoint));
 
 	my ($r, $j) = _fetch_token($c, $token_endpoint, [
@@ -140,7 +140,7 @@ sub authenticate {
 	my $id = _gen_id();
 	unless (defined($id)) {
 		&radiusd::radlog(RADIUS_LOG_ERROR, 'attributes vanished in the request');
-		return RLM_MODULE_REJECT;
+		return RLM_MODULE_FAIL;
 	}
 
 	my $data = {
@@ -212,7 +212,7 @@ sub xlat {
 	my $id = _gen_id();
 	unless (defined($id)) {
 		&radiusd::radlog(RADIUS_LOG_INFO, 'not handled by freeradius-oauth2-perl');
-		return RLM_MODULE_REJECT;
+		return RLM_MODULE_INVALID;
 	}
 
 	lock(%tokens);
@@ -276,13 +276,13 @@ sub _fetch_token ($$) {
 	]);
 	if (is_server_error($r->code)) {
 		&radiusd::radlog(RADIUS_LOG_INFO, 'authentication request failed: ' . $r->status_line);
-		return RLM_MODULE_REJECT;
+		return RLM_MODULE_FAIL;
 	}
 
 	my $j = decode_json $r->decoded_content;
 	unless (defined($j)) {
 		&radiusd::radlog(RADIUS_LOG_INFO, 'non-JSON reponse to authentication request');
-		return RLM_MODULE_REJECT;
+		return RLM_MODULE_FAIL;
 	}
 
 	if (is_client_error($r->code)) {
@@ -297,7 +297,7 @@ sub _fetch_token ($$) {
 
 		$RAD_REPLY{'Reply-Message'} = $m;
 
-		return RLM_MODULE_FAIL;
+		return RLM_MODULE_REJECT;
 	}
 
 	unless (defined($j->{'access_token'} && $j->{'token_type'})) {
