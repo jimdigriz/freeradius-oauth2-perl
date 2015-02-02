@@ -47,8 +47,7 @@ Afterwards, you can get everything you need with:
 
     sudo apt-get install -yy --no-install-recommends \
     	libwww-perl libconfig-tiny-perl libjson-perl libjson-xs-perl libtimedate-perl liburi-perl
-    sudo apt-get install -yy --no-install-recommends -t wheezy-backports \
-    	freeradius freeradius-utils
+    sudo apt-get install -yy --no-install-recommends -t wheezy-backports freeradius
 
 You should now have set up a working *default* installation of FreeRADIUS 2.2.x.
 
@@ -253,16 +252,20 @@ And finally edit the `ttls` section in `/etc/freeradius/eap.conf`:
 
 ## OAuth2
 
+On the target RADIUS server make sure you have a copy of curl available with:
+
+    sudo apt-get install -yy --no-install-recommends curl
+
 Put a copy of your user name in a file called `username`, and your password in `password`.  Now type:
 
     curl -i	-F scope=openid \
-    		-F client_id=$(awk -F= '/^clientid=/ { print $2 }' config) \
-    		-F code=$(awk -F= '/^code=/ { print $2 }' config) \
+    		-F client_id=$(awk -F= '/^clientid=/ { print $2 }' /opt/freeradius-oauth2-perl/config) \
+    		-F code=$(awk -F= '/^code=/ { print $2 }' /opt/freeradius-oauth2-perl/config) \
 	    	-F resource=00000002-0000-0000-c000-000000000000 \
 	    	-F grant_type=password \
 	    	-F username=\<username \
     		-F password=\<password \
-    	$(awk -F= '/^token_endpoint=/ { print $2 }' config)
+    	$(awk -F= '/^token_endpoint=/ { print $2 }' /opt/freeradius-oauth2-perl/config)
 
 **N.B.** if you have multiple realms enabled in your `config`, then you will need to comment out *all* the ones you are not testing
 
@@ -272,17 +275,52 @@ If this works you will get a HTTP 200, otherwise you will see a 400 error.  If s
 
 ## RADIUS
 
-On your RADIUS server, you can test everything is working by typing:
+Before you test freeradius-oauth2-perl is working, you must make sure that the [OAuth2 test method](#OAuth2) above works first.  If it does not, the RADIUS test below will definately not work.
 
-    radtest <USER>@example.com <PASSWORD> localhost 0 testing123 IGNORED 127.0.0.1
+To test freeradius-oauth2-perl is working, you need to have a copy of [`radtest`](http://wiki.freeradius.org/guide/Radtest).  To install it type
 
-**N.B.** this will *not* work if the [OAuth2 test](#OAuth2) above fails to work
+    sudo apt-get install -yy --no-install-recommends -t wheezy-backports freeradius-utils
+
+Whilst testing, it helps a lot to first stop freeradius and run in a separate terminal:
+
+    /etc/init.d/freeradius stop
+    freeradius -X | tee /tmp/freeradius.debug
+
+You may also want to edit `/opt/freeradius-oauth2-perl/config` to have `debug=1` in the global section to provide more information; but do not leave this enabled for production!
+
+To see if everything is working, type in a terminal on the target RADIUS server:
+
+    radtest USERNAME@example.com PASSWORD localhost 0 testing123 IGNORED 127.0.0.1
+
+If it works, you should see an `Access-Accept` being returned:
+
+    Sending Access-Request of id 226 to 127.0.0.1 port 1812
+            User-Name = "USERNAME@example.com"
+            User-Password = "PASSWORD"
+            NAS-IP-Address = 127.0.0.1
+            NAS-Port = 0
+            Message-Authenticator = 0x00000000000000000000000000000000
+            Framed-Protocol = PPP
+    rad_recv: Access-Accept packet from host 127.0.0.1 port 1812, id=226, length=32
+            Framed-Protocol = PPP
+            Framed-Compression = Van-Jacobson-TCP-IP
+
+A failure will either be no reply, or an `Access-Reject`:
+
+    rad_recv: Access-Reject packet from host 127.0.0.1 port 1812, id=39, length=263
+            Reply-Message = "Error: invalid_grant"
+            Reply-Message = "AADSTS70002: Error validating credentials. AADSTS50020: Invalid username or password"
+            Reply-Message = "Trace ID: 06389d3a-eeba-403a-b896-aeb5162f77a7"
+            Reply-Message = "Correlation ID: 700ae598-934f-4dd1-b81b-fd2b75051101"
+            Reply-Message = "Timestamp: 2015-02-02 10:08:22Z"
+
+If there is a problem, look at the contents of `/tmp/freeradius.debug`.
 
 ### 802.1X
 
 You will require a copy of [`eapol_test`](http://deployingradius.com/scripts/eapol_test/) which to build from source on your target RADIUS server you type:
 
-    sudo apt-get install -yy --no-install-recommends curl build-essential libssl-dev libnl-dev
+    sudo apt-get install -yy --no-install-recommends build-essential libssl-dev libnl-dev
     curl -O -J -L http://w1.fi/releases/wpa_supplicant-2.3.tar.gz
     tar zxf wpa_supplicant-2.3.tar.gz
     sed -e 's/^#CONFIG_EAPOL_TEST=y/CONFIG_EAPOL_TEST=y/' wpa_supplicant-2.3/wpa_supplicant/defconfig > wpa_supplicant-2.3/wpa_supplicant/.config
@@ -309,6 +347,24 @@ Once built, you will need a configuration file (amending `USERNAME`, `PASSWORD` 
 To test it works run:
 
     $ ./wpa_supplicant-2.3/wpa_supplicant/eapol_test -s testing123 -c eapol_test.conf
+
+A successful test will have again an `Access-Accept` towards the end of the output:
+
+    Received RADIUS message
+    RADIUS message: code=2 (Access-Accept) identifier=5 length=184
+       Attribute 1 (User-Name) length=24
+          Value: 'USERNAME@example.com'
+       Attribute 26 (Vendor-Specific) length=58
+          Value: 00000137113...64768eac
+       Attribute 26 (Vendor-Specific) length=58
+          Value: 00000137103...a4dae19e
+       Attribute 79 (EAP-Message) length=6
+          Value: 03050004
+       Attribute 80 (Message-Authenticator) length=18
+          Value: 34468e4556b...c5c2230c
+    STA 02:00:00:00:00:01: Received RADIUS packet matched with a pending request, round trip time 0.72 sec
+
+**N.B.** in the case of a failure you will *not* get a set of `Reply-Message` attributes in the `Access-Reject` as [EAP does nto allow this](https://tools.ietf.org/html/rfc3579#section-2.6.5)
 
 # Debugging
 
