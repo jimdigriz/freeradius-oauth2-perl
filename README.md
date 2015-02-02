@@ -88,13 +88,13 @@ If you run a *secure* HTTPS website at `https://example.com` then you can make u
 
 Alternatively you can generate an HTTP redirect to your authentication provider's discovery address:
 
- * **IEFT:** this is the default
+ * **[IETF](https://www.ietf.org/):** this is the default
   * **Vendor:** `ietf`
   * **Discovery:** `https://example.com/.well-known/openid-configuration`
- * **Microsoft Azure AD (Office 365):**
+ * **[Microsoft Azure AD](http://azure.microsoft.com/en-us/) ([Office 365](http://products.office.com/en/business/office-365-business)):**
   * **Vendor:** `microsoft-azure`
   * **Discovery:** `https://login.windows.net/example.com/.well-known/openid-configuration`
- * **Google Apps [not supported]:**
+ * **[Google Apps](https://www.google.com/work/apps/business/) [not supported]:**
   * **Vendor:** `google-apps`
   * **Discovery:** `https://accounts.google.com/.well-known/openid-configuration`
 
