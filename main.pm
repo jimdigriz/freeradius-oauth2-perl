@@ -198,10 +198,8 @@ sub xlat {
 	my ($type, @args) = @_;
 
 	my $id = _gen_id();
-	unless (defined($id)) {
-		&radiusd::radlog(RADIUS_LOG_INFO, 'not handled by freeradius-oauth2-perl');
-		return RLM_MODULE_INVALID;
-	}
+	return RLM_MODULE_INVALID
+		unless (defined($id));
 
 	lock(%tokens);
 	my $data = thaw $tokens{$id};
