@@ -271,7 +271,7 @@ Put a copy of your user name in a file called `username`, and your password in `
 
 If this works you will get a HTTP 200, otherwise you will see a 400 error.  If successful, type the following to remove your credentials:
 
-    shred -f -u username password || srm -f username password
+    shred -f -u username password
 
 ## RADIUS
 
