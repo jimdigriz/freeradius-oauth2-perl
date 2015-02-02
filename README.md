@@ -8,7 +8,7 @@ This is a [FreeRADIUS](http://freeradius.org/) [OAuth2 (OpenID Connect)](http://
  * [RFC7009: OAuth 2.0 Token Revocation](https://tools.ietf.org/html/rfc7009)
  * [OpenID Specifications](http://openid.net/developers/specs/)
   * [Connect Core](http://openid.net/specs/openid-connect-core-1_0.html)
-  * [Connect Discovery][http://openid.net/specs/openid-connect-discovery-1_0.html]
+  * [Connect Discovery](http://openid.net/specs/openid-connect-discovery-1_0.html)
   * [Connect Session Management](http://openid.net/specs/openid-connect-session-1_0.html)
 
 # Preflight
