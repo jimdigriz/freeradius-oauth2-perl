@@ -155,39 +155,11 @@ sub authenticate {
 }
 
 sub accounting {
-	my $id = _gen_id();
-	return RLM_MODULE_NOOP
-		unless (defined($id));
-
-	my $data;
-	{
-		lock(%tokens);
-		$data = thaw $tokens{$id};
-		delete $tokens{$id};
+	# https://tools.ietf.org/html/rfc2866#section-5.1
+	given ($RAD_REQUEST{'Acct-Status-Type'}) {
+	when ('Interim-Update')	{ return _handle_acct_update(); }
+	default			{ return RLM_MODULE_NOOP; }
 	}
-
-	my ($r, $j) = _fetch_token(
-		grant_type	=> 'refresh_token',
-		refresh_token	=> $data->{'refresh_token'},
-	);
-	return $r
-		if (ref($r) eq '');
-
-	$data->{'timestamp'}			= str2time($r->header('Date')) || time;
-	$data->{'token_type'}			= $j->{'token_type'};
-	$data->{'access_token'}			= $j->{'access_token'};
-	$data->{'expires_in'}			= $j->{'expires_in'}
-		if (defined($j->{'expires_in'}));
-	if (defined($j->{'refresh_token'})) {
-		$data->{'refresh_token'}	= $j->{'refresh_token'}
-	} else {
-		delete $data->{'refresh_token'};
-	}
-
-	lock(%tokens);
-	$tokens{$id} = freeze $data;
-
-	return RLM_MODULE_OK;
 }
 
 sub detach {
@@ -210,6 +182,24 @@ sub xlat {
 	}
 
 	return;
+}
+
+sub _gen_id {
+	unless ((defined($RAD_REQUEST{'NAS-Identifier'}) 
+				|| defined($RAD_REQUEST{'NAS-IPv6-Address'})
+				|| defined($RAD_REQUEST{'NAS-IP-Address'}))
+			&& (defined($RAD_REQUEST{'User-Name'}))) {
+		return;
+	}
+
+	my $i = $RAD_REQUEST{'NAS-Identifier'} || $RAD_REQUEST{'NAS-IPv6-Address'} || $RAD_REQUEST{'NAS-IP-Address'};
+	$i .= '|' . $RAD_REQUEST{'NAS-Port-Id'} || $RAD_REQUEST{'NAS-Port'}
+		if (defined($RAD_REQUEST{'NAS-Port-Id'}) || defined($RAD_REQUEST{'NAS-Port'}));
+	$i .= '|' . $RAD_REQUEST{'User-Name'};
+	$i .= '|' . $RAD_REQUEST{'Calling-Station-Id'}
+		if (defined($RAD_REQUEST{'Calling-Station-Id'}));
+
+	return $i;
 }
 
 sub _discovery {
@@ -298,22 +288,40 @@ sub _fetch_token (@) {
 	return ($r, $j);
 }
 
-sub _gen_id {
-	unless ((defined($RAD_REQUEST{'NAS-Identifier'}) 
-				|| defined($RAD_REQUEST{'NAS-IPv6-Address'})
-				|| defined($RAD_REQUEST{'NAS-IP-Address'}))
-			&& (defined($RAD_REQUEST{'User-Name'}))) {
-		return;
+sub _handle_acct_update {
+	my $id = _gen_id();
+	return RLM_MODULE_NOOP
+		unless (defined($id));
+
+	my $data;
+	{
+		lock(%tokens);
+		$data = thaw $tokens{$id};
+		delete $tokens{$id};
 	}
 
-	my $i = $RAD_REQUEST{'NAS-Identifier'} || $RAD_REQUEST{'NAS-IPv6-Address'} || $RAD_REQUEST{'NAS-IP-Address'};
-	$i .= '|' . $RAD_REQUEST{'NAS-Port-Id'} || $RAD_REQUEST{'NAS-Port'}
-		if (defined($RAD_REQUEST{'NAS-Port-Id'}) || defined($RAD_REQUEST{'NAS-Port'}));
-	$i .= '|' . $RAD_REQUEST{'User-Name'};
-	$i .= '|' . $RAD_REQUEST{'Calling-Station-Id'}
-		if (defined($RAD_REQUEST{'Calling-Station-Id'}));
+	my ($r, $j) = _fetch_token(
+		grant_type	=> 'refresh_token',
+		refresh_token	=> $data->{'refresh_token'},
+	);
+	return $r
+		if (ref($r) eq '');
 
-	return $i;
+	$data->{'timestamp'}			= str2time($r->header('Date')) || time;
+	$data->{'token_type'}			= $j->{'token_type'};
+	$data->{'access_token'}			= $j->{'access_token'};
+	$data->{'expires_in'}			= $j->{'expires_in'}
+		if (defined($j->{'expires_in'}));
+	if (defined($j->{'refresh_token'})) {
+		$data->{'refresh_token'}	= $j->{'refresh_token'}
+	} else {
+		delete $data->{'refresh_token'};
+	}
+
+	lock(%tokens);
+	$tokens{$id} = freeze $data;
+
+	return RLM_MODULE_OK;
 }
 
 exit 0;
