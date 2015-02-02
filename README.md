@@ -111,9 +111,9 @@ Using this Client ID, we now need to create an authorisation code, to do this, r
 
     python -m SimpleHTTPServer
 
-Now in your web browser go to (replacing `<CLIENTID>` with your Client ID from above):
+Now in your web browser go to (replacing `CLIENTID` with your Client ID from above):
 
-    https://login.windows.net/common/oauth2/authorize?response_type=code&prompt=admin_consent&client_id=<CLIENTID>
+    https://login.windows.net/common/oauth2/authorize?response_type=code&prompt=admin_consent&client_id=CLIENTID
 
 You will be taken to a page asking you to permit freeradius-oauth2-perl access to enable sign-on and read users' profiles.  When you click on 'Accept' you will be redirected to a page that provides you with the authorisation code.  Take a copy of this, either with cut and paste or using the 'Export to File' link on that page and place it in the `config` file under your realm as `code`.
 
