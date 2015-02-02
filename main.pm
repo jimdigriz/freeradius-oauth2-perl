@@ -155,11 +155,23 @@ sub authenticate {
 }
 
 sub accounting {
+	my $id = _gen_id();
+	return RLM_MODULE_NOOP
+		unless (defined($id));
+
 	# https://tools.ietf.org/html/rfc2866#section-5.1
 	given ($RAD_REQUEST{'Acct-Status-Type'}) {
-	when ('Interim-Update')	{ return _handle_acct_update(); }
-	default			{ return RLM_MODULE_NOOP; }
+		when ('Stop') {
+			lock(%tokens);
+			delete $tokens{$id};
+			return RLM_MODULE_OK;
+		}
+		when ('Interim-Update') {
+			return _handle_acct_update($id);
+		}
 	}
+
+	return RLM_MODULE_NOOP;
 }
 
 sub detach {
@@ -177,8 +189,12 @@ sub xlat {
 	my $data = thaw $tokens{$id};
 
 	given ($type) {
-	when ('timestamp')	{ return $data->{'timestamp'} }
-	when ('expires_in')	{ return $data->{'expires_in'} || -1; }
+		when ('timestamp') {
+			return $data->{'timestamp'}
+		}
+		when ('expires_in') {
+			return $data->{'expires_in'} || -1;
+		}
 	}
 
 	return;
@@ -288,10 +304,8 @@ sub _fetch_token (@) {
 	return ($r, $j);
 }
 
-sub _handle_acct_update {
-	my $id = _gen_id();
-	return RLM_MODULE_NOOP
-		unless (defined($id));
+sub _handle_acct_update($) {
+	my $id = shift;
 
 	my $data;
 	{
