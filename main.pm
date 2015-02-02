@@ -209,8 +209,11 @@ sub _gen_id {
 	}
 
 	my $i = $RAD_REQUEST{'NAS-Identifier'} || $RAD_REQUEST{'NAS-IPv6-Address'} || $RAD_REQUEST{'NAS-IP-Address'};
-	$i .= '|' . $RAD_REQUEST{'NAS-Port-Id'} || $RAD_REQUEST{'NAS-Port'}
-		if (defined($RAD_REQUEST{'NAS-Port-Id'}) || defined($RAD_REQUEST{'NAS-Port'}));
+	if (defined($RAD_REQUEST{'NAS-Port-Id'})) {
+		$i .= '|' . $RAD_REQUEST{'NAS-Port-Id'};
+	} elsif (defined($RAD_REQUEST{'NAS-Port'})) {
+		$i .= '|' . $RAD_REQUEST{'NAS-Port'};
+	}
 	$i .= '|' . $RAD_REQUEST{'User-Name'};
 	$i .= '|' . $RAD_REQUEST{'Calling-Station-Id'}
 		if (defined($RAD_REQUEST{'Calling-Station-Id'}));
