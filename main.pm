@@ -101,6 +101,7 @@ if (defined($cfg->{'_'}->{'debug'}) && $cfg->{'_'}->{'debug'} == 1) {
 	$ua->add_handler('response_done', sub { shift->dump; return });
 }
 
+my %endpoints :shared;
 my %tokens :shared;
 
 sub authorize {
@@ -233,6 +234,12 @@ sub _discovery {
 		? $cfg->{$realm}->{'discovery'}
 		: 'https://$realm/.well-known/openid-configuration';
 
+	{
+		lock(%endpoints);
+		return thaw $endpoints{$url}
+			if (defined($endpoints{$url}));
+	}
+
 	my $r = $ua->get($url);
 	if (is_server_error($r->code)) {
 		&radiusd::radlog(RADIUS_LOG_ERROR, 'unable to perform discovery: ' . $r->status_line);
@@ -245,7 +252,9 @@ sub _discovery {
 		return;
 	}
 
-	my $endpoint;
+	my $endpoint = {
+		timestamp	=> time,
+	};
 	for my $t ('token') {
 		my $v = $j->{"${t}_endpoint"};
 
@@ -261,6 +270,9 @@ sub _discovery {
 
 		$endpoint->{$t} = $v;
 	}
+
+	lock(%endpoints);
+	$endpoints{$url} = freeze $endpoint;
 
 	return $endpoint;
 }

@@ -14,14 +14,13 @@ This is a [FreeRADIUS](http://freeradius.org/) [OAuth2 (OpenID Connect)](http://
 ## TODO
 
  * xlat for user attributes (eg. groups, email, name)
- * add some garbage collector to the token stash
+ * add some garbage collector to the token/endpoint stash
  * xlat method to utilise token (but *not* to provide them) and construct adhoc HTTP requests
  * HTTP keep-alive
  * TLS optimisations - https://bjornjohansen.no/optimizing-https-nginx
   * SSL_session_cache/SSL_session_cache_size/set_default_session_cache from IO::Socket::SSL
   * SSL_cipher_list/SSL_version
   * enable OCSP
- * caching of endpoints
  * Google Apps integration
  * on accounting stop, call either end_session_endpoint or revocation_endpoint
 
