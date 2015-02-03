@@ -29,9 +29,9 @@ This is a [FreeRADIUS](http://freeradius.org/) [OAuth2 (OpenID Connect)](http://
 
 ## Workstation
 
-You will need to [have git installed on your workstation](http://git-scm.com/book/en/Getting-Started-Installing-Git).
+You will need to [have git installed on your workstation](http://git-scm.com/book/en/Getting-Started-Installing-Git) and [python](https://wiki.python.org/moin/BeginnersGuide).
 
-**N.B.** Debian/Redhat users should be able to just type `sudo {apt-get,yum} install git` whilst Mac OS X users will need to install the [Command Line Tools](http://osxdaily.com/2014/02/12/install-command-line-tools-mac-os-x/).
+**N.B.** Debian/Redhat users should be able to just type `sudo {apt-get,yum} install git python` whilst Mac OS X users will need to install the [Command Line Tools](http://osxdaily.com/2014/02/12/install-command-line-tools-mac-os-x/).
 
 So we start off by fetching a copy of the project:
 
