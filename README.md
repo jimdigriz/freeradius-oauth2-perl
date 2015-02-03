@@ -21,7 +21,7 @@ This is a [FreeRADIUS](http://freeradius.org/) [OAuth2 (OpenID Connect)](http://
   * SSL_session_cache/SSL_session_cache_size/set_default_session_cache from IO::Socket::SSL
   * SSL_cipher_list/SSL_version
   * enable OCSP
- * caching of endpoints when discovery is enabled
+ * caching of endpoints
  * Google Apps integration
  * on accounting stop, call either end_session_endpoint or revocation_endpoint
 
@@ -91,7 +91,7 @@ Alternatively you can generate an HTTP redirect to your authentication provider'
  * **[IETF](https://www.ietf.org/):** this is the default
   * **Vendor:** `ietf`
   * **Discovery:** `https://example.com/.well-known/openid-configuration`
- * **[Microsoft Azure AD](http://azure.microsoft.com/en-us/) ([Office 365](http://products.office.com/en/business/office-365-business)):**
+ * **[Microsoft Azure AD](http://azure.microsoft.com/) ([Office 365](http://products.office.com/en/business/office-365-business)):**
   * **Vendor:** `microsoft-azure`
   * **Discovery:** `https://login.windows.net/example.com/.well-known/openid-configuration`
  * **[Google Apps](https://www.google.com/work/apps/business/) [not supported]:**
