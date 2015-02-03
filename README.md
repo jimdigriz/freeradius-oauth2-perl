@@ -284,6 +284,7 @@ Run the following, pointing at your OAuth2 discovery address, and extract `autho
 
 Now run (replacing `USERNAME`, `PASSWORD`, `example.com` and `AUTHORIZATION_ENDPOINT`):
 
+    unset HISTFILE
     curl -i	-F scope=openid \
     		-F client_id=$(awk -F= '/^client_id=/ { print $2 }' /opt/freeradius-oauth2-perl/config) \
     		-F code=$(awk -F= '/^code=/ { print $2 }' /opt/freeradius-oauth2-perl/config) \
@@ -315,6 +316,7 @@ You may also want to edit `/opt/freeradius-oauth2-perl/config` to have `debug=1`
 
 To see if everything is working, type in a terminal on the target RADIUS server (amending `USERNAME`, `PASSWORD` and `example.com`):
 
+    unset HISTFILE
     radtest USERNAME@example.com PASSWORD localhost 0 testing123 IGNORED 127.0.0.1
 
 If it works, you should see an `Access-Accept` being returned:
