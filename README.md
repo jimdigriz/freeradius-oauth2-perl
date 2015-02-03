@@ -161,17 +161,17 @@ Copy `config` on your workstation to `/opt/freeradius-oauth2-perl` on the target
 
     chown root:freerad /opt/freeradius-oauth2-perl/config
     chmod 640 /opt/freeradius-oauth2-perl/config
-    ln -T -f -s /opt/freeradius-oauth2-perl/module /etc/freeradius/modules/freeradius-oauth2-perl
+    ln -T -f -s /opt/freeradius-oauth2-perl/module /etc/freeradius/modules/oauth2-perl
 
 Amend `/etc/freeradius/sites-available/default` like so:
 
     authorize {
       ...
     
-      files
+      #sql
     
-      # after 'files'
-      freeradius-oauth2-perl
+      # after '#sql'
+      oauth2-perl
     
       ...
     }
@@ -179,11 +179,11 @@ Amend `/etc/freeradius/sites-available/default` like so:
     authenticate {
       ...
     
-      eap
+      unix
       
-      # after 'eap'
-      Auth-Type freeradius-oauth2-perl {
-        freeradius-oauth2-perl
+      # after 'unix'
+      Auth-Type oauth2-perl {
+        oauth2-perl
       }
     }
     
@@ -193,7 +193,7 @@ Amend `/etc/freeradius/sites-available/default` like so:
       exec
       
       # after 'exec'
-      freeradius-oauth2-perl
+      oauth2-perl
     
       ...
     }
@@ -227,10 +227,10 @@ To enable this functionality, you will need to amend `/etc/freeradius/sites-avai
     authorize {
       ...
     
-      files
+      #sql
     
-      # after 'files'
-      freeradius-oauth2-perl
+      # after '#sql'
+      oauth2-perl
     
       ...
     }
@@ -238,22 +238,24 @@ To enable this functionality, you will need to amend `/etc/freeradius/sites-avai
     authenticate {
       ...
     
-      eap
+      unix
       
-      # after 'eap'
-      Auth-Type freeradius-oauth2-perl {
-        freeradius-oauth2-perl
+      # after 'unix'
+      Auth-Type oauth2-perl {
+        oauth2-perl
       }
     }
     
     post-auth {
       ...
     
-      #ldap
+      Post-Auth-Type REJECT {
+        ...
+      }
       
-      # after '#ldap'
+      # after 'Post-Auth-Type REJECT'
       update outer.reply {
-        User-Name := "%{User-Name}"
+        User-Name := "%{request:User-Name}"
       }
     
       ...
@@ -404,7 +406,7 @@ The interaction of this module in FreeRADIUS is as described to aid you when rea
  1. if `Realm` is not present or not set to a realm in `config`
   * return `noop`
  1. decides the request is for it
-  * sets `Auth-Type` to `freeradius-oauth2-perl`
+  * sets `Auth-Type` to `oauth2-perl`
   * deletes `Proxy-To-Realm` to force the request to not be proxied
   * return `updated`
  1. ...
@@ -427,7 +429,7 @@ For example:
       ...
     
       update reply {
-        Acct-Interim-Interval := "%{freeradius-oauth2-perl: expires_in}"
+        Acct-Interim-Interval := "%{oauth2-perl: expires_in}"
       }
 
       ...
