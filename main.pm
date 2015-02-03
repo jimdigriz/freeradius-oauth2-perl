@@ -335,7 +335,6 @@ sub _handle_acct_update($) {
 		return RLM_MODULE_INVALID
 			unless (defined($tokens{$id}));
 		$data = thaw $tokens{$id};
-		delete $tokens{$id};
 	}
 
 	my ($r, $j) = _fetch_token(
