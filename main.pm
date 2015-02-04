@@ -47,7 +47,6 @@ use constant {
 use vars qw/%RAD_REQUEST %RAD_REPLY %RAD_CHECK/;
 
 my $cfg;
-
 my $salt;
 
 BEGIN {
@@ -91,8 +90,6 @@ BEGIN {
 
 	$salt = random_string('00000000', [ '0'..'9', 'a'..'f' ]);
 }
-
-my $csh = Crypt::SaltedHash->new(algorithm => 'SHA-1', salt => 'HEX{' . $salt . '}');
 
 my $ua = LWP::UserAgent->new;
 $ua->timeout(10);
@@ -143,6 +140,7 @@ sub authenticate {
 		if (ref($r) eq '');
 
 	# rlm_cache
+	my $csh = Crypt::SaltedHash->new(algorithm => 'SHA-1', salt => 'HEX{' . $salt . '}');
 	$csh->add($RAD_REQUEST{'User-Password'});
 	$RAD_CHECK{'Password-With-Header'} = $csh->generate;
 	$RAD_CHECK{'Cache-TTL'} = (defined($cfg->{'_'}->{'cache'})) ? $cfg->{'_'}->{'cache'} : 1800;
