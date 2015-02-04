@@ -23,6 +23,7 @@ This is a [FreeRADIUS](http://freeradius.org/) [OAuth2 (OpenID Connect)](http://
   * enable OCSP
  * Google Apps integration
  * on accounting stop, call either end_session_endpoint or revocation_endpoint
+ * use the refresh_token for 're-auth's, if credential cache okayed everything, and fall back to full method
 
 # Preflight
 
