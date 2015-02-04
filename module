@@ -1,3 +1,17 @@
 perl oauth2-perl {
 	module = /opt/freeradius-oauth2-perl/main.pm
 }
+
+cache oauth2-perl-cache {
+	key = "%{User-Name}"
+
+	ttl = 1800
+
+	epoch = 0
+
+	add-stats = yes
+
+	update {
+		control:Password-With-Header := "%{control:Password-With-Header}"
+	}
+}

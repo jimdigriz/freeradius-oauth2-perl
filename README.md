@@ -47,6 +47,7 @@ Optionally, you can edit the following elements in the global section of `config
 
  * **`debug` (default: 0):** set to `1` to have verbose output, such as the HTTPS communications (note that you will see passwords in the clear!)
  * **`from` (default: [unset]):** set to a suitable contact email address for your organisation
+ * **`cache` (default: 1800):** number of seconds to cache credentials for (internally uses a [SHA-1 salted hash](http://en.wikipedia.org/wiki/Cryptographic_hash_function#Password_verification))
 
 ## Target RADIUS Server
 
@@ -62,7 +63,8 @@ You require a Debian 'wheezy' 7.x server that is plumbed into [Debian Backports]
 Afterwards, you can get everything you need with:
 
     sudo apt-get install -yy --no-install-recommends \
-    	libwww-perl libconfig-tiny-perl libjson-perl libjson-xs-perl libtimedate-perl liburi-perl
+    	libwww-perl libconfig-tiny-perl libjson-perl libjson-xs-perl libtimedate-perl \
+    	liburi-perl libcrypt-saltedhash-perl libstring-random-perl
     sudo apt-get install -yy --no-install-recommends -t wheezy-backports freeradius
 
 You should now have set up a working *default* installation of FreeRADIUS 2.2.x.
@@ -170,7 +172,22 @@ Amend `/etc/freeradius/sites-available/default` like so:
       #sql
     
       # after '#sql'
-      oauth2-perl
+      update control {
+        Cache-Status-Only := 'yes'
+      }
+      oauth2-perl-cache
+      if (notfound) {
+        update control {
+          Cache-Status-Only := 'no'
+        }
+        oauth2-perl
+      }
+      else {
+        update control {
+          Cache-Status-Only := 'no'
+        }
+        oauth2-perl-cache
+      }
     
       ...
     }
@@ -193,6 +210,17 @@ Amend `/etc/freeradius/sites-available/default` like so:
       
       # after 'exec'
       oauth2-perl
+    
+      ...
+    }
+    
+    post-auth {
+      ...
+    
+      #reply_log
+    
+      # after '#reply_log'
+      oauth2-perl-cache
     
       ...
     }
@@ -229,7 +257,22 @@ To enable this functionality, you will need to amend `/etc/freeradius/sites-avai
       #sql
     
       # after '#sql'
-      oauth2-perl
+      update control {
+        Cache-Status-Only := 'yes'
+      }
+      oauth2-perl-cache
+      if (notfound) {
+        update control {
+          Cache-Status-Only := 'no'
+        }
+        oauth2-perl
+      }
+      else {
+        update control {
+          Cache-Status-Only := 'no'
+        }
+        oauth2-perl-cache
+      }
     
       ...
     }
@@ -246,6 +289,13 @@ To enable this functionality, you will need to amend `/etc/freeradius/sites-avai
     }
     
     post-auth {
+      ...
+    
+      #reply_log
+    
+      # after '#reply_log'
+      oauth2-perl-cache
+    
       ...
     
       Post-Auth-Type REJECT {

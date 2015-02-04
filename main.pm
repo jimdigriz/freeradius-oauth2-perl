@@ -15,6 +15,8 @@ use JSON;
 use Date::Parse qw/str2time/;
 use Storable qw/freeze thaw/;
 use URI;
+use String::Random qw/random_string/;
+use Crypt::SaltedHash;
 
 my $VERSION = '0.1';
 
@@ -45,6 +47,8 @@ use constant {
 use vars qw/%RAD_REQUEST %RAD_REPLY %RAD_CHECK/;
 
 my $cfg;
+
+my $salt;
 
 BEGIN {
 	$cfg = Config::Tiny->read('/opt/freeradius-oauth2-perl/config');
@@ -84,7 +88,11 @@ BEGIN {
 			}
 		}
 	}
+
+	$salt = random_string('00000000', [ '0'..'9', 'a'..'f' ]);
 }
+
+my $csh = Crypt::SaltedHash->new(algorithm => 'SHA-1', salt => 'HEX{' . $salt . '}');
 
 my $ua = LWP::UserAgent->new;
 $ua->timeout(10);
@@ -112,9 +120,6 @@ sub authorize {
 		unless (defined($RAD_REQUEST{'Realm'}) && defined($cfg->{lc $RAD_REQUEST{'Realm'}}));
 
 	return RLM_MODULE_NOOP
-		unless (defined(_gen_id()));
-
-	return RLM_MODULE_NOOP
 		unless (defined($RAD_REQUEST{'User-Password'}));
 
 	$RAD_CHECK{'Auth-Type'} = 'oauth2-perl';
@@ -137,11 +142,10 @@ sub authenticate {
 	return $r
 		if (ref($r) eq '');
 
-	my $id = _gen_id();
-	unless (defined($id)) {
-		&radiusd::radlog(RADIUS_LOG_ERROR, 'attributes vanished in the request');
-		return RLM_MODULE_FAIL;
-	}
+	# rlm_cache
+	$csh->add($RAD_REQUEST{'User-Password'});
+	$RAD_CHECK{'Password-With-Header'} = $csh->generate;
+	$RAD_CHECK{'Cache-TTL'} = (defined($cfg->{'_'}->{'cache'})) ? $cfg->{'_'}->{'cache'};
 
 	my $data = {
 		'_timestamp'				=> str2time($r->header('Date')) || time,
@@ -155,25 +159,24 @@ sub authenticate {
 			if (defined($j->{'refresh_token'}));
 
 	lock(%tokens);
-	$tokens{$id} = freeze $data;
+	$tokens{$RAD_REQUEST{'User-Name'}} = freeze $data;
 
 	return RLM_MODULE_OK;
 }
 
 sub accounting {
-	my $id = _gen_id();
 	return RLM_MODULE_NOOP
-		unless (defined($id));
+		unless (defined($RAD_REQUEST{'User-Name'}));
 
 	# https://tools.ietf.org/html/rfc2866#section-5.1
 	given ($RAD_REQUEST{'Acct-Status-Type'}) {
 		when ('Stop') {
 			lock(%tokens);
-			delete $tokens{$id};
+			delete $tokens{$RAD_REQUEST{'User-Name'}};
 			return RLM_MODULE_OK;
 		}
 		when ('Interim-Update') {
-			return _handle_acct_update($id);
+			return _handle_acct_update($RAD_REQUEST{'User-Name'});
 		}
 	}
 
@@ -187,16 +190,19 @@ sub detach {
 sub xlat {
 	my ($type, @args) = @_;
 
-	my $id = _gen_id();
 	return RLM_MODULE_INVALID
-		unless (defined($id));
+		unless (defined($RAD_REQUEST{'User-Name'}));
 
 	lock(%tokens);
-	my $data = thaw $tokens{$id};
+
+	return RLM_MODULE_NOTFOUND
+		unless (defined($tokens{$RAD_REQUEST{'User-Name'}}));
+
+	my $data = thaw $tokens{$RAD_REQUEST{'User-Name'}};
 
 	given ($type) {
 		when ('timestamp') {
-			return $data->{'_timestamp'}
+			return $data->{'_timestamp'};
 		}
 		when ('expires_in') {
 			return $data->{'expires_in'} || -1;
@@ -204,27 +210,6 @@ sub xlat {
 	}
 
 	return;
-}
-
-sub _gen_id {
-	unless ((defined($RAD_REQUEST{'NAS-Identifier'}) 
-				|| defined($RAD_REQUEST{'NAS-IPv6-Address'})
-				|| defined($RAD_REQUEST{'NAS-IP-Address'}))
-			&& (defined($RAD_REQUEST{'User-Name'}))) {
-		return;
-	}
-
-	my $i = $RAD_REQUEST{'NAS-Identifier'} || $RAD_REQUEST{'NAS-IPv6-Address'} || $RAD_REQUEST{'NAS-IP-Address'};
-	if (defined($RAD_REQUEST{'NAS-Port-Id'})) {
-		$i .= '|' . $RAD_REQUEST{'NAS-Port-Id'};
-	} elsif (defined($RAD_REQUEST{'NAS-Port'})) {
-		$i .= '|' . $RAD_REQUEST{'NAS-Port'};
-	}
-	$i .= '|' . $RAD_REQUEST{'User-Name'};
-	$i .= '|' . $RAD_REQUEST{'Calling-Station-Id'}
-		if (defined($RAD_REQUEST{'Calling-Station-Id'}));
-
-	return $i;
 }
 
 sub _discovery {
