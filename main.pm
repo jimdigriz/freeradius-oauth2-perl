@@ -144,7 +144,7 @@ sub authenticate {
 	}
 
 	my $data = {
-		timestamp				=> str2time($r->header('Date')) || time,
+		'_timestamp'				=> str2time($r->header('Date')) || time,
 		token_type				=> $j->{'token_type'},
 		access_token				=> $j->{'access_token'},
 	};
@@ -196,7 +196,7 @@ sub xlat {
 
 	given ($type) {
 		when ('timestamp') {
-			return $data->{'timestamp'}
+			return $data->{'_timestamp'}
 		}
 		when ('expires_in') {
 			return $data->{'expires_in'} || -1;
@@ -253,7 +253,7 @@ sub _discovery {
 	}
 
 	my $endpoint = {
-		timestamp	=> time,
+		'_timestamp'	=> time,
 	};
 	for my $t ('token') {
 		my $v = $j->{"${t}_endpoint"};
@@ -344,7 +344,7 @@ sub _handle_acct_update($) {
 	return $r
 		if (ref($r) eq '');
 
-	$data->{'timestamp'}			= str2time($r->header('Date')) || time;
+	$data->{'_timestamp'}			= str2time($r->header('Date')) || time;
 	$data->{'token_type'}			= $j->{'token_type'};
 	$data->{'access_token'}			= $j->{'access_token'};
 	$data->{'expires_in'}			= $j->{'expires_in'}
