@@ -145,7 +145,7 @@ sub authenticate {
 	# rlm_cache
 	$csh->add($RAD_REQUEST{'User-Password'});
 	$RAD_CHECK{'Password-With-Header'} = $csh->generate;
-	$RAD_CHECK{'Cache-TTL'} = (defined($cfg->{'_'}->{'cache'})) ? $cfg->{'_'}->{'cache'};
+	$RAD_CHECK{'Cache-TTL'} = (defined($cfg->{'_'}->{'cache'})) ? $cfg->{'_'}->{'cache'} : 1800;
 
 	my $data = {
 		'_timestamp'				=> str2time($r->header('Date')) || time,
