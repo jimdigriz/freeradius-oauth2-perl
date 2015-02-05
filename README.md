@@ -48,7 +48,7 @@ Optionally, you can edit the following elements in the global section of `config
 
  * **`debug` (default: 0):** set to `1` to have verbose output, such as the HTTPS communications (note that you will see passwords in the clear!)
  * **`from` (default: [unset]):** set to a suitable contact email address for your organisation
- * **`cache` (default: 1800):** number of seconds to cache credentials for (internally uses a [SHA-1 salted hash](http://en.wikipedia.org/wiki/Cryptographic_hash_function#Password_verification))
+ * **`cache` (default: 1800):** number of seconds to cache credentials for (internally uses a [salted SHA-1 hash](http://en.wikipedia.org/wiki/Cryptographic_hash_function#Password_verification))
 
 ## Target RADIUS Server
 
