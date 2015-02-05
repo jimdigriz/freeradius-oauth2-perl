@@ -179,13 +179,13 @@ Amend `/etc/freeradius/sites-available/default` like so:
       oauth2-perl-cache
       if (notfound) {
         update control {
-          Cache-Status-Only := 'no'
+          Cache-Status-Only !* ANY
         }
         oauth2-perl
       }
       else {
         update control {
-          Cache-Status-Only := 'no'
+          Cache-Status-Only !* ANY
         }
         oauth2-perl-cache
       }
@@ -264,13 +264,13 @@ To enable this functionality, you will need to amend `/etc/freeradius/sites-avai
       oauth2-perl-cache
       if (notfound) {
         update control {
-          Cache-Status-Only := 'no'
+          Cache-Status-Only !* ANY
         }
         oauth2-perl
       }
       else {
         update control {
-          Cache-Status-Only := 'no'
+          Cache-Status-Only !* ANY
         }
         oauth2-perl-cache
       }
@@ -312,12 +312,28 @@ To enable this functionality, you will need to amend `/etc/freeradius/sites-avai
     }
 
 
-And finally edit the `ttls` section in `/etc/freeradius/eap.conf`:
+And finally edit `/etc/freeradius/eap.conf`:
 
-    ttls {
+    eap {
       ...
     
-      copy_request_to_tunnel = yes
+      default_eap_type = ttls
+    
+      gtc {
+        ...
+    
+        auth_type = oauth2-perl
+      }
+    
+      ttls {
+        ...
+    
+        default_eap_type = gtc
+    
+        copy_request_to_tunnel = yes
+    
+        ...
+      }
     
       ...
     }
