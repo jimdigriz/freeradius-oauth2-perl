@@ -139,7 +139,7 @@ sub authenticate {
 	return $r
 		if (ref($r) eq '');
 
-	# rlm_cache
+	# oauth2-perl-cache
 	my $csh = Crypt::SaltedHash->new(algorithm => 'SHA-1', salt => 'HEX{' . $salt . '}');
 	$csh->add($RAD_REQUEST{'User-Password'});
 	$RAD_CHECK{'Password-With-Header'} = $csh->generate;
