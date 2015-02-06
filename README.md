@@ -138,6 +138,7 @@ Now `Ctrl-C` the python web server as we have finished with it.
  * [OAuth 2.0 in Azure AD](https://msdn.microsoft.com/en-us/library/azure/dn645545.aspx)
  * [Microsoft Azure REST API + OAuth 2.0](https://ahmetalpbalkan.com/blog/azure-rest-api-with-oauth2/)
  * [Azure AD Graph REST API Reference](https://msdn.microsoft.com/en-us/library/azure/hh974478.aspx)
+  * [Azure AD Graph API Directory Schema Extensions](https://msdn.microsoft.com/en-us/library/azure/dn720459.aspx) - SSH keys and other meta data?
 
 ### Google Apps
 
@@ -147,6 +148,7 @@ Now `Ctrl-C` the python web server as we have finished with it.
 
  * [OpenID Connect (OAuth 2.0 for Login)](https://developers.google.com/accounts/docs/OpenIDConnect)
   * [People: getOpenIdConnect (aka `userinfo`)](https://developers.google.com/+/api/openidconnect/getOpenIdConnect)
+  * [Create a custom user schema](https://developers.google.com/admin-sdk/directory/v1/guides/manage-schemas#create_schema) - SSH keys and other meta data?
  * [Using OAuth 2.0 for Devices](https://developers.google.com/accounts/docs/OAuth2ForDevices) - via SMS or email maybe?
 
 ## FreeRADIUS
