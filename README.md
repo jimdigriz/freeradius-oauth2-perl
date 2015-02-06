@@ -64,8 +64,8 @@ You require a Debian 'wheezy' 7.x server that is plumbed into [Debian Backports]
 Afterwards, you can get everything you need with:
 
     sudo apt-get install -yy --no-install-recommends \
-    	libwww-perl libconfig-tiny-perl libjson-perl libjson-xs-perl libtimedate-perl \
-    	liburi-perl libcrypt-saltedhash-perl libstring-random-perl
+    	libwww-perl libconfig-tiny-perl libjson-perl libjson-xs-perl \
+	libtimedate-perl liburi-perl libcrypt-saltedhash-perl
     sudo apt-get install -yy --no-install-recommends -t wheezy-backports freeradius
 
 You should now have set up a working *default* installation of FreeRADIUS 2.2.x.
