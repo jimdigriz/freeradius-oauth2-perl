@@ -139,7 +139,8 @@ sub authenticate {
 	my $csh = Crypt::SaltedHash->new(algorithm => 'SHA-1');
 	$csh->add($RAD_REQUEST{'User-Password'});
 	$RAD_CHECK{'Password-With-Header'} = $csh->generate;
-	$RAD_CHECK{'Cache-TTL'} = (defined($cfg->{'_'}->{'cache'})) ? $cfg->{'_'}->{'cache'} : 1800;
+	$RAD_CHECK{'Cache-TTL'} = $cfg->{'_'}->{'cache'}
+		if (defined($cfg->{'_'}->{'cache'}));
 
 	my $data = {
 		'_timestamp'				=> str2time($r->header('Date')) || time,
