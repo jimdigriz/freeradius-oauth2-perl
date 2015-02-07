@@ -116,7 +116,6 @@ sub authorize {
 		unless (defined($RAD_REQUEST{'User-Password'}));
 
 	$RAD_CHECK{'Auth-Type'} = 'oauth2-perl';
-	delete $RAD_CHECK{'Proxy-To-Realm'};
 	return RLM_MODULE_UPDATED;
 }
 
