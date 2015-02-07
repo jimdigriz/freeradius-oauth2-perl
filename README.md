@@ -10,26 +10,7 @@ This is a [FreeRADIUS](http://freeradius.org/) [OAuth2 (OpenID Connect)](http://
   * [Connect Core](http://openid.net/specs/openid-connect-core-1_0.html)
   * [Connect Discovery](http://openid.net/specs/openid-connect-discovery-1_0.html)
   * [Connect Session Management](http://openid.net/specs/openid-connect-session-1_0.html)
-
-## TODO
-
- * xlat for user attributes (eg. groups, email, name)
- * add some garbage collector to the token/endpoint stash
- * xlat method to utilise token (but *not* to provide them) and construct adhoc HTTP requests
- * HTTP keep-alive
- * TLS optimisations - https://bjornjohansen.no/optimizing-https-nginx
-  * SSL_session_cache/SSL_session_cache_size/set_default_session_cache from IO::Socket::SSL
-  * SSL_cipher_list/SSL_version
-  * enable OCSP
- * on accounting stop, call either end_session_endpoint or revocation_endpoint
- * use the refresh_token for 're-auth's, if credential cache okayed everything, and fall back to full method
- * Google Apps integration - and probably others too
-  * does not support Resource Owner Password Credentials Grant
-  * means we have to have a 'priming' step for each user - not the end of the world as a user typically has to get instructions for how to use things like 802.1X so has to seek 'out of bound' Internet access from somewhere
-   * 'traditional' oauth2: Set up web page that user goes before using any service that relies on this module.  Get user to log in, and with the redirect, send off the the authorisation token to the RADIUS server after getting the user to re-enter in their credentials.  Once authenticated, the users own credentials are used to encrypt the token and future re-authentications test if the token decrypts and is still valid
-   * using Google's OAuth2 for Devices: They try to log in as usual into the service, but then are sent an SMS/twitter message telling them to go to a URL and punch in a code.  Once authenticated, the users own credentials are used to encrypt the token and future re-authentications test if the token decrypts and is still valid
-  * disadvantage here is that is the token is encrypted with a mistyped password the user will have to rerun the process; plenty of other userability problems come to mind too
-  * huge advantage is that this will work in two factor auth safe environments; although of course the authentications against this module will not be two factor
+ * [TODO List for Project](TODO.md)
 
 # Preflight
 
