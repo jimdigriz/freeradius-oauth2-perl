@@ -165,10 +165,6 @@ sub accounting {
 	return RLM_MODULE_NOOP;
 }
 
-sub detach {
-	return RLM_MODULE_OK;
-}
-
 sub xlat {
 	my ($type, @args) = @_;
 
