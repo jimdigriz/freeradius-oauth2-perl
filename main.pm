@@ -98,8 +98,8 @@ $ua->from($cfg->{'_'}->{'from'})
 if (defined($cfg->{'_'}->{'debug'}) && $cfg->{'_'}->{'debug'} == 1) {
 	&radiusd::radlog(RADIUS_LOG_INFO, 'debugging enabled, you will see the HTTPS requests in the clear!');
 
-	$ua->add_handler('request_send',  sub { shift->dump; return });
-	$ua->add_handler('response_done', sub { shift->dump; return });
+	$ua->add_handler('request_send',  sub { &radiusd::radlog(RADIUS_LOG_DEBUG, $_) foreach split /\n/, shift->dump; return });
+	$ua->add_handler('response_done', sub { &radiusd::radlog(RADIUS_LOG_DEBUG, $_) foreach split /\n/, shift->dump; return });
 }
 
 my %endpoints :shared;
