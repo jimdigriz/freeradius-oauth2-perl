@@ -87,6 +87,9 @@ BEGIN {
 	}
 }
 
+my %endpoints :shared;
+my %tokens :shared;
+
 my $ua = LWP::UserAgent->new;
 $ua->timeout(10);
 $ua->env_proxy;
@@ -101,9 +104,6 @@ if (defined($cfg->{'_'}->{'debug'}) && $cfg->{'_'}->{'debug'} == 1) {
 	$ua->add_handler('request_send',  sub { &radiusd::radlog(RADIUS_LOG_DEBUG, $_) foreach split /\n/, shift->dump; return });
 	$ua->add_handler('response_done', sub { &radiusd::radlog(RADIUS_LOG_DEBUG, $_) foreach split /\n/, shift->dump; return });
 }
-
-my %endpoints :shared;
-my %tokens :shared;
 
 sub authorize {
 	return RLM_MODULE_NOOP
