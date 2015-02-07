@@ -7,7 +7,7 @@ This is a [FreeRADIUS](http://freeradius.org/) [OAuth2 (OpenID Connect)](http://
  * credentials cache that utilisies a [salted SHA-1 hash](http://en.wikipedia.org/wiki/Cryptographic_hash_function#Password_verification)
  * `Group` attribute is populated with users group membership
  * `User-Name` is validated against list of actually valid usernames
- * xlat [JSONPath](http://jsonpath.curiousconcept.com/) support to pull any URL with a suitable token
+ * xlat support to pull any URL with a suitable token and use [JSONPath](http://jsonpath.curiousconcept.com/) to extract data
 
 There is a [TODO list](TODO.md) for the project listing outstanding problems and missing functionality.
 
@@ -510,9 +510,9 @@ This lets you pull any URL utilising the Web API token and extract arbitary data
 
 The arguments are in order:
 
- **realm:** the realm of the Web API token you want to use
- **url:** URL to use the token against
- **jsonpath:** a JSONPath statement to select the information you wish to extract
+ * **realm:** the realm of the Web API token you want to use
+ * **url:** URL to use the token against
+ * **jsonpath:** a JSONPath statement to select the information you wish to extract
 
 **N.B.** [JSON::Path](http://search.cpan.org/~tobyink/JSON-Path/lib/JSON/Path.pm) is used so if you wish to do filtering the section titled [JSONPath Embedded Perl Expressions](http://search.cpan.org/~tobyink/JSON-Path/lib/JSON/Path.pm#JSONPath_Embedded_Perl_Expressions) and the [`authorize` function](https://github.com/jimdigriz/freeradius-oauth2-perl/blob/master/main.pm) for this module may help
 
