@@ -510,6 +510,10 @@ The arguments are in order:
  **url:** URL to use the token against
  **jsonpath:** a [JSONPath](http://jsonpath.curiousconcept.com/) statement to select the information you wish to extract
 
+**N.B.** [JSON::Path](http://search.cpan.org/~tobyink/JSON-Path/lib/JSON/Path.pm) is used so if you wish to do filtering the section titled [JSONPath Embedded Perl Expressions](http://search.cpan.org/~tobyink/JSON-Path/lib/JSON/Path.pm#JSONPath_Embedded_Perl_Expressions) and the [`authorize` function](https://github.com/jimdigriz/freeradius-oauth2-perl/blob/master/main.pm) for this module may help
+
+your JSONPath must have `$` substituted with `^` to workaround escaping problems in xlat
+
 **N.B.** your JSONPath must have `$` substituted with `^` to workaround escaping problems in xlat
 
 For example the following puts the `displayName` attribute into `Tmp-String-0`:
