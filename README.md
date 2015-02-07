@@ -135,6 +135,12 @@ Also add to `config` under your realm a `vendor` attribute if you use one of the
 
 ## FreeRADIUS
 
+This section assumes you are familar with configuring FreeRADIUS, or have an existing working service and want to know what you need to splice in.  For example the following problems are not addressed here:
+
+ * what to do with realmless usernames, you may wish to use [unlang](http://freeradius.org/radiusd/man/unlang.html) to fix it up before the `suffix` module
+ * throttling authentication attempts, care is to be taken incase your OAuth2 provider throttles *all* authentication requests from your RADIUS server, possibly causing you service unavailability
+ * preventing attempts by your RADIUS server to proxy realmed usernames that are not handled locally
+
 By now your `config` file should look something like:
 
     [example.com]
