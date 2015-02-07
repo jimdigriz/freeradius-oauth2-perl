@@ -2,6 +2,15 @@ This is a [FreeRADIUS](http://freeradius.org/) [OAuth2 (OpenID Connect)](http://
 
 **N.B.** this module relies on your OAuth2 provider supporting the [Resource Owner Password Credentials Grant](https://tools.ietf.org/html/rfc6749#section-4.3)
 
+## Features
+
+ * credentials cache that utilisies a [salted SHA-1 hash](http://en.wikipedia.org/wiki/Cryptographic_hash_function#Password_verification)
+ * `Group` attribute is populated with users group membership
+ * `User-Name` is validated against list of actually valid usernames
+ * xlat [JSONPath](http://jsonpath.curiousconcept.com/) support to pull any URL with a suitable token
+
+There is a [TODO list](TODO.md) for the project listing outstanding problems and missing functionality.
+
 ## Related Links
 
  * [RFC6749: The OAuth 2.0 Authorization Framework](https://tools.ietf.org/html/rfc6749)
@@ -10,7 +19,6 @@ This is a [FreeRADIUS](http://freeradius.org/) [OAuth2 (OpenID Connect)](http://
   * [Connect Core](http://openid.net/specs/openid-connect-core-1_0.html)
   * [Connect Discovery](http://openid.net/specs/openid-connect-discovery-1_0.html)
   * [Connect Session Management](http://openid.net/specs/openid-connect-session-1_0.html)
- * [TODO List for Project](TODO.md)
 
 # Preflight
 
@@ -35,7 +43,7 @@ Optionally, you can edit the following elements in the global section of `config
 
  * **`debug` (default: 0):** set to `1` to have verbose output, such as the HTTPS communications (note that you will see passwords in the clear!)
  * **`from` (default: [unset]):** set to a suitable contact email address for your organisation
- * **`cache` (default: 1800):** number of seconds to cache credentials for (internally uses a [salted SHA-1 hash](http://en.wikipedia.org/wiki/Cryptographic_hash_function#Password_verification))
+ * **`cache` (default: 1800):** number of seconds to cache credentials for
 
 ## Target RADIUS Server
 
@@ -504,7 +512,7 @@ The arguments are in order:
 
  **realm:** the realm of the Web API token you want to use
  **url:** URL to use the token against
- **jsonpath:** a [JSONPath](http://jsonpath.curiousconcept.com/) statement to select the information you wish to extract
+ **jsonpath:** a JSONPath statement to select the information you wish to extract
 
 **N.B.** [JSON::Path](http://search.cpan.org/~tobyink/JSON-Path/lib/JSON/Path.pm) is used so if you wish to do filtering the section titled [JSONPath Embedded Perl Expressions](http://search.cpan.org/~tobyink/JSON-Path/lib/JSON/Path.pm#JSONPath_Embedded_Perl_Expressions) and the [`authorize` function](https://github.com/jimdigriz/freeradius-oauth2-perl/blob/master/main.pm) for this module may help
 
