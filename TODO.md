@@ -1,7 +1,7 @@
 This page lists the outstanding tasks and problems I am yet to solve:
 
  * xlat for user attributes (eg. groups, email, name)
- * add some garbage collector to the token/endpoint stash
+ * add some garbage collector to the cache (offload into rlm_cache?)
  * HTTP keep-alive
  * TLS optimisations - https://bjornjohansen.no/optimizing-https-nginx
   * SSL_session_cache/SSL_session_cache_size/set_default_session_cache from IO::Socket::SSL
@@ -9,7 +9,6 @@ This page lists the outstanding tasks and problems I am yet to solve:
   * enable OCSP
  * on accounting stop, call either end_session_endpoint or revocation_endpoint
  * use the refresh_token for 're-auth's, if credential cache okayed everything, and fall back to full method
- * fetch from provider a list of valid usernames to filter invalid usernames hitting the endpoint
 
 # Google Apps
 

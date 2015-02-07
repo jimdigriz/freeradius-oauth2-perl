@@ -18,6 +18,8 @@ use URI;
 use Crypt::SaltedHash;
 use JSON::Path;
 
+$JSON::Path::Safe = 0;
+
 my $VERSION = '0.1';
 
 # http://wiki.freeradius.org/modules/Rlm_perl#Logging
@@ -88,8 +90,7 @@ BEGIN {
 	}
 }
 
-my %endpoints :shared;
-my %tokens :shared;
+my %cache :shared;
 
 my $ua = LWP::UserAgent->new;
 $ua->timeout(10);
@@ -116,7 +117,25 @@ sub authorize {
 	return RLM_MODULE_NOOP
 		unless (defined($RAD_REQUEST{'User-Password'}) && $RAD_REQUEST{'User-Password'} ne '');
 
-	$RAD_CHECK{'Auth-Type'} = 'oauth2-perl';
+	my $realm = lc $RAD_REQUEST{'Realm'};
+
+	if ($cfg->{$realm}->{'vendor'} eq 'microsoft-azure') {
+		my $url = "https://graph.windows.net/$realm/users?api-version=1.5";
+		my $jsonpath = '$.value[?($_->{accountEnabled} eq "true")].userPrincipalName';
+
+		my @accounts = map { s/@[^@]*$//; lc $_ } _handle_jsonpath($realm, $url, $jsonpath);
+
+		return RLM_MODULE_NOTFOUND
+			unless (grep { $_ eq lc $RAD_REQUEST{'Stripped-User-Name'} } @accounts);
+
+		$url = "https://graph.windows.net/$realm/users/$RAD_REQUEST{'User-Name'}/memberOf?api-version=1.5";
+		$jsonpath = '$.value[?($_->{objectType} eq "Group" && $_->{securityEnabled} eq "true")].displayName';
+		$RAD_CHECK{'Group'} = [ _handle_jsonpath($realm, $url, $jsonpath) ];
+	}
+
+	$RAD_CHECK{'Auth-Type'} = 'oauth2-perl'
+		unless (defined($RAD_CHECK{'Password-With-Header'}));
+
 	return RLM_MODULE_UPDATED;
 }
 
@@ -145,16 +164,13 @@ sub authenticate {
 
 sub accounting {
 	return RLM_MODULE_NOOP
-		unless (defined($RAD_REQUEST{'User-Name'}));
-
-	return RLM_MODULE_NOOP
 		unless (defined($RAD_REQUEST{'Realm'}) && defined($cfg->{lc $RAD_REQUEST{'Realm'}}));
 
 	# https://tools.ietf.org/html/rfc2866#section-5.1
 	given ($RAD_REQUEST{'Acct-Status-Type'}) {
 		when ('Stop') {
-			lock(%tokens);
-			delete $tokens{$RAD_REQUEST{'User-Name'}};
+			lock(%cache);
+			delete $cache{$RAD_REQUEST{'User-Name'}};
 			return RLM_MODULE_OK;
 		}
 		when ('Interim-Update') {
@@ -175,21 +191,21 @@ sub xlat {
 
 	given ($type) {
 		when ('timestamp') {
-			lock(%tokens);
+			lock(%cache);
 			return ''
-				unless (defined($tokens{$args[0]}));
-			my $data = thaw $tokens{$args[0]};
+				unless (defined($cache{$args[0]}));
+			my $data = thaw $cache{$args[0]};
 			return $data->{'_timestamp'};
 		}
 		when ('expires_in') {
-			lock(%tokens);
+			lock(%cache);
 			return ''
-				unless (defined($tokens{$args[0]}));
-			my $data = thaw $tokens{$args[0]};
+				unless (defined($cache{$args[0]}));
+			my $data = thaw $cache{$args[0]};
 			return $data->{'expires_in'} || -1;
 		}
 		when ('jsonpath') {
-			return _handle_jsonpath($realm, @args) || '';
+			return (_handle_jsonpath($realm, @args))[0] || '';
 		}
 	}
 
@@ -204,9 +220,9 @@ sub _discovery ($) {
 		: 'https://$realm/.well-known/openid-configuration';
 
 	{
-		lock(%endpoints);
-		return thaw $endpoints{$url}
-			if (defined($endpoints{$url}));
+		lock(%cache);
+		return thaw $cache{$url}
+			if (defined($cache{$url}));
 	}
 
 	my $r = $ua->get($url);
@@ -221,9 +237,8 @@ sub _discovery ($) {
 		return;
 	}
 
-	my $endpoint = {
-		'_timestamp'	=> time,
-	};
+	$j->{'_timestamp'} = str2time($r->header('Date')) || time;
+
 	for my $t ('token') {
 		my $v = $j->{"${t}_endpoint"};
 
@@ -236,27 +251,31 @@ sub _discovery ($) {
 			&radiusd::radlog(RADIUS_LOG_ERROR, "'${t}_endpoint' is not 'https' scheme");
 			return;
 		}
-
-		$endpoint->{$t} = $v;
 	}
 
-	lock(%endpoints);
-	$endpoints{$url} = freeze $endpoint;
+	lock(%cache);
+	$cache{$url} = freeze $j;
 
-	return $endpoint;
+	return $j;
 }
 
 sub _fetch_token (@) {
 	my ($realm, $key, @args) = @_;
 
-	my $endpoint = _discovery($realm);
+	my $d = _discovery($realm);
 	return RLM_MODULE_FAIL
-		unless (defined($endpoint));
+		unless (defined($d));
+
+	{
+		lock(%cache);
+		return thaw $cache{$d->{'token_endpoint'}}
+			if (defined($cache{$d->{'token_endpoint'}}));
+	}
 
 	push @args, resource => 'https://graph.windows.net'
 		if ($cfg->{$realm}->{'vendor'} eq 'microsoft-azure');
 
-	my $r = $ua->post($endpoint->{'token'}, [
+	my $r = $ua->post($d->{'token_endpoint'}, [
 		scope		=> 'openid',
 		client_id	=> $cfg->{$realm}->{'client_id'},
 		client_secret	=> $cfg->{$realm}->{'client_secret'},
@@ -272,6 +291,8 @@ sub _fetch_token (@) {
 		&radiusd::radlog(RADIUS_LOG_INFO, 'non-JSON reponse to authentication request');
 		return RLM_MODULE_FAIL;
 	}
+
+	$j->{'_timestamp'} = str2time($r->header('Date')) || time;
 
 	if (is_client_error($r->code)) {
 		my $m = [];
@@ -293,18 +314,8 @@ sub _fetch_token (@) {
 		return RLM_MODULE_REJECT;
 	}
 
-	my $data = {
-		'_timestamp'				=> str2time($r->header('Date')) || time,
-		token_type				=> $j->{'token_type'},
-		access_token				=> $j->{'access_token'},
-	};
-	$data->{'expires_in'}				= $j->{'expires_in'}
-			if (defined($j->{'expires_in'}));
-	$data->{'refresh_token'}			= $j->{'refresh_token'}
-			if (defined($j->{'refresh_token'}));
-
-	lock(%tokens);
-	$tokens{$key} = freeze $data;
+	lock(%cache);
+	$cache{$key} = freeze $j;
 
 	return RLM_MODULE_OK;
 }
@@ -314,10 +325,10 @@ sub _handle_acct_update($) {
 
 	my $data;
 	{
-		lock(%tokens);
+		lock(%cache);
 		return RLM_MODULE_INVALID
-			unless (defined($tokens{$id}));
-		$data = thaw $tokens{$id};
+			unless (defined($cache{$id}));
+		$data = thaw $cache{$id};
 	}
 
 	my $rc = _fetch_token($RAD_REQUEST{'Realm'}, $RAD_REQUEST{'User-Name'},
@@ -333,17 +344,25 @@ sub _handle_acct_update($) {
 sub _handle_jsonpath($$$) {
 	my ($realm, $url, $jsonpath) = @_;
 
+	$jsonpath =~ s/\^/\$/g;
+
+	{
+		lock(%cache);
+		return JSON::Path->new($jsonpath)->values(thaw $cache{$url})
+			if (defined($cache{$url}));
+	}
+
 	my $atok;
 	{
-		lock(%tokens);
-		$atok = thaw $tokens{$realm};
+		lock(%cache);
+		$atok = thaw $cache{$realm};
 	}
 	unless (defined($atok)) {
 		my $rc = _fetch_token($realm, $realm, grant_type => 'client_credentials');
 		return
 			if ($rc != RLM_MODULE_OK);
-		lock(%tokens);
-		$atok = thaw $tokens{$realm};
+		lock(%cache);
+		$atok = thaw $cache{$realm};
 	}
 
 	my $r = $ua->get($url, Authorization => $atok->{'token_type'} . ' ' . $atok->{'access_token'});
@@ -355,9 +374,18 @@ sub _handle_jsonpath($$$) {
 	return
 		if (is_client_error($r->code));
 
-	$jsonpath =~ s/\^/\$/g;
+	my $j = decode_json $r->decoded_content;
+	unless (defined($j)) {
+		&radiusd::radlog(RADIUS_LOG_INFO, 'non-JSON reponse to authentication request');
+		return RLM_MODULE_FAIL;
+	}
 
-	return (JSON::Path->new($jsonpath)->get($r->decoded_content))[0];
+	$j->{'_timestamp'} = str2time($r->header('Date')) || time;
+
+	lock(%cache);
+	$cache{$url} = freeze $j;
+
+	return JSON::Path->new($jsonpath)->values($j);
 }
 
 exit 0;

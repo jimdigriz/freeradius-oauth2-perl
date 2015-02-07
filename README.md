@@ -168,18 +168,16 @@ Amend `/etc/freeradius/sites-available/default` like so:
         Cache-Status-Only := 'yes'
       }
       oauth2-perl-cache
-      if (notfound) {
-        update control {
-          Cache-Status-Only !* ANY
-        }
-        oauth2-perl
-      }
-      else {
+      if (ok) {
         update control {
           Cache-Status-Only !* ANY
         }
         oauth2-perl-cache
       }
+      update control {
+        Cache-Status-Only !* ANY
+      }
+      oauth2-perl
     
       ...
     }
@@ -253,18 +251,16 @@ To enable this functionality, you will need to amend `/etc/freeradius/sites-avai
         Cache-Status-Only := 'yes'
       }
       oauth2-perl-cache
-      if (notfound) {
-        update control {
-          Cache-Status-Only !* ANY
-        }
-        oauth2-perl
-      }
-      else {
+      if (ok) {
         update control {
           Cache-Status-Only !* ANY
         }
         oauth2-perl-cache
       }
+      update control {
+        Cache-Status-Only !* ANY
+      }
+      oauth2-perl
     
       ...
     }
