@@ -129,7 +129,7 @@ sub authenticate {
 		password	=> $RAD_REQUEST{'User-Password'},
 	);
 
-	my $rc = _fetch_token('User-Name', @opts);
+	my $rc = _fetch_token($realm, $RAD_REQUEST{'User-Name'}, @opts);
 	return $rc
 		if ($rc != RLM_MODULE_OK);
 
@@ -166,39 +166,38 @@ sub accounting {
 }
 
 sub xlat {
-	my ($type, @args) = @_;
+	my ($type, $realm, @args) = @_;
+
+	$realm = lc $realm;
 
 	return ''
-		unless (defined($RAD_REQUEST{'User-Name'}));
-
-	return ''
-		unless (defined($RAD_REQUEST{'Realm'}) && defined($cfg->{lc $RAD_REQUEST{'Realm'}}));
+		unless (defined($cfg->{lc $realm}));
 
 	given ($type) {
 		when ('timestamp') {
 			lock(%tokens);
 			return ''
-				unless (defined($tokens{$RAD_REQUEST{'User-Name'}}));
-			my $data = thaw $tokens{$RAD_REQUEST{'User-Name'}};
+				unless (defined($tokens{$args[0]}));
+			my $data = thaw $tokens{$args[0]};
 			return $data->{'_timestamp'};
 		}
 		when ('expires_in') {
 			lock(%tokens);
 			return ''
-				unless (defined($tokens{$RAD_REQUEST{'User-Name'}}));
-			my $data = thaw $tokens{$RAD_REQUEST{'User-Name'}};
+				unless (defined($tokens{$args[0]}));
+			my $data = thaw $tokens{$args[0]};
 			return $data->{'expires_in'} || -1;
 		}
 		when ('jsonpath') {
-			return _handle_jsonpath(@args) || '';
+			return _handle_jsonpath($realm, @args) || '';
 		}
 	}
 
 	return;
 }
 
-sub _discovery {
-	my $realm = lc $RAD_REQUEST{'Realm'};
+sub _discovery ($) {
+	my ($realm) = @_;
 
 	my $url = (defined($cfg->{$realm}->{'discovery'})) 
 		? $cfg->{$realm}->{'discovery'}
@@ -248,11 +247,9 @@ sub _discovery {
 }
 
 sub _fetch_token (@) {
-	my ($attr, @args) = @_;
+	my ($realm, $key, @args) = @_;
 
-	my $realm = lc $RAD_REQUEST{'Realm'};
-
-	my $endpoint = _discovery();
+	my $endpoint = _discovery($realm);
 	return RLM_MODULE_FAIL
 		unless (defined($endpoint));
 
@@ -307,7 +304,7 @@ sub _fetch_token (@) {
 			if (defined($j->{'refresh_token'}));
 
 	lock(%tokens);
-	$tokens{$RAD_REQUEST{$attr}} = freeze $data;
+	$tokens{$key} = freeze $data;
 
 	return RLM_MODULE_OK;
 }
@@ -323,7 +320,7 @@ sub _handle_acct_update($) {
 		$data = thaw $tokens{$id};
 	}
 
-	my $rc = _fetch_token('User-Name',
+	my $rc = _fetch_token($RAD_REQUEST{'Realm'}, $RAD_REQUEST{'User-Name'},
 		grant_type	=> 'refresh_token',
 		refresh_token	=> $data->{'refresh_token'},
 	);
@@ -333,20 +330,20 @@ sub _handle_acct_update($) {
 	return RLM_MODULE_OK;
 }
 
-sub _handle_jsonpath($$) {
-	my ($url, $jsonpath) = @_;
+sub _handle_jsonpath($$$) {
+	my ($realm, $url, $jsonpath) = @_;
 
 	my $atok;
 	{
 		lock(%tokens);
-		$atok = thaw $tokens{$RAD_REQUEST{'Realm'}};
+		$atok = thaw $tokens{$realm};
 	}
 	unless (defined($atok)) {
-		my $rc = _fetch_token('Realm', grant_type => 'client_credentials');
+		my $rc = _fetch_token($realm, $realm, grant_type => 'client_credentials');
 		return
 			if ($rc != RLM_MODULE_OK);
 		lock(%tokens);
-		$atok = thaw $tokens{$RAD_REQUEST{'Realm'}};
+		$atok = thaw $tokens{$realm};
 	}
 
 	my $r = $ua->get($url, Authorization => $atok->{'token_type'} . ' ' . $atok->{'access_token'});

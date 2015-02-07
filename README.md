@@ -478,11 +478,13 @@ There is some basic xlat functionality in the module that lets you extract some 
 
 ## `timestamp`
 
-Returns the epoch time of when the authorization token was created.
+Returns the epoch time of when the authorization token was created.  Takes a single argument, the User-Name.
 
 ## `expires_in`
 
 Returns the time in seconds, from `timestamp`, that the [authorization token is valid](https://tools.ietf.org/html/rfc6749#section-5.1).  If this is unset, it returns `-1`.
+
+Takes a single argument, the User-Name.
 
 For example:
 
@@ -490,7 +492,7 @@ For example:
       ...
     
       update reply {
-        Acct-Interim-Interval := "%{oauth2-perl: expires_in}"
+        Acct-Interim-Interval := "%{oauth2-perl: expires_in %{User-Name}}"
       }
 
       ...
@@ -500,7 +502,13 @@ For example:
 
 ## `jsonpath`
 
-This lets you pull any URL utilising the Web API token and extract arbitary data from it using [JSONPath](http://jsonpath.curiousconcept.com/).  If nothing matches, you get an emptry string and if you fetch a multi-value element only the first item will be returned.
+This lets you pull any URL utilising the Web API token and extract arbitary data from it, if nothing matches, you get an emptry string and if you fetch a multi-value element only the first item will be returned.
+
+The arguments are in order:
+
+ **realm:** the realm of the Web API token you want to use
+ **url:** URL to use the token against
+ **jsonpath:** a [JSONPath](http://jsonpath.curiousconcept.com/) statement to select the information you wish to extract
 
 **N.B.** your JSONPath must have `$` substituted with `^` to workaround escaping problems in xlat
 
@@ -510,7 +518,7 @@ For example the following puts the `displayName` attribute into `Tmp-String-0`:
       ...
     
       update request {
-        Tmp-String-0 := "%{oauth2-perl: jsonpath https://graph.windows.net/%{Realm}/users/%{User-Name}?api-version=1.5 ^.displayName}"
+        Tmp-String-0 := "%{oauth2-perl: jsonpath %{Realm} https://graph.windows.net/%{Realm}/users/%{User-Name}?api-version=1.5 ^.displayName}"
       }
     
       ...
@@ -521,7 +529,7 @@ Another interesting example is reject'ing early for disabled accounts:
     authorize {
       ...
     
-      if ("%{%{oauth2-perl: jsonpath https://graph.windows.net/%{Realm}/users/%{User-Name}?api-version=1.5 ^.accountEnabled}:-true}" != "true") {
+      if ("%{%{oauth2-perl: jsonpath %{Realm} https://graph.windows.net/%{Realm}/users/%{User-Name}?api-version=1.5 ^.accountEnabled}:-true}" != "true") {
         update request {
           Auth-Type := Reject
         }
