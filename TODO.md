@@ -1,8 +1,9 @@
 This page lists the outstanding tasks and problems I am yet to solve:
 
+ * figure out what xlat works only properly on the second run (%RAD_REQUEST is empty)
+  * workaround is to put xlat after `oauth2-perl` in the `authorize` section, not before
  * xlat for user attributes (eg. groups, email, name)
  * add some garbage collector to the token/endpoint stash
- * xlat method to utilise token (but *not* to provide them) and construct adhoc HTTP requests
  * HTTP keep-alive
  * TLS optimisations - https://bjornjohansen.no/optimizing-https-nginx
   * SSL_session_cache/SSL_session_cache_size/set_default_session_cache from IO::Socket::SSL

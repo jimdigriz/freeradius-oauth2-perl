@@ -52,8 +52,9 @@ Afterwards, you can get everything you need with:
 
     sudo apt-get install -yy --no-install-recommends \
     	libwww-perl libconfig-tiny-perl libjson-perl libjson-xs-perl \
-	libtimedate-perl liburi-perl libcrypt-saltedhash-perl
+	libtimedate-perl liburi-perl libcrypt-saltedhash-perl cpanminus
     sudo apt-get install -yy --no-install-recommends -t wheezy-backports freeradius
+    sudo cpanm JSON::Path
 
 You should now have set up a working *default* installation of FreeRADIUS 2.2.x.
 
@@ -471,13 +472,17 @@ The interaction of this module in FreeRADIUS is as described to aid you when rea
 
  1. ...
 
-# xlat
+# `xlat`
 
 There is some basic xlat functionality in the module that lets you extract some state data about the current user where possible.
 
-Calling the function with the following argument will return:
- * **`timestamp`:** epoch of when the authorization token was created
- * **`expires_in`:** time in seconds from `timestamp` that the [authorization token is valid](https://tools.ietf.org/html/rfc6749#section-5.1) for or `-1` if there is not one; this is *not* how long the `refresh_token` is valid for which is typically significantly longer
+## `timestamp`
+
+Returns the epoch time of when the authorization token was created.
+
+## `expires_in`
+
+Returns the time in seconds, from `timestamp`, that the [authorization token is valid](https://tools.ietf.org/html/rfc6749#section-5.1).  If this is unset, it returns `-1`.
 
 For example:
 
@@ -486,6 +491,40 @@ For example:
     
       update reply {
         Acct-Interim-Interval := "%{oauth2-perl: expires_in}"
+      }
+
+      ...
+    }
+
+**N.B.** this is *not* how long the `refresh_token` is valid for which is typically significantly longer
+
+## `jsonpath`
+
+This lets you pull any URL utilising the Web API token and extract arbitary data from it using [JSONPath](http://jsonpath.curiousconcept.com/).  If nothing matches, you get an emptry string and if you fetch a multi-value element only the first item will be returned.
+
+**N.B.** your JSONPath must have `$` substituted with `^` to workaround escaping problems in xlat
+
+For example the following puts the `displayName` attribute into `Tmp-String-0`:
+
+    authorize {
+      ...
+    
+      update request {
+        Tmp-String-0 := "%{oauth2-perl: jsonpath https://graph.windows.net/%{Realm}/users/%{User-Name}?api-version=1.5 ^.displayName}"
+      }
+    
+      ...
+    }
+
+Another interesting example is reject'ing early for disabled accounts:
+
+    authorize {
+      ...
+    
+      if ("%{%{oauth2-perl: jsonpath https://graph.windows.net/%{Realm}/users/%{User-Name}?api-version=1.5 ^.accountEnabled}:-true}" != "true") {
+        update request {
+          Auth-Type := Reject
+        }
       }
 
       ...

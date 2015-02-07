@@ -16,6 +16,7 @@ use Date::Parse qw/str2time/;
 use Storable qw/freeze thaw/;
 use URI;
 use Crypt::SaltedHash;
+use JSON::Path;
 
 my $VERSION = '0.1';
 
@@ -127,12 +128,10 @@ sub authenticate {
 		username	=> $RAD_REQUEST{'User-Name'},
 		password	=> $RAD_REQUEST{'User-Password'},
 	);
-	push @opts, resource => 'https://graph.windows.net'
-		if ($cfg->{$realm}->{'vendor'} eq 'microsoft-azure');
 
-	my ($r, $j) = _fetch_token(@opts);
-	return $r
-		if (ref($r) eq '');
+	my $rc = _fetch_token('User-Name', @opts);
+	return $rc
+		if ($rc != RLM_MODULE_OK);
 
 	# oauth2-perl-cache
 	my $csh = Crypt::SaltedHash->new(algorithm => 'SHA-1');
@@ -141,26 +140,15 @@ sub authenticate {
 	$RAD_CHECK{'Cache-TTL'} = $cfg->{'_'}->{'cache'}
 		if (defined($cfg->{'_'}->{'cache'}));
 
-	my $data = {
-		'_timestamp'				=> str2time($r->header('Date')) || time,
-		token_type				=> $j->{'token_type'},
-		access_token				=> $j->{'access_token'},
-	};
-	if (defined($j->{'expires_in'})) {
-		$data->{'expires_in'}			= $j->{'expires_in'};
-	}
-	$data->{'refresh_token'}			= $j->{'refresh_token'}
-			if (defined($j->{'refresh_token'}));
-
-	lock(%tokens);
-	$tokens{$RAD_REQUEST{'User-Name'}} = freeze $data;
-
 	return RLM_MODULE_OK;
 }
 
 sub accounting {
 	return RLM_MODULE_NOOP
 		unless (defined($RAD_REQUEST{'User-Name'}));
+
+	return RLM_MODULE_NOOP
+		unless (defined($RAD_REQUEST{'Realm'}) && defined($cfg->{lc $RAD_REQUEST{'Realm'}}));
 
 	# https://tools.ietf.org/html/rfc2866#section-5.1
 	given ($RAD_REQUEST{'Acct-Status-Type'}) {
@@ -184,22 +172,29 @@ sub detach {
 sub xlat {
 	my ($type, @args) = @_;
 
-	return RLM_MODULE_INVALID
+	return ''
 		unless (defined($RAD_REQUEST{'User-Name'}));
 
-	lock(%tokens);
-
-	return RLM_MODULE_NOTFOUND
-		unless (defined($tokens{$RAD_REQUEST{'User-Name'}}));
-
-	my $data = thaw $tokens{$RAD_REQUEST{'User-Name'}};
+	return ''
+		unless (defined($RAD_REQUEST{'Realm'}) && defined($cfg->{lc $RAD_REQUEST{'Realm'}}));
 
 	given ($type) {
 		when ('timestamp') {
+			lock(%tokens);
+			return ''
+				unless (defined($tokens{$RAD_REQUEST{'User-Name'}}));
+			my $data = thaw $tokens{$RAD_REQUEST{'User-Name'}};
 			return $data->{'_timestamp'};
 		}
 		when ('expires_in') {
+			lock(%tokens);
+			return ''
+				unless (defined($tokens{$RAD_REQUEST{'User-Name'}}));
+			my $data = thaw $tokens{$RAD_REQUEST{'User-Name'}};
 			return $data->{'expires_in'} || -1;
+		}
+		when ('jsonpath') {
+			return _handle_jsonpath(@args) || '';
 		}
 	}
 
@@ -257,13 +252,16 @@ sub _discovery {
 }
 
 sub _fetch_token (@) {
-	my (@args) = @_;
+	my ($attr, @args) = @_;
 
 	my $realm = lc $RAD_REQUEST{'Realm'};
 
 	my $endpoint = _discovery();
 	return RLM_MODULE_FAIL
 		unless (defined($endpoint));
+
+	push @args, resource => 'https://graph.windows.net'
+		if ($cfg->{$realm}->{'vendor'} eq 'microsoft-azure');
 
 	my $r = $ua->post($endpoint->{'token'}, [
 		scope		=> 'openid',
@@ -302,7 +300,20 @@ sub _fetch_token (@) {
 		return RLM_MODULE_REJECT;
 	}
 
-	return ($r, $j);
+	my $data = {
+		'_timestamp'				=> str2time($r->header('Date')) || time,
+		token_type				=> $j->{'token_type'},
+		access_token				=> $j->{'access_token'},
+	};
+	$data->{'expires_in'}				= $j->{'expires_in'}
+			if (defined($j->{'expires_in'}));
+	$data->{'refresh_token'}			= $j->{'refresh_token'}
+			if (defined($j->{'refresh_token'}));
+
+	lock(%tokens);
+	$tokens{$RAD_REQUEST{$attr}} = freeze $data;
+
+	return RLM_MODULE_OK;
 }
 
 sub _handle_acct_update($) {
@@ -316,28 +327,44 @@ sub _handle_acct_update($) {
 		$data = thaw $tokens{$id};
 	}
 
-	my ($r, $j) = _fetch_token(
+	my $rc = _fetch_token('User-Name',
 		grant_type	=> 'refresh_token',
 		refresh_token	=> $data->{'refresh_token'},
 	);
-	return $r
-		if (ref($r) eq '');
-
-	$data->{'_timestamp'}			= str2time($r->header('Date')) || time;
-	$data->{'token_type'}			= $j->{'token_type'};
-	$data->{'access_token'}			= $j->{'access_token'};
-	$data->{'expires_in'}			= $j->{'expires_in'}
-		if (defined($j->{'expires_in'}));
-	if (defined($j->{'refresh_token'})) {
-		$data->{'refresh_token'}	= $j->{'refresh_token'}
-	} else {
-		delete $data->{'refresh_token'};
-	}
-
-	lock(%tokens);
-	$tokens{$id} = freeze $data;
+	return $rc
+		if ($rc != RLM_MODULE_OK);
 
 	return RLM_MODULE_OK;
+}
+
+sub _handle_jsonpath($$) {
+	my ($url, $jsonpath) = @_;
+
+	my $atok;
+	{
+		lock(%tokens);
+		$atok = thaw $tokens{$RAD_REQUEST{'Realm'}};
+	}
+	unless (defined($atok)) {
+		my $rc = _fetch_token('Realm', grant_type => 'client_credentials');
+		return
+			if ($rc != RLM_MODULE_OK);
+		lock(%tokens);
+		$atok = thaw $tokens{$RAD_REQUEST{'Realm'}};
+	}
+
+	my $r = $ua->get($url, Authorization => $atok->{'token_type'} . ' ' . $atok->{'access_token'});
+	if (is_server_error($r->code)) {
+		&radiusd::radlog(RADIUS_LOG_INFO, 'jsonpath request failed: ' . $r->status_line);
+		return;
+	}
+
+	return
+		if (is_client_error($r->code));
+
+	$jsonpath =~ s/\^/\$/g;
+
+	return (JSON::Path->new($jsonpath)->get($r->decoded_content))[0];
 }
 
 exit 0;
