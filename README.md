@@ -60,7 +60,7 @@ Afterwards, you can get everything you need with:
 
     sudo apt-get install -yy --no-install-recommends \
     	libwww-perl libconfig-tiny-perl libjson-perl libjson-xs-perl \
-	libtimedate-perl liburi-perl libcrypt-saltedhash-perl cpanminus
+	libtimedate-perl liburi-perl libcrypt-saltedhash-perl cpanminus make
     sudo apt-get install -yy --no-install-recommends -t wheezy-backports freeradius
     sudo cpanm JSON::Path
 
