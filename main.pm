@@ -114,7 +114,7 @@ sub authorize {
 		unless (defined($RAD_REQUEST{'Realm'}) && defined($cfg->{lc $RAD_REQUEST{'Realm'}}));
 
 	return RLM_MODULE_NOOP
-		unless (defined($RAD_REQUEST{'User-Password'}));
+		unless (defined($RAD_REQUEST{'User-Password'}) && $RAD_REQUEST{'User-Password'} ne '');
 
 	$RAD_CHECK{'Auth-Type'} = 'oauth2-perl';
 	return RLM_MODULE_UPDATED;
