@@ -35,7 +35,7 @@ This is a [FreeRADIUS](http://freeradius.org/) [OAuth2 (OpenID Connect)](http://
 
 ## Workstation
 
-You will need to [have git installed on your workstation](http://git-scm.com/book/en/Getting-Started-Installing-Git) and [python](https://wiki.python.org/moin/BeginnersGuide).
+You will need to [have git installed on your workstation](http://git-scm.com/book/en/Getting-Started-Installing-Git).
 
 **N.B.** Debian/Redhat users should be able to just type `sudo {apt-get,yum} install git python` whilst Mac OS X users will need to install the [Command Line Tools](http://osxdaily.com/2014/02/12/install-command-line-tools-mac-os-x/).
 
@@ -121,23 +121,18 @@ Also add to `config` under your realm a `vendor` attribute if you use one of the
 1. click on 'Applications' at the top
 1. click on 'Add' located at the centre of the bottom of the page
 1. a window will open asking 'What do you want to do?', click on 'Add an application my organization is developing'
-1. enter in the application name `freeradius-oauth2-perl`, click on 'Native client application', and click on the next arrow
-1. as a redirect URI, enter in `http://localhost:8000/code.html`, then click on the complete arrow
+1. enter in the application name `freeradius-oauth2-perl`, click on 'Web Application and/or Web API', and click on the next arrow
+1. as a sign-on URI, enter in `http://localhost`
+1. as an App ID URI, use `https://github.com/jimdigriz/freeradius-oauth2-perl`
+1. click on the complete arrow
 1. the application will now be added and you will be shown a preview page
-1. before we leave, you will need the 'Client ID' (the long formatted hex string known as a [GUID](http://en.wikipedia.org/wiki/Globally_unique_identifier#Text_encoding)), which you can find located under both 'Configure' (at the top of the page) or 'Update your Code' (under the 'Getting Started' title)
-1. place this Client ID in the `config` file under your realm as `client_id`
-
-Using this Client ID, we now need to create an authorisation code, to do this, run a web server from a terminal, inside the project with:
-
-    python -m SimpleHTTPServer
-
-Now in your web browser go to (replacing `CLIENTID` with your Client ID from above):
-
-    https://login.windows.net/common/oauth2/authorize?response_type=code&prompt=admin_consent&client_id=CLIENTID
-
-You will be taken to a page asking you to permit freeradius-oauth2-perl access to enable sign-on and read users' profiles.  When you click on 'Accept' you will be redirected to a page that provides you with the authorisation code.  Take a copy of this, either with cut and paste or using the 'Export to File' link on that page and place it in the `config` file under your realm as `code`.
-
-Now `Ctrl-C` the python web server as we have finished with it.
+1. go to the 'Configure' section found at the top of the page
+1. under the 'Keys' section, select the drop down menu to create a key of a duration of your choosing
+1. under the 'Permissions to other applications', in the first drop down menu, give application permissions to 'Read directory data', and under the second drop down menu select give delegated permissions to 'Enable sign-on and read users'
+1. click on 'Save' located in the bottom bar of the page
+1. now edit your `config` file and place under your realm:
+  * 'Client ID' as `client_id`
+  * take a copy of your new generated key and place it under `client_secret`
 
 #### Related Links
 
@@ -165,7 +160,7 @@ By now your `config` file should look something like:
     vendor=microsoft-azure
     discovery=https://login.windows.net/example.com/.well-known/openid-configuration
     client_id=12345678-abcd-abcd-abcd-1234567890ab
-    code=AAAB....
+    client_secret=....
 
 Copy `config` on your workstation to `/opt/freeradius-oauth2-perl` on the target RADIUS server, and then on the server run as root:
 
@@ -352,26 +347,26 @@ And finally edit `/etc/freeradius/eap.conf`:
 
 On the target RADIUS server make sure you have a copy of curl available with:
 
-    sudo apt-get install -yy --no-install-recommends curl
+    sudo apt-get install -yy --no-install-recommends curl python
 
 Run the following, pointing at your OAuth2 discovery address, and extract `authorization_endpoint`:
 
     curl -s -L https://.../.well-known/openid-configuration | python -m json.tool
 
-Now run (replacing `USERNAME`, `PASSWORD`, `example.com` and `AUTHORIZATION_ENDPOINT`):
+Now run (replacing `USERNAME`, `PASSWORD`, `example.com` and `TOKEN_ENDPOINT`):
 
     unset HISTFILE
-    curl -i	-F scope=openid \
-    		-F client_id=$(awk -F= '/^client_id=/ { print $2 }' /opt/freeradius-oauth2-perl/config) \
-    		-F code=$(awk -F= '/^code=/ { print $2 }' /opt/freeradius-oauth2-perl/config) \
-	    	-F grant_type=password \
-	    	-F username=USERNAME@example.com \
-    		-F password=PASSWORD \
-    	AUTHORIZATION_ENDPOINT
+    curl -i	-d scope=openid \
+    		--data-urlencode client_id=$(awk -F= '/^client_id=/ { print $2 }' /opt/freeradius-oauth2-perl/config) \
+    		--data-urlencode client_secret=$(awk -F= '/^client_secret=/ { print $2 }' /opt/freeradius-oauth2-perl/config) \
+	    	-d grant_type=password \
+	    	--data-urlencode username=USERNAME@example.com \
+    		--data-urlencode password=PASSWORD \
+    	TOKEN_ENDPOINT
 
-**N.B.** Microsoft Azure users will need to also add `-F resource=https://graph.windows.net` as an parameter
+**N.B.** Microsoft Azure users will need to also add `--data-urlencode resource=https://graph.windows.net` as an additional parameter
 
-If this works you will get a HTTP 200, otherwise you will see a 400 error.
+If this works you will get a HTTP 200 and an JSON response in the body, otherwise you will see a 400 error.
 
 **N.B.** if you have multiple realms enabled in your `config`, then you will need to comment out the realms you do not wish to test.
 
