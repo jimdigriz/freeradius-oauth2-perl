@@ -10,6 +10,7 @@ This page lists the outstanding tasks and problems I am yet to solve:
   * enable OCSP
  * on accounting stop, call either end_session_endpoint or revocation_endpoint
  * use the refresh_token for 're-auth's, if credential cache okayed everything, and fall back to full method
+ * fetch from provider a list of valid usernames to filter invalid usernames hitting the endpoint
 
 # Google Apps
 
