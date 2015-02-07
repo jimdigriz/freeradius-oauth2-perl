@@ -26,15 +26,8 @@ This is a [FreeRADIUS](http://freeradius.org/) [OAuth2 (OpenID Connect)](http://
  * Google Apps integration - and probably others too
   * does not support Resource Owner Password Credentials Grant
   * means we have to have a 'priming' step for each user - not the end of the world as a user typically has to get instructions for how to use things like 802.1X so has to seek 'out of bound' Internet access from somewhere
-   * 'traditional' oauth2:
-    1. set up web page that user goes before using any service that relies on this module
-    1. get user to log in, and with the redirect, send off the the authorisation token to the RADIUS server after getting the user to re-enter in their credentials
-    1. once authenticated, the users own credentials (optionally with Calling-Station-Id mixed in?) are used to encrypt the token
-    1. future re-authentications test if the token decrypts and is still valid
-   * using Google's OAuth2 for Devices:
-    1. they try to log in as usual into the service, but then sent an SMS/twitter message telling them to go to a URL and punch in a code
-    1. once authenticated, the users own credentials (optionally with Calling-Station-Id mixed in?) are used to encrypt the token
-    1. future re-authentications test if the token decrypts and is still valid
+   * 'traditional' oauth2: Set up web page that user goes before using any service that relies on this module.  Get user to log in, and with the redirect, send off the the authorisation token to the RADIUS server after getting the user to re-enter in their credentials.  Once authenticated, the users own credentials are used to encrypt the token and future re-authentications test if the token decrypts and is still valid
+   * using Google's OAuth2 for Devices: They try to log in as usual into the service, but then are sent an SMS/twitter message telling them to go to a URL and punch in a code.  Once authenticated, the users own credentials are used to encrypt the token and future re-authentications test if the token decrypts and is still valid
   * disadvantage here is that is the token is encrypted with a mistyped password the user will have to rerun the process; plenty of other userability problems come to mind too
   * huge advantage is that this will work in two factor auth safe environments; although of course the authentications against this module will not be two factor
 
