@@ -1,6 +1,6 @@
 This is a [FreeRADIUS](http://freeradius.org/) [OAuth2 (OpenID Connect)](http://en.wikipedia.org/wiki/OpenID_Connect) [Perl module](http://wiki.freeradius.org/modules/Rlm_perl) to handle authentication.  It was created to allow the users of a wireless 802.1X (WPA Enterprise) network to connect.
 
-**N.B.** this module relies on [`grant_type=password`](https://tools.ietf.org/html/rfc6749#section-4.3) being supported by your OAuth2 provider
+**N.B.** this module relies on your OAuth2 provider supporting the [Resource Owner Password Credentials Grant](https://tools.ietf.org/html/rfc6749#section-4.3)
 
 ## Related Links
 
@@ -21,9 +21,22 @@ This is a [FreeRADIUS](http://freeradius.org/) [OAuth2 (OpenID Connect)](http://
   * SSL_session_cache/SSL_session_cache_size/set_default_session_cache from IO::Socket::SSL
   * SSL_cipher_list/SSL_version
   * enable OCSP
- * Google Apps integration
  * on accounting stop, call either end_session_endpoint or revocation_endpoint
  * use the refresh_token for 're-auth's, if credential cache okayed everything, and fall back to full method
+ * Google Apps integration - and probably others too
+  * does not support Resource Owner Password Credentials Grant
+  * means we have to have a 'priming' step for each user - not the end of the world as a user typically has to get instructions for how to use things like 802.1X so has to seek 'out of bound' Internet access from somewhere
+   * 'traditional' oauth2:
+    * set up web page that user goes before using any service that relies on this module
+    * get user to log in, and with the redirect, send off the the authorisation token to the RADIUS server after getting the user to re-enter in their credentials
+    * once authenticated, the users own credentials (optionally with Calling-Station-Id mixed in?) are used to encrypt the token
+    * future re-authentications test if the token decrypts and is still valid
+   * using Google's OAuth2 for Devices:
+    * they try to log in as usual into the service, but then sent an SMS/twitter message telling them to go to a URL and punch in a code
+    * once authenticated, the users own credentials (optionally with Calling-Station-Id mixed in?) are used to encrypt the token
+    * future re-authentications test if the token decrypts and is still valid
+  * disadvantage here is that is the token is encrypted with a mistyped password the user will have to rerun the process; plenty of other userability problems come to mind too
+  * huge advantage is that this will work in two factor auth safe environments; although of course the authentications against this module will not be two factor
 
 # Preflight
 
