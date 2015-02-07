@@ -530,10 +530,12 @@ Another interesting example is reject'ing early for disabled accounts:
       ...
     
       if ("%{%{oauth2-perl: jsonpath %{Realm} https://graph.windows.net/%{Realm}/users/%{User-Name}?api-version=1.5 ^.accountEnabled}:-true}" != "true") {
-        update request {
-          Auth-Type := Reject
+        update control {
+          Expiration := "01 Jan 1970"
         }
       }
-
+    
+      expiration
+    
       ...
     }
