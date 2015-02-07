@@ -1,6 +1,6 @@
 This page lists the outstanding tasks and problems I am yet to solve:
 
- * xlat for user attributes (eg. groups, email, name)
+ * work on more testing of the accounting path
  * add some garbage collector to the cache (offload into rlm_cache?)
  * HTTP keep-alive
  * TLS optimisations - https://bjornjohansen.no/optimizing-https-nginx
