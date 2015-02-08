@@ -542,7 +542,7 @@ For example the following will reject anyone not a member of the 'Office Staff' 
       ...
     
       update control {
-        Tmp-String-0 := %{oauth2-perl:jsonpath %{Realm} https://graph.windows.net/%{Realm}/groups?api-version=1.5 \\$.value[?(\\$_->{displayName\\} eq 'Office Staff')].objectId}"
+        Tmp-String-0 := "%{oauth2-perl:jsonpath %{Realm} https://graph.windows.net/%{Realm}/groups?api-version=1.5 \\$.value[?(\\$_->{securityEnabled\\} eq 'true' && \\$_->{displayName\\} eq 'Office Staff')].objectId}"
       }
       if (control:Tmp-String-0) {
         update control {
