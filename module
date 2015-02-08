@@ -9,8 +9,6 @@ cache oauth2-perl-cache {
 
 	epoch = 0
 
-	add-stats = yes
-
 	update {
 		control:Password-With-Header := "%{control:Password-With-Header}"
 	}
