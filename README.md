@@ -530,22 +530,6 @@ For example the following puts the `displayName` attribute into `Tmp-String-0`:
       ...
     }
 
-Another interesting example is reject'ing early for disabled accounts:
-
-    authorize {
-      ...
-    
-      if ("%{%{oauth2-perl:jsonpath %{Realm} https://graph.windows.net/%{Realm}/users/%{User-Name}?api-version=1.5 \\$.accountEnabled}:-true}" != "true") {
-        update control {
-          Expiration := "01 Jan 1970"
-        }
-      }
-    
-      expiration
-    
-      ...
-    }
-
 If you are not running a [recent multivalue supporting version of FreeRADIUS](https://github.com/FreeRADIUS/freeradius-server/blob/master/src/tests/keywords/if-multivalue), then the autopopulating of `Group-Name` is inaccessible, so you should use `jsonpath`.
 
 For example the following will reject anyone not a member of the 'Office Staff' group:
