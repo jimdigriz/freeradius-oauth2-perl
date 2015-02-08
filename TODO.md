@@ -1,5 +1,6 @@
 This page lists the outstanding tasks and problems I am yet to solve:
 
+ * think of how to better handle xlat injection
  * work on more testing of the accounting path
  * add some garbage collector to the cache (offload into rlm_cache?)
  * HTTP keep-alive

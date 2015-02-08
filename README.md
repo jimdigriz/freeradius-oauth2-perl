@@ -6,7 +6,7 @@ This is a [FreeRADIUS](http://freeradius.org/) [OAuth2 (OpenID Connect)](http://
 
  * `User-Name` is validated against list of actually valid usernames
  * `Group-Name` attribute is populated with users group membership
- * credentials cache that utilisies a [salted SHA-1 hash](http://en.wikipedia.org/wiki/Cryptographic_hash_function#Password_verification)
+ * credentials cache that utilises a [salted SHA-1 hash](http://en.wikipedia.org/wiki/Cryptographic_hash_function#Password_verification)
  * xlat support to pull any URL with a suitable token and use [JSONPath](http://jsonpath.curiousconcept.com/) to extract data
 
 There is a [TODO list](TODO.md) for the project listing outstanding problems and missing functionality.
@@ -144,10 +144,10 @@ Also add to `config` under your realm a `vendor` attribute if you use one of the
 
 ## FreeRADIUS
 
-This section assumes you are familar with configuring FreeRADIUS, or have an existing working service and want to know what you need to splice in.  For example the following problems are not addressed here:
+This section assumes you are familiar with configuring FreeRADIUS, or have an existing working service and want to know what you need to splice in.  For example the following problems are not addressed here:
 
  * what to do with realmless usernames, you may wish to use [unlang](http://freeradius.org/radiusd/man/unlang.html) to fix it up before the `suffix` module
- * throttling authentication attempts, care is to be taken incase your OAuth2 provider throttles *all* authentication requests from your RADIUS server, possibly causing you service unavailability
+ * throttling authentication attempts, care is to be taken in case your OAuth2 provider throttles *all* authentication requests from your RADIUS server, possibly causing you service unavailability
  * preventing attempts by your RADIUS server to proxy realmed usernames that are not handled locally
 
 By now your `config` file should look something like:
@@ -506,7 +506,7 @@ For example:
 
 ## `jsonpath`
 
-This lets you pull any URL utilising the Web API token and extract arbitary data from it, if nothing matches, you get an emptry string and if you fetch a multi-value element only the first item will be returned.
+This lets you pull any URL utilising the Web API token and extract arbitrary data from it, if nothing matches, you get an empty string and if you fetch a multi-value element only the first item will be returned.
 
 The arguments are in order:
 
@@ -516,7 +516,7 @@ The arguments are in order:
 
 **N.B.** [JSON::Path](http://search.cpan.org/~tobyink/JSON-Path/lib/JSON/Path.pm) is used so if you wish to do filtering the section titled [JSONPath Embedded Perl Expressions](http://search.cpan.org/~tobyink/JSON-Path/lib/JSON/Path.pm#JSONPath_Embedded_Perl_Expressions) and the [`authorize` function](https://github.com/jimdigriz/freeradius-oauth2-perl/blob/master/main.pm) for this module may help
 
-**N.B.** your JSONPath will need escaping where you need to prepend `\\` before every occurance of `$` and `}`
+**N.B.** your JSONPath will need escaping where you need to prepend `\\` before every occurrence of `$` and `}`
 
 For example the following puts the `displayName` attribute into `Tmp-String-0`:
 
@@ -530,7 +530,9 @@ For example the following puts the `displayName` attribute into `Tmp-String-0`:
       ...
     }
 
-If you are not running a [recent multivalue supporting version of FreeRADIUS](https://github.com/FreeRADIUS/freeradius-server/blob/master/src/tests/keywords/if-multivalue), then the autopopulating of `Group-Name` is inaccessible, so you should use `jsonpath`.
+**SECURITY WARNING:** rlm_perl xlat splits on spaces and quoting is completely ignored, so if any variables you use in the URL argument contain spaces, you will run into trouble.  `Realm` is safe as `suffix` protects you, but `User-Name`, and other user controllable fields, need validating so it is crucial that using something like `filter_username` is *strongly* recommended (including for `inner-tunnel`)
+
+If you are not running a [recent multivalue supporting version of FreeRADIUS](https://github.com/FreeRADIUS/freeradius-server/blob/master/src/tests/keywords/if-multivalue), then the auto-populating of `Group-Name` is inaccessible, so you should use `jsonpath`.
 
 For example the following will reject anyone not a member of the 'Office Staff' group:
 
