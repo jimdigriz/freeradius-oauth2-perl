@@ -109,9 +109,6 @@ if (defined($cfg->{'_'}->{'debug'}) && $cfg->{'_'}->{'debug'} == 1) {
 
 sub authorize {
 	return RLM_MODULE_NOOP
-		if (defined($RAD_CHECK{'Auth-Type'}));
-
-	return RLM_MODULE_NOOP
 		unless (defined($RAD_REQUEST{'Realm'}) && defined($cfg->{lc $RAD_REQUEST{'Realm'}}));
 
 	return RLM_MODULE_NOOP
@@ -130,13 +127,22 @@ sub authorize {
 
 		$url = "https://graph.windows.net/$realm/users/$RAD_REQUEST{'User-Name'}/memberOf?api-version=1.5";
 		$jsonpath = '$.value[?($_->{objectType} eq "Group" && $_->{securityEnabled} eq "true")].displayName';
-		$RAD_CHECK{'Group'} = [ _handle_jsonpath($realm, $url, $jsonpath) ];
+		push @{$RAD_REQUEST{'Group-Name'}}, _handle_jsonpath($realm, $url, $jsonpath);
 	}
 
-	$RAD_CHECK{'Auth-Type'} = 'oauth2-perl'
-		unless (defined($RAD_CHECK{'Password-With-Header'}));
+	# Normally would NOOP the top when Auth-Type is set, however
+	# rlm_cache in v2.x.x does not support multivalue attributes
+	# and to get Group-Name populated we instead break out here
+	return RLM_MODULE_UPDATED
+		if (defined($RAD_CHECK{'Auth-Type'}));
 
-	return RLM_MODULE_UPDATED;
+	# let PAP catch this
+	return RLM_MODULE_UPDATED
+		if (defined($RAD_CHECK{'Password-With-Header'}));
+
+	$RAD_CHECK{'Auth-Type'} = 'oauth2-perl';
+
+	return RLM_MODULE_OK;
 }
 
 sub authenticate {

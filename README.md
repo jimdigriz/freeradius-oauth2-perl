@@ -4,9 +4,9 @@ This is a [FreeRADIUS](http://freeradius.org/) [OAuth2 (OpenID Connect)](http://
 
 ## Features
 
- * credentials cache that utilisies a [salted SHA-1 hash](http://en.wikipedia.org/wiki/Cryptographic_hash_function#Password_verification)
- * `Group` attribute is populated with users group membership
  * `User-Name` is validated against list of actually valid usernames
+ * `Group-Name` attribute is populated with users group membership
+ * credentials cache that utilisies a [salted SHA-1 hash](http://en.wikipedia.org/wiki/Cryptographic_hash_function#Password_verification)
  * xlat support to pull any URL with a suitable token and use [JSONPath](http://jsonpath.curiousconcept.com/) to extract data
 
 There is a [TODO list](TODO.md) for the project listing outstanding problems and missing functionality.
@@ -169,11 +169,11 @@ Amend `/etc/freeradius/sites-available/default` like so:
     authorize {
       ...
     
-      #sql
+      eap
     
-      # after '#sql'
+      # after 'eap'
       update control {
-        Cache-Status-Only := 'yes'
+        Cache-Status-Only := yes
       }
       oauth2-perl-cache
       if (ok) {
@@ -252,11 +252,11 @@ To enable this functionality, you will need to amend `/etc/freeradius/sites-avai
     authorize {
       ...
     
-      #sql
+      eap
     
-      # after '#sql'
+      # after 'eap'
       update control {
-        Cache-Status-Only := 'yes'
+        Cache-Status-Only := yes
       }
       oauth2-perl-cache
       if (ok) {
