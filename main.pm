@@ -118,7 +118,7 @@ sub authorize {
 
 	if ($cfg->{$realm}->{'vendor'} eq 'microsoft-azure') {
 		my $url = "https://graph.windows.net/$realm/users?api-version=1.5";
-		my $jsonpath = '$.value[?($_->{accountEnabled} eq "true")].userPrincipalName';
+		my $jsonpath = '\\$.value[?(\\$_->{accountEnabled} eq "true")].userPrincipalName';
 
 		my @accounts = map { s/@[^@]*$//; lc $_ } _handle_jsonpath($realm, $url, $jsonpath);
 
@@ -126,7 +126,7 @@ sub authorize {
 			unless (grep { $_ eq lc $RAD_REQUEST{'Stripped-User-Name'} } @accounts);
 
 		$url = "https://graph.windows.net/$realm/users/$RAD_REQUEST{'User-Name'}/memberOf?api-version=1.5";
-		$jsonpath = '$.value[?($_->{objectType} eq "Group" && $_->{securityEnabled} eq "true")].displayName';
+		$jsonpath = '\\$.value[?(\\$_->{objectType} eq "Group" && \\$_->{securityEnabled} eq "true")].displayName';
 		push @{$RAD_REQUEST{'Group-Name'}}, _handle_jsonpath($realm, $url, $jsonpath);
 	}
 
@@ -188,12 +188,12 @@ sub accounting {
 }
 
 sub xlat {
-	my ($type, $realm, @args) = @_;
+	my ($type, @args) = @_;
 
-	$realm = lc $realm;
+	my $realm = lc shift @args;
 
 	return ''
-		unless (defined($cfg->{lc $realm}));
+		unless (defined($cfg->{$realm}));
 
 	given ($type) {
 		when ('timestamp') {
@@ -211,7 +211,8 @@ sub xlat {
 			return $data->{'expires_in'} || -1;
 		}
 		when ('jsonpath') {
-			return (_handle_jsonpath($realm, @args))[0] || '';
+			my ($url, $jsonpath) = (shift @args, join ' ', @args);
+			return (_handle_jsonpath($realm, $url, $jsonpath))[0] || '';
 		}
 	}
 
@@ -350,7 +351,7 @@ sub _handle_acct_update($) {
 sub _handle_jsonpath($$$) {
 	my ($realm, $url, $jsonpath) = @_;
 
-	$jsonpath =~ s/\^/\$/g;
+	$jsonpath =~ s/\\//g;
 
 	{
 		lock(%cache);

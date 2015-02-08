@@ -496,7 +496,7 @@ For example:
       ...
     
       update reply {
-        Acct-Interim-Interval := "%{oauth2-perl: expires_in %{User-Name}}"
+        Acct-Interim-Interval := "%{oauth2-perl:expires_in %{User-Name}}"
       }
 
       ...
@@ -516,9 +516,7 @@ The arguments are in order:
 
 **N.B.** [JSON::Path](http://search.cpan.org/~tobyink/JSON-Path/lib/JSON/Path.pm) is used so if you wish to do filtering the section titled [JSONPath Embedded Perl Expressions](http://search.cpan.org/~tobyink/JSON-Path/lib/JSON/Path.pm#JSONPath_Embedded_Perl_Expressions) and the [`authorize` function](https://github.com/jimdigriz/freeradius-oauth2-perl/blob/master/main.pm) for this module may help
 
-your JSONPath must have `$` substituted with `^` to workaround escaping problems in xlat
-
-**N.B.** your JSONPath must have `$` substituted with `^` to workaround escaping problems in xlat
+**N.B.** your JSONPath will need escaping where you need to prepend `\\` before every occurance of `$` and `}`
 
 For example the following puts the `displayName` attribute into `Tmp-String-0`:
 
@@ -526,7 +524,7 @@ For example the following puts the `displayName` attribute into `Tmp-String-0`:
       ...
     
       update request {
-        Tmp-String-0 := "%{oauth2-perl: jsonpath %{Realm} https://graph.windows.net/%{Realm}/users/%{User-Name}?api-version=1.5 ^.displayName}"
+        Tmp-String-0 := "%{oauth2-perl:jsonpath %{Realm} https://graph.windows.net/%{Realm}/users/%{User-Name}?api-version=1.5 \\$.displayName}"
       }
     
       ...
@@ -537,7 +535,7 @@ Another interesting example is reject'ing early for disabled accounts:
     authorize {
       ...
     
-      if ("%{%{oauth2-perl: jsonpath %{Realm} https://graph.windows.net/%{Realm}/users/%{User-Name}?api-version=1.5 ^.accountEnabled}:-true}" != "true") {
+      if ("%{%{oauth2-perl:jsonpath %{Realm} https://graph.windows.net/%{Realm}/users/%{User-Name}?api-version=1.5 \\$.accountEnabled}:-true}" != "true") {
         update control {
           Expiration := "01 Jan 1970"
         }
@@ -547,3 +545,33 @@ Another interesting example is reject'ing early for disabled accounts:
     
       ...
     }
+
+If you are not running a [recent multivalue supporting version of FreeRADIUS](https://github.com/FreeRADIUS/freeradius-server/blob/master/src/tests/keywords/if-multivalue), then the autopopulating of `Group-Name` is inaccessible, so you should use `jsonpath`.
+
+For example the following will reject anyone not a member of the 'Office Staff' group:
+
+    authorize {
+      ...
+    
+      oauth2-perl
+    
+      ...
+    
+      update control {
+        Tmp-String-0 := %{oauth2-perl:jsonpath %{Realm} https://graph.windows.net/%{Realm}/groups?api-version=1.5 \\$.value[?(\\$_->{displayName\\} eq 'Office Staff')].objectId}"
+      }
+      if (control:Tmp-String-0) {
+        update control {
+          Tmp-String-1 := "%{oauth2-perl:jsonpath %{Realm} https://graph.windows.net/%{Realm}/groups/%{control:Tmp-String-0}/members?api-version=1.5 \\$.value[?(\\$_->{mailNickname\\} =~ /^%{Stripped-User-Name}\\$/i)].mailNickname}"
+        }
+        if (!(control:Tmp-String-1)) {
+          update control {
+            Auth-Type := Reject
+          }
+        }
+      }
+    
+      ...
+    }
+
+**N.B.** although the above may look inefficient, the URL caching makes it very fast on subsequent runs.
