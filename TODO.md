@@ -1,5 +1,7 @@
 This page lists the outstanding tasks and problems I am yet to solve:
 
+ * fetching users from azure is paged (100 at a time)
+ * check threading in rlm_perl, global is probably on run once anyway, BEGIN{} for just validation and barfing at init
  * think of how to better handle xlat injection
  * work on more testing of the accounting path
  * add some garbage collector to the cache (offload into rlm_cache?)
