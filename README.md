@@ -360,7 +360,7 @@ To test freeradius-oauth2-perl is working, you need to have a copy of [`radtest`
 
     sudo apt-get install -yy --no-install-recommends -t wheezy-backports freeradius-utils
 
-Whilst testing, it helps a lot to first stop FreeRADIUS and run in a separate terminal in [debugging mode(http://wiki.freeradius.org/guide/Troubleshooting):
+Whilst testing, it helps a lot to first stop FreeRADIUS and run in a separate terminal in [debugging mode](http://wiki.freeradius.org/guide/Troubleshooting):
 
     /etc/init.d/freeradius stop
     freeradius -X | tee /tmp/freeradius.debug
