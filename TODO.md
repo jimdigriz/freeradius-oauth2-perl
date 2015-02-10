@@ -5,9 +5,8 @@ This page lists the outstanding tasks and problems I am yet to solve:
  * think of how to better handle xlat injection
  * use the refresh_token for 're-auth's, if credential cache okayed everything, and fall back to full method
  * caching
-  * superclass LWP::UserAgent
+  * remove X-Cache-Key from request...does it matter?
   * add some garbage collector to the cache (offload into rlm_cache?)
-  * maybe have the user refresh token placed into rlm_cache, though do we even want/need it now we are a Web API?
  * work on more testing of the accounting path
   * on accounting stop, call either end_session_endpoint or revocation_endpoint
  * HTTP keep-alive

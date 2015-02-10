@@ -43,7 +43,8 @@ Optionally, you can edit the following elements in the global section of `config
 
  * **`debug` (default: 0):** set to `1` to have verbose output, such as the HTTPS communications (note that you will see passwords in the clear!)
  * **`from` (default: [unset]):** set to a suitable contact email address for your organisation
- * **`cache` (default: 1800):** number of seconds to cache credentials for
+ * **`cache` (default: 1800):** number of seconds to cache HTTP GET requests for
+ * **`cache_cred` (default: 1800):** number of seconds to cache credentials for
 
 ## Target RADIUS Server
 
@@ -60,7 +61,7 @@ Afterwards, you can get everything you need with:
 
     sudo apt-get install -yy --no-install-recommends \
     	libwww-perl libconfig-tiny-perl libjson-perl libjson-xs-perl \
-	libtimedate-perl liburi-perl libcrypt-saltedhash-perl cpanminus make
+	libhttp-date-perl liburi-perl libcrypt-saltedhash-perl cpanminus make
     sudo apt-get install -yy --no-install-recommends -t wheezy-backports freeradius
     sudo cpanm JSON::Path
 
@@ -199,17 +200,6 @@ Amend `/etc/freeradius/sites-available/default` like so:
       Auth-Type oauth2-perl {
         oauth2-perl
       }
-    }
-    
-    accounting {
-      ...
-    
-      exec
-      
-      # after 'exec'
-      oauth2-perl
-    
-      ...
     }
     
     post-auth {
@@ -479,30 +469,6 @@ The interaction of this module in FreeRADIUS is as described to aid you when rea
 # `xlat`
 
 There is some basic xlat functionality in the module that lets you extract some state data about the current user where possible.
-
-## `timestamp`
-
-Returns the epoch time of when the authorization token was created.  Takes a single argument, the User-Name.
-
-## `expires_in`
-
-Returns the time in seconds, from `timestamp`, that the [authorization token is valid](https://tools.ietf.org/html/rfc6749#section-5.1).  If this is unset, it returns `-1`.
-
-Takes a single argument, the User-Name.
-
-For example:
-
-    post-auth {
-      ...
-    
-      update reply {
-        Acct-Interim-Interval := "%{oauth2-perl:expires_in %{User-Name}}"
-      }
-
-      ...
-    }
-
-**N.B.** this is *not* how long the `refresh_token` is valid for which is typically significantly longer
 
 ## `jsonpath`
 
