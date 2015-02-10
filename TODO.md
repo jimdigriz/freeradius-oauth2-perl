@@ -3,12 +3,9 @@ This page lists the outstanding tasks and problems I am yet to solve:
  * fetching users from azure is paged (100 at a time)
  * check threading in rlm_perl, global is probably on run once anyway, BEGIN{} for just validation and barfing at init
  * think of how to better handle xlat injection
- * use the refresh_token for 're-auth's, if credential cache okayed everything, and fall back to full method
  * caching
   * remove X-Cache-Key from request...does it matter?
   * add some garbage collector, maybe just make it an LRU?
- * work on more testing of the accounting path
-  * on accounting stop, call either end_session_endpoint or revocation_endpoint
  * HTTP keep-alive
  * TLS optimisations - https://bjornjohansen.no/optimizing-https-nginx
   * SSL_session_cache/SSL_session_cache_size/set_default_session_cache from IO::Socket::SSL

@@ -166,12 +166,11 @@ sub authenticate {
 	my $realm = lc $RAD_REQUEST{'Realm'};
 
 	my @opts = (
-		grant_type	=> 'password',
 		username	=> $RAD_REQUEST{'User-Name'},
 		password	=> $RAD_REQUEST{'User-Password'},
 	);
 
-	my $t = _fetch_token($realm, @opts);
+	my $t = _fetch_token_password($realm, @opts);
 	return $t
 		if (ref($t) eq '');
 
@@ -299,12 +298,7 @@ sub _fetch_token ($@) {
 	push @args, resource => 'https://graph.windows.net'
 		if ($cfg->{$realm}->{'vendor'} eq 'microsoft-azure');
 
-	my $r = $ua->post($d->{'token_endpoint'}, [
-		scope		=> 'openid',
-		client_id	=> $cfg->{$realm}->{'client_id'},
-		client_secret	=> $cfg->{$realm}->{'client_secret'},
-		@args,
-	]);
+	my $r = $ua->post($d->{'token_endpoint'}, [ scope => 'openid', @args ]);
 	if (is_server_error($r->code)) {
 		&radiusd::radlog(RADIUS_LOG_INFO, 'authentication request failed: ' . $r->status_line);
 		return RLM_MODULE_FAIL;
@@ -339,18 +333,43 @@ sub _fetch_token ($@) {
 	return $j;
 }
 
+sub _fetch_token_password ($@) {
+	my ($realm, @args) = @_;
+
+	push @args, grant_type		=> 'password';
+	push @args, client_id		=> $cfg->{$realm}->{'client_id'};
+	push @args, client_secret	=> $cfg->{$realm}->{'client_secret'};
+
+	return _fetch_token($realm, @args);
+}
+
 sub _fetch_token_client ($@) {
 	my ($realm, @args) = @_;
 
+	my $t = { };
 	{
 		lock(%token);
+		$t = thaw $token{$realm};
+
 		return thaw $token{$realm}
-			if (defined($token{$realm}));
+			if (defined($t->{'token_type'}));
 	}
 
-	my $j = _fetch_token($realm, grant_type => 'client_credentials', @args);
-	return $j
-		if (ref($j) eq '');
+	if (defined($t->{'refresh_token'})) {
+		push @args, grant_type		=> 'refresh_token';
+		push @args, refresh_token	=> $t->{'refresh_token'};
+	} else {
+		push @args, grant_type		=> 'client_credentials';
+		push @args, client_id		=> $cfg->{$realm}->{'client_id'};
+		push @args, client_secret	=> $cfg->{$realm}->{'client_secret'};
+	}
+
+	my $j = _fetch_token($realm, @args);
+	if (ref($j) eq '') {
+		lock(%token);
+		delete $token{$realm};
+		return $j;
+	}
 
 	lock(%token);
 	$token{$realm} = freeze $j;
@@ -363,18 +382,29 @@ sub _handle_jsonpath($$$) {
 
 	$jsonpath =~ s/\\//g;
 
-	my $t = _fetch_token_client($realm);
-	return
-		if (ref($t) eq '');
+	my $r;
+	for (1..3) {
+		my $t = _fetch_token_client($realm);
+		return
+			if (ref($t) eq '');
 
-	my $r = $ua->get($url, 'X-Cache-Key' => $realm, Authorization => $t->{'token_type'} . ' ' . $t->{'access_token'});
-	if (is_server_error($r->code)) {
-		&radiusd::radlog(RADIUS_LOG_INFO, 'jsonpath request failed: ' . $r->status_line);
-		return;
+		$r = $ua->get($url, 'X-Cache-Key' => $realm, Authorization => $t->{'token_type'} . ' ' . $t->{'access_token'});
+		if (is_server_error($r->code)) {
+			&radiusd::radlog(RADIUS_LOG_INFO, 'jsonpath request failed: ' . $r->status_line);
+			return;
+		}
+
+		if (is_client_error($r->code)) {
+			delete $t->{'token_type'};
+
+			lock(%token);
+			$token{$realm} = freeze $t;
+
+			continue;
+		}
+
+		last;
 	}
-
-	return
-		if (is_client_error($r->code));
 
 	my $j = decode_json $r->decoded_content;
 	unless (defined($j)) {
