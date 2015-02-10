@@ -6,7 +6,7 @@ This page lists the outstanding tasks and problems I am yet to solve:
  * use the refresh_token for 're-auth's, if credential cache okayed everything, and fall back to full method
  * caching
   * remove X-Cache-Key from request...does it matter?
-  * add some garbage collector to the cache (offload into rlm_cache?)
+  * add some garbage collector, maybe just make it an LRU?
  * work on more testing of the accounting path
   * on accounting stop, call either end_session_endpoint or revocation_endpoint
  * HTTP keep-alive
