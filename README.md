@@ -460,7 +460,7 @@ The arguments are in order:
  * **url:** URL to use the token against
  * **jsonpath:** a JSONPath statement to select the information you wish to extract
 
-**N.B.** [JSON::Path](http://search.cpan.org/~tobyink/JSON-Path/lib/JSON/Path.pm) is used so if you wish to do filtering the section titled [JSONPath Embedded Perl Expressions](http://search.cpan.org/~tobyink/JSON-Path/lib/JSON/Path.pm#JSONPath_Embedded_Perl_Expressions) and the [`authorize` function](https://github.com/jimdigriz/freeradius-oauth2-perl/blob/master/main.pm) for this module may help
+**N.B.** [JSON::Path](http://search.cpan.org/~tobyink/JSON-Path/lib/JSON/Path.pm) is used so if you wish to do filtering the section titled [JSONPath Embedded Perl Expressions](http://search.cpan.org/~tobyink/JSON-Path/lib/JSON/Path.pm#JSONPath_Embedded_Perl_Expressions) along with the examples below may help
 
 **N.B.** your JSONPath will need escaping where you need to prepend `\\` before every occurrence of `$` and `}`
 
@@ -506,4 +506,4 @@ For example the following will reject anyone not a member of the 'Office Staff' 
       ...
     }
 
-**N.B.** although the above may look inefficient, the URL caching makes it very fast on subsequent runs.
+**N.B.** although the above may look inefficient, the URL caching makes it very fast on subsequent runs, so it helps to keep any dynamic componment in the JSONPath filter rather than the URL
