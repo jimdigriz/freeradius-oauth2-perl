@@ -118,7 +118,7 @@ sub authorize {
 
 	if ($cfg->{$realm}->{'vendor'} eq 'microsoft-azure') {
 		my $url = "https://graph.windows.net/$realm/users?api-version=1.5";
-		my $jsonpath = '\\$.value[?(\\$_->{accountEnabled} eq "true")].userPrincipalName';
+		my $jsonpath = '$.value[?($_->{accountEnabled} eq "true")].userPrincipalName';
 
 		my @accounts = map { s/@[^@]*$//; lc $_ } _handle_jsonpath($realm, $url, $jsonpath);
 
@@ -126,7 +126,7 @@ sub authorize {
 			unless (grep { $_ eq lc $RAD_REQUEST{'Stripped-User-Name'} } @accounts);
 
 		$url = "https://graph.windows.net/$realm/users/$RAD_REQUEST{'User-Name'}/memberOf?api-version=1.5";
-		$jsonpath = '\\$.value[?(\\$_->{objectType} eq "Group" && \\$_->{securityEnabled} eq "true")].displayName';
+		$jsonpath = '$.value[?($_->{objectType} eq "Group" && $_->{securityEnabled} eq "true")].displayName';
 		push @{$RAD_REQUEST{'Group-Name'}}, _handle_jsonpath($realm, $url, $jsonpath);
 	}
 
