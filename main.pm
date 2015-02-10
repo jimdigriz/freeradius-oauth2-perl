@@ -210,21 +210,24 @@ sub _cache_check {
 
 	return unless (defined($request->headers('X-Cache-Key')));
 
+	my $key = $request->header('X-Cache-Key');
+	my $uri = $request->uri;
+
+	my $response;
 	{
-		my $key = $request->header('X-Cache-Key');
-		my $uri = $request->uri;
-
 		lock(%cache);
-		if (defined($cache{"$key:$uri"})) {
-			my $response = HTTP::Response->parse($cache{"$key:$uri"});
-			my $date = $response->header('Date');
+		return unless (defined($cache{"$key:$uri"}));
 
-			return $response
-				if (str2time($date) + $cfg->{'_'}->{'cache'} > time);
-
-			delete $cache{"$key:$uri"};
-		}
+		$response = HTTP::Response->parse($cache{"$key:$uri"});
 	}
+
+	my $date = $response->header('Date');
+
+	return $response
+		if (str2time($date) + $cfg->{'_'}->{'cache'} > time);
+
+	lock(%cache);
+	delete $cache{"$key:$uri"};
 
 	return;
 }
@@ -238,16 +241,14 @@ sub _cache_store {
 
 	return unless (defined($response->request->header('X-Cache-Key')));
 
-	{
-		my $key = $response->request->header('X-Cache-Key');
-		my $uri = $response->request->uri;
+	my $key = $response->request->header('X-Cache-Key');
+	my $uri = $response->request->uri;
 
-		$response->header('Date') = $response->header->date(time)
-			unless (defined($response->header('Date')));
+	$response->header('Date') = $response->header->date(time)
+		unless (defined($response->header('Date')));
 
-		lock(%cache);
-		$cache{"$key:$uri"} = $response->as_string;
-	}
+	lock(%cache);
+	$cache{"$key:$uri"} = $response->as_string;
 
 	return;
 }
