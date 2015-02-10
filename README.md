@@ -360,7 +360,7 @@ To test freeradius-oauth2-perl is working, you need to have a copy of [`radtest`
 
     sudo apt-get install -yy --no-install-recommends -t wheezy-backports freeradius-utils
 
-Whilst testing, it helps a lot to first stop freeradius and run in a separate terminal:
+Whilst testing, it helps a lot to first stop FreeRADIUS and run in a separate terminal in [debugging mode(http://wiki.freeradius.org/guide/Troubleshooting):
 
     /etc/init.d/freeradius stop
     freeradius -X | tee /tmp/freeradius.debug
@@ -445,26 +445,6 @@ A successful test will have again an `Access-Accept` towards the end of the outp
     STA 02:00:00:00:00:01: Received RADIUS packet matched with a pending request, round trip time 0.72 sec
 
 **N.B.** in the case of a failure you will *not* get a set of `Reply-Message` attributes in the `Access-Reject` as [EAP does not allow this](https://tools.ietf.org/html/rfc3579#section-2.6.5)
-
-# Debugging
-
-The interaction of this module in FreeRADIUS is as described to aid you when reading the [debugging output](http://wiki.freeradius.org/guide/Troubleshooting).
-
-## `authorize`
-
- 1. if `Auth-Type` is already set
-  * return `noop`
- 1. if `Realm` is not present or not set to a realm in `config`
-  * return `noop`
- 1. decides the request is for it
-  * sets `Auth-Type` to `oauth2-perl`
-  * deletes `Proxy-To-Realm` to force the request to not be proxied
-  * return `updated`
- 1. ...
-
-## `authenticate`
-
- 1. ...
 
 # `xlat`
 
