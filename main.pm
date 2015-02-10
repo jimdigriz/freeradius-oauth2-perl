@@ -125,8 +125,8 @@ sub authorize {
 		return RLM_MODULE_NOTFOUND
 			unless (grep { $_ eq lc $RAD_REQUEST{'Stripped-User-Name'} } @accounts);
 
-		$url = "https://graph.windows.net/$realm/users/$RAD_REQUEST{'User-Name'}/memberOf?api-version=1.5&\$filter=objectType+eq'Group'+and+securityEnabled+eq+true";
-		$jsonpath = '$.value[*].displayName';
+		$url = "https://graph.windows.net/$realm/users/$RAD_REQUEST{'User-Name'}/memberOf?api-version=1.5";
+		$jsonpath = '$.value[?($_->{objectType} eq "Group" && $_->{securityEnabled} eq "true")].displayName';
 		push @{$RAD_REQUEST{'Group-Name'}}, _handle_jsonpath($realm, $url, $jsonpath);
 	}
 
