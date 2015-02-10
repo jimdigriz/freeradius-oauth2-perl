@@ -96,6 +96,7 @@ my $ua = LWP::UserAgent->new;
 $ua->timeout(10);
 $ua->env_proxy;
 $ua->agent("freeradius-oauth2-perl/$VERSION (+https://github.com/jimdigriz/freeradius-oauth2-perl; " . $ua->_agent . ')');
+$ua->default_header('Accept-Encoding' => scalar HTTP::Message::decodable());
 $ua->from($cfg->{'_'}->{'from'})
 	if (defined($cfg->{'_'}->{'from'}));
 
