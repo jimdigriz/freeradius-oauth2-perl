@@ -3,16 +3,18 @@ This page lists the outstanding tasks and problems I am yet to solve:
  * fetching users from azure is paged (100 at a time)
  * check threading in rlm_perl, global is probably on run once anyway, BEGIN{} for just validation and barfing at init
  * think of how to better handle xlat injection
- * work on more testing of the accounting path
- * add some garbage collector to the cache (offload into rlm_cache?)
+ * use the refresh_token for 're-auth's, if credential cache okayed everything, and fall back to full method
+ * caching
+  * superclass LWP::UserAgent
+  * add some garbage collector to the cache (offload into rlm_cache?)
   * maybe have the user refresh token placed into rlm_cache, though do we even want/need it now we are a Web API?
+ * work on more testing of the accounting path
+  * on accounting stop, call either end_session_endpoint or revocation_endpoint
  * HTTP keep-alive
  * TLS optimisations - https://bjornjohansen.no/optimizing-https-nginx
   * SSL_session_cache/SSL_session_cache_size/set_default_session_cache from IO::Socket::SSL
   * SSL_cipher_list/SSL_version
   * enable OCSP
- * on accounting stop, call either end_session_endpoint or revocation_endpoint
- * use the refresh_token for 're-auth's, if credential cache okayed everything, and fall back to full method
 
 ## Google Apps
 
