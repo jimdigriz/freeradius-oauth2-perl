@@ -43,8 +43,8 @@ Optionally, you can edit the following elements in the global section of `config
 
  * **`debug` (default: 0):** set to `1` to have verbose output, such as the HTTPS communications (note that you will see passwords in the clear!)
  * **`from` (default: [unset]):** set to a suitable contact email address for your organisation
- * **`cache` (default: 1800):** number of seconds to cache HTTP GET requests for
- * **`cache_cred` (default: 1800):** number of seconds to cache credentials for
+ * **`cache` (default: 1800):** number of seconds to cache HTTP GET requests for with 10% fuzz
+ * **`cache_cred` (default: 1800):** number of seconds to cache credentials for with 10% fuzz
 
 ## Target RADIUS Server
 

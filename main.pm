@@ -89,6 +89,9 @@ BEGIN {
 		}
 	}
 
+	$cfg->{'_'}->{'cache_cred'} = 1800
+		unless (defined($cfg->{'_'}->{'cache_cred'}));
+
 	$cfg->{'_'}->{'cache'} = 1800
 		unless (defined($cfg->{'_'}->{'cache'}));
 }
@@ -178,8 +181,7 @@ sub authenticate {
 	my $csh = Crypt::SaltedHash->new(algorithm => 'SHA-1');
 	$csh->add($RAD_REQUEST{'User-Password'});
 	$RAD_CHECK{'Password-With-Header'} = $csh->generate;
-	$RAD_CHECK{'Cache-TTL'} = $cfg->{'_'}->{'cache_cred'}
-		if (defined($cfg->{'_'}->{'cache_cred'}));
+	$RAD_CHECK{'Cache-TTL'} = int($cfg->{'_'}->{'cache_cred'} * (1.1-rand(0.2)));
 
 	return RLM_MODULE_OK;
 }
@@ -221,10 +223,8 @@ sub _cache_check {
 		$response = HTTP::Response->parse($cache{"$key:$uri"});
 	}
 
-	my $date = $response->header('Date');
-
 	return $response
-		if (str2time($date) + $cfg->{'_'}->{'cache'} > time);
+		unless ($response->header('X-Cache-Expires') < time);
 
 	lock(%cache);
 	delete $cache{"$key:$uri"};
@@ -244,8 +244,11 @@ sub _cache_store {
 	my $key = $response->request->header('X-Cache-Key');
 	my $uri = $response->request->uri;
 
-	$response->header('Date') = $response->header->date(time)
+	$response->header('Date' => $response->header->date(time))
 		unless (defined($response->header('Date')));
+
+	my $expires = str2time($response->header('Date')) + int($cfg->{'_'}->{'cache'} * (1.1-rand(0.2)));
+	$response->header('X-Cache-Expires' => $expires);
 
 	lock(%cache);
 	$cache{"$key:$uri"} = $response->as_string;
