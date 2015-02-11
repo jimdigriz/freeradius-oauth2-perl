@@ -331,6 +331,10 @@ sub _fetch_token ($@) {
 		return RLM_MODULE_REJECT;
 	}
 
+	$j->{'_timestamp'} = (defined($r->header('Date')))
+			? str2time($r->header('Date'))
+			: time;
+
 	return $j;
 }
 
@@ -354,7 +358,7 @@ sub _fetch_token_client ($@) {
 			$t = thaw $token{$realm};
 
 			return $t
-				if (defined($t->{'token_type'}));
+				if (defined($t->{'token_type'}) && $t->{'_timestamp'} + $t->{'expires_in'} > time);
 		}
 	}
 

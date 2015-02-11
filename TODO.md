@@ -3,7 +3,6 @@ This page lists the outstanding tasks and problems I am yet to solve:
  * fetching users from azure is paged (100 at a time)
  * check threading in rlm_perl, global is probably on run once anyway, BEGIN{} for just validation and barfing at init
  * think of how to better handle xlat injection
- * just before using the token, check if it has not expired first, rather than just wanging it out
  * caching
   * if unable to reauth, then do not expire data in cache
   * remove X-Cache-Key from request...does it matter?
