@@ -235,7 +235,7 @@ Once confirmed, amend the `security` section of `/etc/freeradius/radiusd.conf` l
 
 ### 802.1X
 
-For 802.1X authentication, only EAP-TTLS/PAP is supported, so Linux, Mac OS X and [Microsoft Windows 8](https://adamsync.wordpress.com/2012/05/08/eap-ttls-on-windows-2012-build-8250/) based devices will have no problems.  However, for Microsoft Windows 7 and earlier, you will need to use a supplicant extension such as [SecureW2 Enterprise Client](http://www.securew2.com/enterpriseclient).
+For 802.1X authentication, only EAP-TTLS/PAP is supported, so Linux, Android, BB10, Mac OS X/iOS (although you will need to create a [.mobileconfig](https://itunes.apple.com/us/app/apple-configurator/id434433123)) and [Microsoft Windows 8](https://adamsync.wordpress.com/2012/05/08/eap-ttls-on-windows-2012-build-8250/) based devices will have no problems.  However, for Microsoft Windows 7 and earlier, you will need to use a supplicant extension such as [SecureW2 Enterprise Client](http://www.securew2.com/enterpriseclient).
 
 To enable this functionality, you will need to amend `/etc/freeradius/sites-available/inner-tunnel`:
 
