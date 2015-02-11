@@ -350,10 +350,12 @@ sub _fetch_token_client ($@) {
 	my $t = { };
 	{
 		lock(%token);
-		$t = thaw $token{$realm};
+		if (defined($token{$realm})) {
+			$t = thaw $token{$realm};
 
-		return thaw $token{$realm}
-			if (defined($t->{'token_type'}));
+			return $t
+				if (defined($t->{'token_type'}));
+		}
 	}
 
 	if (defined($t->{'refresh_token'})) {
