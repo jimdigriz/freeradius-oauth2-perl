@@ -208,7 +208,7 @@ sub _cache_check {
 
 	return unless ($request->method eq 'GET');
 
-	return unless (defined($request->headers('X-Cache-Key')));
+	return unless (defined($request->header('X-Cache-Key')));
 
 	my $key = $request->header('X-Cache-Key');
 	my $uri = $request->uri;
