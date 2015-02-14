@@ -48,7 +48,7 @@ Optionally, you can edit the following elements in the global section of `config
 
 ## Target RADIUS Server
 
-You require a Debian 'wheezy' 7.x server that is plumbed into [Debian Backports](http://backports.debian.org/), which if you have not done already is just a case of running:
+Required is a Debian 'wheezy' 7.x server that is plumbed into [Debian Backports](http://backports.debian.org/), which if you have not done already is just a case of running:
 
     sudo cat <<'EOF' > /etc/apt/sources.list.d/debian-backports.list
     deb http://http.debian.net/debian wheezy-backports main
