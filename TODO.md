@@ -7,6 +7,7 @@ This page lists the outstanding tasks and problems I am yet to solve:
   * if unable to reauth, then do not expire data in cache
   * remove X-Cache-Key from request...does it matter?
   * add some garbage collector, maybe just make it an LRU?
+ * include NSS DNS Hesiod service for services that need UID mapping like Samba/Netatalk
  * HTTP keep-alive
  * TLS optimisations - https://bjornjohansen.no/optimizing-https-nginx
   * SSL_session_cache/SSL_session_cache_size/set_default_session_cache from IO::Socket::SSL
