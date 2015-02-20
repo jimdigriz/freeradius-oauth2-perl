@@ -3,14 +3,75 @@
 <plist version="1.0">
 <dict>
 	<key>ConsentText</key>
-	<dict>
-		<key>default</key>
-		<string>You will be asked for your credentials, make sure you append your username with '@example.com'</string>
-	</dict>
+	<dict/>
 	<key>DurationUntilRemoval</key>
 	<integer>47347200</integer>
+	<key>PayloadDescription</key>
+	<string>Wireless Setup for Example</string>
+	<key>PayloadDisplayName</key>
+	<string>Example Wireless</string>
+	<key>PayloadIdentifier</key>
+	<string>localhost.local.0DB03E91-D8ED-43BD-BCF1-5F48C15F0328</string>
+	<key>PayloadOrganization</key>
+	<string>Example Inc</string>
+	<key>PayloadRemovalDisallowed</key>
+	<false/>
+	<key>PayloadType</key>
+	<string>Configuration</string>
+	<key>PayloadUUID</key>
+	<string>608C41FA-8CF0-4D35-B756-C08E09EC006B</string>
+	<key>PayloadVersion</key>
+	<integer>1</integer>
 	<key>PayloadContent</key>
 	<array>
+		<dict>
+			<key>AutoJoin</key>
+			<true/>
+			<key>EAPClientConfiguration</key>
+			<dict>
+				<key>AcceptEAPTypes</key>
+				<array>
+					<integer>21</integer>
+				</array>
+				<key>OuterIdentity</key>
+				<string>@example.com</string>
+				<key>PayloadCertificateAnchorUUID</key>
+				<array>
+					<string>592502CA-A711-49E4-A427-00BA4822BE32</string>
+					<string>E22923E6-2E05-4ABE-97E3-FCA12D9BD2FE</string>
+					<string>47C2C120-E787-4287-8384-7B3E40D9B865</string>
+				</array>
+				<key>TLSTrustedServerNames</key>
+				<array>
+					<string>login.example.net</string>
+					<string>*.example.com</string>
+				</array>
+				<key>TTLSInnerAuthentication</key>
+				<string>PAP</string>
+			</dict>
+			<key>EncryptionType</key>
+			<string>WPA</string>
+			<key>HIDDEN_NETWORK</key>
+			<false/>
+			<key>IsHotspot</key>
+			<false/>
+			<key>PayloadDescription</key>
+			<string>Configures Wi-Fi settings</string>
+			<key>PayloadDisplayName</key>
+			<string>WiFi</string>
+			<key>PayloadIdentifier</key>
+			<string>localhost.local.0DB03E91-D8ED-43BD-BCF1-5F48C15F0328.com.apple.wifi.managed.5BB8FA3A-B4C7-4F66-903E-8BBDC88AB28F</string>
+			<key>PayloadType</key>
+			<string>com.apple.wifi.managed</string>
+			<key>PayloadUUID</key>
+			<string>5BB8FA3A-B4C7-4F66-903E-8BBDC88AB28F</string>
+			<key>PayloadVersion</key>
+			<real>1</real>
+			<key>ProxyType</key>
+			<string>None</string>
+			<key>SSID_STR</key>
+			<string>Example</string>
+		</dict>
 		<dict>
 			<key>PayloadCertificateFileName</key>
 			<string>AddTrust External CA Root.cer</string>
@@ -60,6 +121,47 @@
 		</dict>
 		<dict>
 			<key>PayloadCertificateFileName</key>
+			<string>GeoTrust Global CA.cer</string>
+			<key>PayloadContent</key>
+			<data>
+			MIIDVDCCAjygAwIBAgIDAjRWMA0GCSqGSIb3DQEBBQUAMEIxCzAJ
+			BgNVBAYTAlVTMRYwFAYDVQQKEw1HZW9UcnVzdCBJbmMuMRswGQYD
+			VQQDExJHZW9UcnVzdCBHbG9iYWwgQ0EwHhcNMDIwNTIxMDQwMDAw
+			WhcNMjIwNTIxMDQwMDAwWjBCMQswCQYDVQQGEwJVUzEWMBQGA1UE
+			ChMNR2VvVHJ1c3QgSW5jLjEbMBkGA1UEAxMSR2VvVHJ1c3QgR2xv
+			YmFsIENBMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA
+			2swYYzD99BcjGlZ+W988bDjkcbd4kdS8odhM+KhDtgPpTSEHCIja
+			WC9mOSm9BXiLnTjoBbdqfnGk5sRgprDvgOSJKA+eJdbtg/OtppHH
+			mMlCGDUUna2YRpIuT8rxh0PBFpVXLVDviS2Aelet8u5fa9IAjbkU
+			+BQVNdnARqN7csiRv8lVK83Qlz6cJmTM386DGXHKTubU1XupGc1V
+			3sjs0l44U+VcT4wt/lAjNvxm5suOpDkZALeVAjmRCw7+OC7RHQWa
+			9k0+bw8HHa8sHo9gOeL6NlMTOdReJivbPagUvTLrGAMoUgRx5asz
+			PeE4uwc2hGKceeoWMPRfwCvocWvk+QIDAQABo1MwUTAPBgNVHRMB
+			Af8EBTADAQH/MB0GA1UdDgQWBBTAephojYn7qwVkDBF9qn1luMrM
+			TjAfBgNVHSMEGDAWgBTAephojYn7qwVkDBF9qn1luMrMTjANBgkq
+			hkiG9w0BAQUFAAOCAQEANeMpauUvXVSOKVCUn5kaFOSPeCpilKIn
+			Z57QzxpeR+nBsqTP3UEaBU6bS+5Kb1VSsyShNwrrZHYqLizz/Tt1
+			kL/6cdjHPTfStQWVYrmm3ok9Nns4d0iXrKYgjy6myQzCsplFAMfO
+			EVEiIuCl6rYVSAlk6l5PdPcFPseKUgzbFbS9bZvlxrFUaKnjaZC2
+			mqUPuLk/IH2uSrW4nOQdtqvmlKXBx4Ot2/Unhw4EbNX/3aBd7YdS
+			tysVAq45pmp06drE57xNNB6pXE0zX5IJL4hmXXeXxx12E6nV5fEW
+			CRE11azbJHFwLJhWC9kXtNHjUStedejV0NxPNO3CBWaAocvmMw==
+			</data>
+			<key>PayloadDescription</key>
+			<string>Configures certificate settings.</string>
+			<key>PayloadDisplayName</key>
+			<string>GeoTrust Global CA</string>
+			<key>PayloadIdentifier</key>
+			<string>localhost.local.0DB03E91-D8ED-43BD-BCF1-5F48C15F0328.com.apple.security.root.47C2C120-E787-4287-8384-7B3E40D9B865</string>
+			<key>PayloadType</key>
+			<string>com.apple.security.root</string>
+			<key>PayloadUUID</key>
+			<string>47C2C120-E787-4287-8384-7B3E40D9B865</string>
+			<key>PayloadVersion</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>PayloadCertificateFileName</key>
 			<string>Equifax Secure Certificate Authority.cer</string>
 			<key>PayloadContent</key>
 			<data>
@@ -98,69 +200,6 @@
 			<key>PayloadVersion</key>
 			<integer>1</integer>
 		</dict>
-		<dict>
-			<key>AutoJoin</key>
-			<true/>
-			<key>EAPClientConfiguration</key>
-			<dict>
-				<key>AcceptEAPTypes</key>
-				<array>
-					<integer>21</integer>
-				</array>
-				<key>OuterIdentity</key>
-				<string>@example.com</string>
-				<key>PayloadCertificateAnchorUUID</key>
-				<array>
-					<string>592502CA-A711-49E4-A427-00BA4822BE32</string>
-					<string>E22923E6-2E05-4ABE-97E3-FCA12D9BD2FE</string>
-				</array>
-				<key>TLSTrustedServerNames</key>
-				<array>
-					<string>login.example.net</string>
-					<string>*.example.com</string>
-				</array>
-				<key>TTLSInnerAuthentication</key>
-				<string>PAP</string>
-			</dict>
-			<key>EncryptionType</key>
-			<string>WPA</string>
-			<key>HIDDEN_NETWORK</key>
-			<false/>
-			<key>IsHotspot</key>
-			<false/>
-			<key>PayloadDescription</key>
-			<string>Configures Wi-Fi settings</string>
-			<key>PayloadDisplayName</key>
-			<string>WiFi</string>
-			<key>PayloadIdentifier</key>
-			<string>localhost.local.0DB03E91-D8ED-43BD-BCF1-5F48C15F0328.com.apple.wifi.managed.B5FDA35A-8764-43B3-BAEA-45B9AFC8D0D6</string>
-			<key>PayloadType</key>
-			<string>com.apple.wifi.managed</string>
-			<key>PayloadUUID</key>
-			<string>B5FDA35A-8764-43B3-BAEA-45B9AFC8D0D6</string>
-			<key>PayloadVersion</key>
-			<real>1</real>
-			<key>ProxyType</key>
-			<string>None</string>
-			<key>SSID_STR</key>
-			<string>Example</string>
-		</dict>
 	</array>
-	<key>PayloadDescription</key>
-	<string>Configures your Apple device so it can connect to the Example wireless network.</string>
-	<key>PayloadDisplayName</key>
-	<string>Example Wireless</string>
-	<key>PayloadIdentifier</key>
-	<string>localhost.local.0DB03E91-D8ED-43BD-BCF1-5F48C15F0328</string>
-	<key>PayloadOrganization</key>
-	<string>Example Inc</string>
-	<key>PayloadRemovalDisallowed</key>
-	<false/>
-	<key>PayloadType</key>
-	<string>Configuration</string>
-	<key>PayloadUUID</key>
-	<string>F4B32ABA-6B9C-440B-865F-E2A4E7812259</string>
-	<key>PayloadVersion</key>
-	<integer>1</integer>
 </dict>
 </plist>
