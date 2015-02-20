@@ -10,6 +10,93 @@
 	<key>PayloadContent</key>
 	<array>
 		<dict>
+			<key>PayloadCertificateFileName</key>
+			<string>AddTrust External CA Root.cer</string>
+			<key>PayloadContent</key>
+			<data>
+			MIIENjCCAx6gAwIBAgIBATANBgkqhkiG9w0BAQUFADBvMQswCQYD
+			VQQGEwJTRTEUMBIGA1UEChMLQWRkVHJ1c3QgQUIxJjAkBgNVBAsT
+			HUFkZFRydXN0IEV4dGVybmFsIFRUUCBOZXR3b3JrMSIwIAYDVQQD
+			ExlBZGRUcnVzdCBFeHRlcm5hbCBDQSBSb290MB4XDTAwMDUzMDEw
+			NDgzOFoXDTIwMDUzMDEwNDgzOFowbzELMAkGA1UEBhMCU0UxFDAS
+			BgNVBAoTC0FkZFRydXN0IEFCMSYwJAYDVQQLEx1BZGRUcnVzdCBF
+			eHRlcm5hbCBUVFAgTmV0d29yazEiMCAGA1UEAxMZQWRkVHJ1c3Qg
+			RXh0ZXJuYWwgQ0EgUm9vdDCCASIwDQYJKoZIhvcNAQEBBQADggEP
+			ADCCAQoCggEBALf3GjPm8gAELTngTlvtH7xsD821+iO2zt6bETOX
+			pClMfZOfvUq8k+0DGuOPz+VtUFrWlymUWoCwSXrbLpX9uMq/Nzgt
+			Hj6RQa1wVsfwTz/oMp50ysiQVOnGXw94nZpAPA6sYapeFI+eh6Fq
+			UNzXmk6vBbOmcZSccbNQYArHE504B4YCqOmoaSYYkKtMsE8jqzpP
+			hNjfzp/haW+710LXa0Tkx63ubUFfclpxCDezeWWkWaCUN/cALw3C
+			knLa0Dhy2xSoRcRdKn23tNbE7qzNE0S3ySvdQwAl+mG5aWpYIxG3
+			pzOPVnVZ9c0p10a3CitlttNCbxWyuHv77+ldU9U0WicCAwEAAaOB
+			3DCB2TAdBgNVHQ4EFgQUrb2YejS0Jvf6xCZU7wO94CTLVBowCwYD
+			VR0PBAQDAgEGMA8GA1UdEwEB/wQFMAMBAf8wgZkGA1UdIwSBkTCB
+			joAUrb2YejS0Jvf6xCZU7wO94CTLVBqhc6RxMG8xCzAJBgNVBAYT
+			AlNFMRQwEgYDVQQKEwtBZGRUcnVzdCBBQjEmMCQGA1UECxMdQWRk
+			VHJ1c3QgRXh0ZXJuYWwgVFRQIE5ldHdvcmsxIjAgBgNVBAMTGUFk
+			ZFRydXN0IEV4dGVybmFsIENBIFJvb3SCAQEwDQYJKoZIhvcNAQEF
+			BQADggEBALCb4IUlwtYj4g+WBpKdQZic2YR5gdkeWxQHIzZlj7DY
+			d7usQWxHYINRsPkyPef89iYTx4AWpb9a/IfPeHmJIZriTAcKhjW8
+			8t5RxNKWt9x+Tu5w/Rw56wwCURQtjr0W4MHfRnXnJK3s9EK0hZNw
+			EGe6nQY1ShjTK3rMUUKhemPR5ruhxSvCNr4TDea9Y355e6cJDUCr
+			at2PisP29owaQgVR1EX1n6diIWgVIEM8med8vSTYqZEXc4g/Vhsx
+			OBi0cQ+azcgOno4uG+GMmIPLHzHxREzGBHNJdmAPx/i9F4BrLunM
+			TA5amnkPIAou1Z5jJh5VkpTYghdae9C8x49OhgQ=
+			</data>
+			<key>PayloadDescription</key>
+			<string>Configures certificate settings.</string>
+			<key>PayloadDisplayName</key>
+			<string>AddTrust External CA Root</string>
+			<key>PayloadIdentifier</key>
+			<string>localhost.local.0DB03E91-D8ED-43BD-BCF1-5F48C15F0328.com.apple.security.root.E22923E6-2E05-4ABE-97E3-FCA12D9BD2FE</string>
+			<key>PayloadType</key>
+			<string>com.apple.security.root</string>
+			<key>PayloadUUID</key>
+			<string>E22923E6-2E05-4ABE-97E3-FCA12D9BD2FE</string>
+			<key>PayloadVersion</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>PayloadCertificateFileName</key>
+			<string>Equifax Secure Certificate Authority.cer</string>
+			<key>PayloadContent</key>
+			<data>
+			MIIDIDCCAomgAwIBAgIENd70zzANBgkqhkiG9w0BAQUFADBOMQsw
+			CQYDVQQGEwJVUzEQMA4GA1UEChMHRXF1aWZheDEtMCsGA1UECxMk
+			RXF1aWZheCBTZWN1cmUgQ2VydGlmaWNhdGUgQXV0aG9yaXR5MB4X
+			DTk4MDgyMjE2NDE1MVoXDTE4MDgyMjE2NDE1MVowTjELMAkGA1UE
+			BhMCVVMxEDAOBgNVBAoTB0VxdWlmYXgxLTArBgNVBAsTJEVxdWlm
+			YXggU2VjdXJlIENlcnRpZmljYXRlIEF1dGhvcml0eTCBnzANBgkq
+			hkiG9w0BAQEFAAOBjQAwgYkCgYEAwV2xWGcIYu6gmi0fCG2RFGiY
+			Ch7+2gRvE4RiIcPRfM6fBeC4AfBONOziipUEZKzxa1NfBbPLZ4C/
+			QgKO/t0BCezhABRP/PvwDN1Dulsr4R+AcJkVV5MW8Q+XarfCaCMc
+			zE1ZMKxRHjuvK9buY0V7xdlfUNLjUA86iOe/FP3gx7kCAwEAAaOC
+			AQkwggEFMHAGA1UdHwRpMGcwZaBjoGGkXzBdMQswCQYDVQQGEwJV
+			UzEQMA4GA1UEChMHRXF1aWZheDEtMCsGA1UECxMkRXF1aWZheCBT
+			ZWN1cmUgQ2VydGlmaWNhdGUgQXV0aG9yaXR5MQ0wCwYDVQQDEwRD
+			UkwxMBoGA1UdEAQTMBGBDzIwMTgwODIyMTY0MTUxWjALBgNVHQ8E
+			BAMCAQYwHwYDVR0jBBgwFoAUSOZo+SvSspXXR9gjIBBPM5iQn9Qw
+			HQYDVR0OBBYEFEjmaPkr0rKV10fYIyAQTzOYkJ/UMAwGA1UdEwQF
+			MAMBAf8wGgYJKoZIhvZ9B0EABA0wCxsFVjMuMGMDAgbAMA0GCSqG
+			SIb3DQEBBQUAA4GBAFjOKer89961zgK5F7WF0bnj4JXMJTENAKaS
+			bn+2kmOeUJXRmm/kEd5jhW6Y7qj/WsjTVbJmcVfewCHrPSqnI0kB
+			BIZCe/zuf6IWUrVnZ9NA2zsmWLIodz2uFHdh1voqZiegDfqnc1zq
+			cPGUIWVEX/r87yloqaKHee9570+sB3c4
+			</data>
+			<key>PayloadDescription</key>
+			<string>Configures certificate settings.</string>
+			<key>PayloadDisplayName</key>
+			<string>Equifax Secure Certificate Authority.cer</string>
+			<key>PayloadIdentifier</key>
+			<string>localhost.local.0DB03E91-D8ED-43BD-BCF1-5F48C15F0328.com.apple.security.root.592502CA-A711-49E4-A427-00BA4822BE32</string>
+			<key>PayloadType</key>
+			<string>com.apple.security.root</string>
+			<key>PayloadUUID</key>
+			<string>592502CA-A711-49E4-A427-00BA4822BE32</string>
+			<key>PayloadVersion</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
 			<key>AutoJoin</key>
 			<true/>
 			<key>EAPClientConfiguration</key>
@@ -22,7 +109,8 @@
 				<string>@example.com</string>
 				<key>TLSTrustedServerNames</key>
 				<array>
-					<string>login.example.com</string>
+					<string>*.example.com</string>
+					<string>login.example.net</string>
 				</array>
 				<key>TTLSInnerAuthentication</key>
 				<string>PAP</string>
@@ -38,11 +126,11 @@
 			<key>PayloadDisplayName</key>
 			<string>WiFi</string>
 			<key>PayloadIdentifier</key>
-			<string>localhost.local.0DB03E91-D8ED-43BD-BCF1-5F48C15F0328.com.apple.wifi.managed.112FC572-7FB3-4F75-A468-1CE71DBBF2F0</string>
+			<string>localhost.local.0DB03E91-D8ED-43BD-BCF1-5F48C15F0328.com.apple.wifi.managed.FD2C726F-37D5-423D-A011-822FF36AC235</string>
 			<key>PayloadType</key>
 			<string>com.apple.wifi.managed</string>
 			<key>PayloadUUID</key>
-			<string>112FC572-7FB3-4F75-A468-1CE71DBBF2F0</string>
+			<string>FD2C726F-37D5-423D-A011-822FF36AC235</string>
 			<key>PayloadVersion</key>
 			<real>1</real>
 			<key>ProxyType</key>
@@ -64,7 +152,7 @@
 	<key>PayloadType</key>
 	<string>Configuration</string>
 	<key>PayloadUUID</key>
-	<string>8CF73C69-5155-444C-91EA-8D0781470863</string>
+	<string>31F44F6C-632D-4650-A703-173EC4D69242</string>
 	<key>PayloadVersion</key>
 	<integer>1</integer>
 </dict>
