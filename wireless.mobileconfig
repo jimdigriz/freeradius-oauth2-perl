@@ -2,6 +2,11 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>ConsentText</key>
+	<dict>
+		<key>default</key>
+		<string>You will be asked for your credentials, make sure you append your username with '@example.com'</string>
+	</dict>
 	<key>PayloadContent</key>
 	<array>
 		<dict>
@@ -15,11 +20,15 @@
 				</array>
 				<key>OuterIdentity</key>
 				<string>@example.com</string>
+				<key>TLSTrustedServerNames</key>
+				<array>
+					<string>login.example.com</string>
+				</array>
 				<key>TTLSInnerAuthentication</key>
 				<string>PAP</string>
 			</dict>
 			<key>EncryptionType</key>
-			<string>WPA2</string>
+			<string>WPA</string>
 			<key>HIDDEN_NETWORK</key>
 			<false/>
 			<key>IsHotspot</key>
@@ -29,29 +38,33 @@
 			<key>PayloadDisplayName</key>
 			<string>WiFi</string>
 			<key>PayloadIdentifier</key>
-			<string>localhost.local.0DB03E91-D8ED-43BD-BCF1-5F48C15F0328.com.apple.wifi.managed.90733C86-5C03-4730-9AAA-ACD667C7994C</string>
+			<string>localhost.local.0DB03E91-D8ED-43BD-BCF1-5F48C15F0328.com.apple.wifi.managed.112FC572-7FB3-4F75-A468-1CE71DBBF2F0</string>
 			<key>PayloadType</key>
 			<string>com.apple.wifi.managed</string>
 			<key>PayloadUUID</key>
-			<string>90733C86-5C03-4730-9AAA-ACD667C7994C</string>
+			<string>112FC572-7FB3-4F75-A468-1CE71DBBF2F0</string>
 			<key>PayloadVersion</key>
 			<real>1</real>
 			<key>ProxyType</key>
 			<string>None</string>
 			<key>SSID_STR</key>
-			<string>Example SSID</string>
+			<string>Example</string>
 		</dict>
 	</array>
+	<key>PayloadDescription</key>
+	<string>Configures your Apple device so it can connect to the Example wireless network.</string>
 	<key>PayloadDisplayName</key>
 	<string>Example Wireless</string>
 	<key>PayloadIdentifier</key>
 	<string>localhost.local.0DB03E91-D8ED-43BD-BCF1-5F48C15F0328</string>
+	<key>PayloadOrganization</key>
+	<string>Example Inc</string>
 	<key>PayloadRemovalDisallowed</key>
 	<false/>
 	<key>PayloadType</key>
 	<string>Configuration</string>
 	<key>PayloadUUID</key>
-	<string>3E2351EC-3FEA-47B8-B43A-3DED89BEB16B</string>
+	<string>8CF73C69-5155-444C-91EA-8D0781470863</string>
 	<key>PayloadVersion</key>
 	<integer>1</integer>
 </dict>
