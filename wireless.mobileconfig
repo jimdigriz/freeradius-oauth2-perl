@@ -7,6 +7,8 @@
 		<key>default</key>
 		<string>You will be asked for your credentials, make sure you append your username with '@example.com'</string>
 	</dict>
+	<key>DurationUntilRemoval</key>
+	<integer>47347200</integer>
 	<key>PayloadContent</key>
 	<array>
 		<dict>
@@ -107,10 +109,15 @@
 				</array>
 				<key>OuterIdentity</key>
 				<string>@example.com</string>
+				<key>PayloadCertificateAnchorUUID</key>
+				<array>
+					<string>592502CA-A711-49E4-A427-00BA4822BE32</string>
+					<string>E22923E6-2E05-4ABE-97E3-FCA12D9BD2FE</string>
+				</array>
 				<key>TLSTrustedServerNames</key>
 				<array>
-					<string>*.example.com</string>
 					<string>login.example.net</string>
+					<string>*.example.com</string>
 				</array>
 				<key>TTLSInnerAuthentication</key>
 				<string>PAP</string>
@@ -126,11 +133,11 @@
 			<key>PayloadDisplayName</key>
 			<string>WiFi</string>
 			<key>PayloadIdentifier</key>
-			<string>localhost.local.0DB03E91-D8ED-43BD-BCF1-5F48C15F0328.com.apple.wifi.managed.FD2C726F-37D5-423D-A011-822FF36AC235</string>
+			<string>localhost.local.0DB03E91-D8ED-43BD-BCF1-5F48C15F0328.com.apple.wifi.managed.B5FDA35A-8764-43B3-BAEA-45B9AFC8D0D6</string>
 			<key>PayloadType</key>
 			<string>com.apple.wifi.managed</string>
 			<key>PayloadUUID</key>
-			<string>FD2C726F-37D5-423D-A011-822FF36AC235</string>
+			<string>B5FDA35A-8764-43B3-BAEA-45B9AFC8D0D6</string>
 			<key>PayloadVersion</key>
 			<real>1</real>
 			<key>ProxyType</key>
@@ -152,7 +159,7 @@
 	<key>PayloadType</key>
 	<string>Configuration</string>
 	<key>PayloadUUID</key>
-	<string>31F44F6C-632D-4650-A703-173EC4D69242</string>
+	<string>F4B32ABA-6B9C-440B-865F-E2A4E7812259</string>
 	<key>PayloadVersion</key>
 	<integer>1</integer>
 </dict>
