@@ -114,8 +114,8 @@ $ua->add_handler('response_done', sub { return _cache_store(@_) });
 if (defined($cfg->{'_'}->{'debug'}) && $cfg->{'_'}->{'debug'} == 1) {
 	&radiusd::radlog(RADIUS_LOG_INFO, 'debugging enabled, you will see the HTTPS requests in the clear!');
 
-	$ua->add_handler('request_send',  sub { &radiusd::radlog(RADIUS_LOG_DEBUG, $_) foreach split /\n/, shift->dump });
-	$ua->add_handler('response_done', sub { &radiusd::radlog(RADIUS_LOG_DEBUG, $_) foreach split /\n/, shift->dump });
+	$ua->add_handler('request_send',  sub { my $r = $_[0]->clone; $r->decode; &radiusd::radlog(RADIUS_LOG_DEBUG, $_) foreach split /\n/, $r->dump });
+	$ua->add_handler('response_done', sub { my $r = $_[0]->clone; $r->decode; &radiusd::radlog(RADIUS_LOG_DEBUG, $_) foreach split /\n/, $r->dump });
 }
 
 sub authorize {
