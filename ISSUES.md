@@ -1,5 +1,6 @@
 This page lists the outstanding tasks and problems I am yet to solve:
 
+ * if `Cleartext-Password` is set (say in `files`), the caching breaks things, workaround is to use `Password-With-Header` instead
  * fetching users from azure is paged (100 at a time)
  * check threading in rlm_perl, global is probably on run once anyway, BEGIN{} for just validation and barfing at init
  * think of how to better handle xlat injection
