@@ -410,7 +410,7 @@ sub _handle_jsonpath($$$) {
 			lock(%token);
 			$token{$realm} = freeze $t;
 
-			continue;
+			next;
 		}
 
 		last;
