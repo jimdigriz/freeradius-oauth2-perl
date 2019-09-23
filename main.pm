@@ -128,7 +128,7 @@ sub authorize {
 	my $realm = lc $RAD_REQUEST{'Realm'};
 
 	if ($cfg->{$realm}->{'vendor'} eq 'microsoft-azure') {
-		my $url = "https://graph.windows.net/$realm/users?api-version=1.5&\$top=999&\$filter=accountEnabled+eq+true";
+		my $url = "https://graph.microsoft.com/v1.0/users?\$top=999&\$filter=accountEnabled+eq+true";
 		my $jsonpath = '$.value[*].userPrincipalName';
 
 		my ($j, @results) = _handle_jsonpath($realm, $url, $jsonpath);
@@ -139,7 +139,7 @@ sub authorize {
 		return RLM_MODULE_NOTFOUND
 			unless (grep { $_ eq lc $RAD_REQUEST{'Stripped-User-Name'} } map { s/@[^@]*$//; lc $_ } @results);
 
-		$url = "https://graph.windows.net/$realm/users/$RAD_REQUEST{'User-Name'}/memberOf?api-version=1.5&\$top=999";
+		$url = "https://graph.microsoft.com/v1.0/users/$RAD_REQUEST{'User-Name'}/memberOf?\$top=999";
 		$jsonpath = '$.value[?($_->{objectType} eq "Group" && $_->{securityEnabled} eq "true")].displayName';
 
 		($j, @results) = _handle_jsonpath($realm, $url, $jsonpath);
@@ -269,7 +269,7 @@ sub _discovery ($) {
 		return;
 	}
 
-	my $j = decode_json $r->decoded_content;
+	my $j = JSON->new->allow_nonref->decode($r->decoded_content);
 	unless (defined($j)) {
 		&radiusd::radlog(RADIUS_LOG_ERROR, 'non-JSON reponse');
 		return;
@@ -299,7 +299,7 @@ sub _fetch_token ($@) {
 	return RLM_MODULE_FAIL
 		unless (defined($d));
 
-	push @args, resource => 'https://graph.windows.net'
+	push @args, resource => 'https://graph.microsoft.com'
 		if ($cfg->{$realm}->{'vendor'} eq 'microsoft-azure');
 
 	my $r = $ua->post($d->{'token_endpoint'}, [ scope => 'openid', @args ]);
@@ -308,7 +308,7 @@ sub _fetch_token ($@) {
 		return RLM_MODULE_FAIL;
 	}
 
-	my $j = decode_json $r->decoded_content;
+	my $j = JSON->new->allow_nonref->decode($r->decoded_content);
 	unless (defined($j)) {
 		&radiusd::radlog(RADIUS_LOG_INFO, 'non-JSON reponse to authentication request');
 		return RLM_MODULE_FAIL;
@@ -416,7 +416,7 @@ sub _handle_jsonpath($$$) {
 		last;
 	}
 
-	my $j = decode_json $r->decoded_content;
+	my $j = JSON->new->allow_nonref->decode($r->decoded_content);
 	unless (defined($j)) {
 		&radiusd::radlog(RADIUS_LOG_INFO, 'non-JSON reponse to authentication request');
 		return RLM_MODULE_FAIL;
