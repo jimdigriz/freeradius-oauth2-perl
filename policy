@@ -1,0 +1,31 @@
+oauth2.authorize {
+	# for non-oauth2 handled domains you will see and should ignore
+	# ERRROR: "Config item "realm[...].oauth2.discovery" does not exist"
+	if (&Realm && &User-Password && "%{config:realm[%{Realm}].oauth2.discovery}") {
+		update control {
+			&Cache-Read-Only = yes
+		}
+		oauth2_cache
+		oauth2_perl
+	} else {
+		noop
+	}
+}
+
+oauth2.authenticate {
+	oauth2_perl
+}
+
+oauth2.post-auth {
+	if (&control:Auth-Type == "oauth2") {
+		update request {
+			&Tmp-String-0 = "%{randstr:32.}"
+		}
+		update control {
+			&Password-With-Header = "{ssha512}%{sha512:%{&User-Password}%{&Tmp-String-0}}%{hex:&Tmp-String-0}"
+		}
+	}
+	if (&control:OAuth2-Password-Last-Modified) {
+		oauth2_cache
+	}
+}
