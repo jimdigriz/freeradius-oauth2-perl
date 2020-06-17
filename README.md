@@ -186,8 +186,8 @@ The initial request will be slow as the user/group databases populate, then futu
 
 If your authentication does not work, you should stop FreeRADIUS and run it in debugging mode:
 
-    systemctl stop freeradius
-    freeradius -X
+    sudo systemctl stop freeradius
+    sudo freeradius -X
 
 From another terminal re-run `radtest` and the debugging output from FreeRADIUS should provide clues to the underlying problem.
 
