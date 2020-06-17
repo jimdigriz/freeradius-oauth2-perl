@@ -17,7 +17,7 @@ Many of these features aim to try to *not* communicate with Azure so to hide bot
  * [supports paging](https://docs.microsoft.com/en-us/graph/paging)
      * earlier versions of this code were limited to 999 user accounts
  * [supports delta queries](https://docs.microsoft.com/en-us/graph/delta-query-overview)
-     * reduces amount of data needing to be transfered from Azure
+     * reduces amount of data needing to be transferred from Azure
      * means faster polling for updates can be used without triggering throttling
  * connection cache to Azure to make requests faster
  * password (using [`{ssha512}`](https://freeradius.org/radiusd/man/rlm_pap.html)) caching for faster re-authentications
@@ -99,7 +99,7 @@ This will let you to track the changes you made using:
 
 ## FreeRADIUS
 
-After updating the following files as described below (you may need to replace `freeradius` with `raddb`), you should restart FreeRADIUS (`systemctl restart freeradius`) to apply the changes.
+After updating the following files as described below (you may need to replace `freeradius` with `raddb`), you should restart FreeRADIUS (`sudo systemctl restart freeradius`) to apply the changes.
 
 Add the following to `/etc/freeradius/proxy.conf`:
 
