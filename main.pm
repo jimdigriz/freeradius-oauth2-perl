@@ -193,8 +193,9 @@ sub worker {
 				return $delta;
 			}
 
+			# delta queries can be seen as a database replication stream so we have to retain everything
+			# unless explictly told that it can be deleted via @remove->reason->'deleted'
 			my (%users, %groups);
-			# delta does not support $filter=accountEnabled+eq+true
 			my $usersUri = 'https://graph.microsoft.com/v1.0/users/delta?$select=id,userPrincipalName,isResourceAccount,accountEnabled,lastPasswordChangeDateTime';
 			my $groupsUri = 'https://graph.microsoft.com/v1.0/groups/delta?$select=id,displayName,members';
 			while ($running) {
@@ -272,6 +273,7 @@ sub worker {
 					cond_signal(%{$realms{$realm}});
 				}
 
+				# successful run means we can reset the pacer
 				$pacing = 0;
 
 				my $sleep = int($ttl - ($ttl / 3) + rand(2 * $ttl / 3));
