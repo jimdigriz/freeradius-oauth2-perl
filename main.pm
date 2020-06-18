@@ -99,8 +99,8 @@ sub from_radtime {
 sub worker {
 	my $thr;
 	my $running = 1;
-	$SIG{'HUP'} = sub { print STDERR "HERE1\n"; $thr->kill('TERM') if (defined($thr)); };
-	$SIG{'TERM'} = sub { print STDERR "HERE0\n"; $running = 0; $SIG{'HUP'}(); };
+	$SIG{'HUP'} = sub { print STDERR "worker supervisor SIGHUP\n"; $thr->kill('TERM') if (defined($thr)); };
+	$SIG{'TERM'} = sub { print STDERR "worker supervisor SIGTERM\n"; $running = 0; $thr->kill('TERM') if (defined($thr)); };
 
 	our ($realm, $discovery_uri, $client_id, $client_secret) = @_;
 	our $ttl = int($RAD_PERLCONF{ttl} || 30);
@@ -121,7 +121,7 @@ sub worker {
 	while (1) {
 		$thr = async {
 			my $running = 1;
-			$SIG{'TERM'} = sub { print STDERR "HERE2\n"; $running = 0; };
+			$SIG{'TERM'} = sub { print STDERR "worker SIGTERM\n"; $running = 0; };
 
 			&radiusd::radlog(L_DBG, "oauth2 worker ($realm): started (tid=${\threads->tid()})");
 
