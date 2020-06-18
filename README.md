@@ -182,7 +182,7 @@ After a restart, you should be able to do an authentication against the server u
 
 The initial request will be slow as the user/group databases populate, then future requests (even on different accounts) will be fast.
 
-If your authentication fails, then you may see some `Reply-Message' attributes from Azure if there is a problem with the account.  If there is no `Reply-Message` then your next step is to stop FreeRADIUS and run it in debugging mode:
+If your authentication fails, then you may see some `Reply-Message` attributes from Azure if there is a problem with the account.  If there is no `Reply-Message` then your next step is to stop FreeRADIUS and run it in debugging mode:
 
     sudo systemctl stop freeradius
     sudo freeradius -X
