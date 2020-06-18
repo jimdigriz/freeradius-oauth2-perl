@@ -174,6 +174,8 @@ This should look something like:
 
 ### 802.1X
 
+For 802.1X (WPA Enterprise wireless and wired) authentication, you *must* use [EAP-TTLS/PAP](https://en.wikipedia.org/wiki/Extensible_Authentication_Protocol#EAP_Tunneled_Transport_Layer_Security_(EAP-TTLS)).  Fortunately client support is widespread and so Linux, Android, BB10, macOS/iOS (via a [`.mobileconfig`](https://support.apple.com/apple-configurator)) and [Microsoft Windows 8](https://adamsync.wordpress.com/2012/05/08/eap-ttls-on-windows-2012-build-8250/) or later (use a supplicant extension such as [SecureW2 Enterprise Client](https://www.securew2.com/products/enterpriseclient/) for earlier versions) users will have have no problems.
+
 You should edit your `/etc/freeradius/sites-enabled/inner-tunnel` file similarly to how you amended `/etc/freeradius/sites-enabled/default` above.
 
 # Troubleshooting
