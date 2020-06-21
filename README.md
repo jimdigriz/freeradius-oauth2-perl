@@ -1,6 +1,8 @@
 This page describes how to set up [FreeRADIUS](https://freeradius.org/) using [`rlm_perl`](https://freeradius.org/modules/?s=perl&mod=rlm_perl) to communicate with an [OAuth2](https://oauth.net/2/) identity provider backend allowing users to connect to a wireless [802.1X](https://en.wikipedia.org/wiki/IEEE_802.1X) (WPA Enterprise) network without needing on premise systems.
 
-**N.B.** your OAuth2 provider *must* support the [Resource Owner Password Credentials Grant](https://tools.ietf.org/html/rfc6749#section-4.3); this means (for now) only [Microsoft Azure Active Directory](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth-ropc) is supported.
+Your OAuth2 provider *must* support the [Resource Owner Password Credentials Grant](https://tools.ietf.org/html/rfc6749#section-4.3); this means (for now) only [Microsoft Azure Active Directory](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth-ropc) is supported.  The [Password Grant](https://oauth.net/2/grant-types/password/) is necessary as it is the only grant flows that does not require user interaction with a web browser which is impossible during an 802.1X authentication.
+
+For 802.1X (wired and WPA Enterprise wireless) authentication, you *must* use [EAP-TTLS/PAP](https://en.wikipedia.org/wiki/Extensible_Authentication_Protocol#EAP_Tunneled_Transport_Layer_Security_(EAP-TTLS)) so that the cleartext password is securely transported to your RADIUS server and usable with the password grant flow.  Fortunately client support is widespread and so Linux, Android, BB10, macOS/iOS (via a [`.mobileconfig`](https://support.apple.com/apple-configurator)) and [Microsoft Windows 8](https://adamsync.wordpress.com/2012/05/08/eap-ttls-on-windows-2012-build-8250/) or later (use a supplicant extension such as [SecureW2 Enterprise Client](https://www.securew2.com/products/enterpriseclient/) for earlier versions) users will have have no problems.
 
 These instructions assume you are familiar with using FreeRADIUS in an 802.1X environment; if you are not you should start with a deployment utilising static credentials stored in a [local users file](https://wiki.freeradius.org/config/Users).
 
@@ -20,15 +22,10 @@ Many of these features aim to try to *not* communicate with Azure so to hide bot
      * reduces amount of data needing to be transferred from Azure
      * means faster polling for updates can be used without triggering throttling
  * connection cache to Azure to make requests faster
- * password (using [`{ssha512}`](https://freeradius.org/radiusd/man/rlm_pap.html)) caching for faster re-authentications
+ * password caching (hashed using [`{ssha512}`](https://freeradius.org/radiusd/man/rlm_pap.html))
      * user list is still checked so the effect of disabling an account will continue to be fast
      * if a user updates their password, the cached entry is ignored
  * group membership is populated via way of the `OAuth2-Group` attribute and optionally checked by using unlang
-
-## Related Links
-
- * [OAuth 2.0](https://oauth.net/2/)
-     * [Password Grant](https://oauth.net/2/grant-types/password/) is used by this module
 
 # Preflight
 
@@ -53,7 +50,7 @@ Starting with a fresh empty Debian 'buster' 10.x installation, as root run the f
     curl -f -o /etc/apt/trusted.gpg.d/networkradius.gpg.asc http://packages.networkradius.com/pgp/packages@networkradius.com
     echo 'deb [signed-by=/etc/apt/trusted.gpg.d/networkradius.gpg.asc] http://packages.networkradius.com/releases/debian-buster buster main' > /etc/apt/sources.list.d/networkradius-freeradius.list
     apt-get update
-    apt-get -y install --no-install-recommends freeradius freeradius-rest freeradius-utils
+    apt-get -y install --no-install-recommends freeradius freeradius-utils
 
 You should now have a working 3.0.x FreeRADIUS installation.
 
@@ -104,12 +101,13 @@ Add the following to `/etc/freeradius/proxy.conf`:
             discovery = "https://login.microsoftonline.com/%{Realm}/v2.0"
             client_id = "..."
             client_secret = "..."
+            cache_password = yes
         }
     }
 
-Replacing `example.com` with your domain and `oauth2_client_{id,secret}` with the noted values from earlier.
+Replacing `example.com` with your domain and `oauth2_client_{id,secret}` with the noted values from earlier and if you maintain multiple domains you should add multiple blocks here too.
 
-**N.B.** you can add multiple entries if you maintain multiple domains
+If your local company policy requires you disabling password caching then you can set `cache_password = no` (default: `yes`, *anything* else is treated as `no`) though this is strongly *not* recommended not just due to the impact on the user-experience but more importantly as it assists avoid triggering throttling by Azure which would lead to a service outage.
 
 Run the following as root:
 
@@ -169,8 +167,6 @@ This should look something like:
     }
 
 ### 802.1X
-
-For 802.1X (WPA Enterprise wireless and wired) authentication, you *must* use [EAP-TTLS/PAP](https://en.wikipedia.org/wiki/Extensible_Authentication_Protocol#EAP_Tunneled_Transport_Layer_Security_(EAP-TTLS)).  Fortunately client support is widespread and so Linux, Android, BB10, macOS/iOS (via a [`.mobileconfig`](https://support.apple.com/apple-configurator)) and [Microsoft Windows 8](https://adamsync.wordpress.com/2012/05/08/eap-ttls-on-windows-2012-build-8250/) or later (use a supplicant extension such as [SecureW2 Enterprise Client](https://www.securew2.com/products/enterpriseclient/) for earlier versions) users will have have no problems.
 
 You should edit your `/etc/freeradius/sites-enabled/inner-tunnel` file similarly to how you amended `/etc/freeradius/sites-enabled/default` above.
 
