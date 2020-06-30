@@ -45,7 +45,7 @@ On the target RADIUS server, as `root` fetch a copy of the project, the recommen
     git clone https://github.com/jimdigriz/freeradius-oauth2-perl.git
     cd freeradius-oauth2-perl
 
-**N.B.** you can alternatively open the URL above in your browser, click on 'Clone or download' and use the 'Download ZIP'
+**N.B.** alternatively open the URL above in your browser, click on 'Clone or download' and use the 'Download ZIP'
 
 You now need to install FreeRADIUS 3.0.x as your target, and it is *strongly* recommended you use the [packages distributed by Network RADIUS](https://networkradius.com/freeradius-packages/index.html).
 
