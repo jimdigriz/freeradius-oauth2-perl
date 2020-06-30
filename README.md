@@ -33,7 +33,7 @@ If you run into problems getting a `users` file environment to run, then please 
 
 Once you are more familiar with using FreeRADIUS and have the above working, then you should try to follow these instructions. If you run into problems then do seek non-guaranteed 'best effort' help from me through a GitHub issue including the output of `freeradius -X` with both client secrets and `User-Password` obscured.
 
-I also do offer consultancy services through [coreMem Limited](https://coremem.com/).
+Consultancy services are available through [coreMem Limited](https://coremem.com/).
 
 # Preflight
 
