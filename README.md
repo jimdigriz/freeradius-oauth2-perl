@@ -115,7 +115,7 @@ Add the following to `/etc/freeradius/proxy.conf`:
 
 Replacing `example.com` with your domain and `oauth2_client_{id,secret}` with the noted values from earlier and if you maintain multiple domains you should add multiple blocks here too.
 
-If your local company policy requires you disabling password caching then you can set `cache_password = no` (default: `yes`, *anything* else is treated as `no`) though this is strongly *not* recommended not just due to the impact on the user-experience but more importantly as it assists avoid triggering throttling by Azure which would lead to a service outage.
+If your local company policy requires you to disable password caching then you can set `cache_password = no` (default: `yes`, *anything* else is treated as `no`) though this is strongly recommended *against* due to both the impact on the user-experience and the protection it offers from potential service outages if Azure decides to throttle you.
 
 Run the following as root:
 
