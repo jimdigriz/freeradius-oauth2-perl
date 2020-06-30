@@ -87,13 +87,15 @@ if (defined($RAD_PERLCONF{debug}) && $RAD_PERLCONF{debug} =~ /^(?:1|true|yes)$/i
 }
 
 # %{date:...} does not work :(
+Time::Piece->use_locale();
+use constant RADTIME_FMT => '%b %e %Y %H:%M:%S %Z';
 sub to_radtime {
 	my ($dt) = @_;
-	return Time::Piece->strptime($dt, '%Y-%m-%dT%H:%M:%SZ')->strftime('%b %e %Y %H:%M:%S UTC');
+	return gmtime->strptime($dt, '%Y-%m-%dT%H:%M:%SZ')->strftime(RADTIME_FMT);
 }
 sub from_radtime {
 	my ($dt) = @_;
-	return Time::Piece->strptime($dt, '%b %e %Y %H:%M:%S UTC');
+	return localtime->strptime($dt, RADTIME_FMT);
 }
 
 sub worker {
