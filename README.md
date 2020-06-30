@@ -22,7 +22,7 @@ Many of these features aim to try to *not* communicate with Azure so to hide bot
      * reduces amount of data needing to be transferred from Azure
      * means faster polling for updates can be used without triggering throttling
  * connection cache to Azure to make requests faster
- * password caching (hashed using [`{ssha512}`](https://freeradius.org/radiusd/man/rlm_pap.html))
+ * password caching (protected with a [`{ssha512}`](https://freeradius.org/radiusd/man/rlm_pap.html) salted hash)
      * user list is still checked so the effect of disabling an account will continue to be fast
      * if a user updates their password, the cached entry is ignored
  * group membership is populated via way of the `OAuth2-Group` attribute and optionally checked by using unlang
