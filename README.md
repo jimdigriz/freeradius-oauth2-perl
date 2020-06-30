@@ -4,14 +4,6 @@ Your OAuth2 provider *must* support the [Resource Owner Password Credentials Gra
 
 For 802.1X (wired and WPA Enterprise wireless) authentication, you *must* use [EAP-TTLS/PAP](https://en.wikipedia.org/wiki/Extensible_Authentication_Protocol#EAP_Tunneled_Transport_Layer_Security_(EAP-TTLS)) so that the cleartext password is securely transported to your RADIUS server and usable with the password grant flow. Fortunately client support is widespread and so Linux, Android, BB10, macOS/iOS (via a [`.mobileconfig`](https://support.apple.com/apple-configurator)) and [Microsoft Windows 8](https://adamsync.wordpress.com/2012/05/08/eap-ttls-on-windows-2012-build-8250/) or later (use a supplicant extension such as [SecureW2 Enterprise Client](https://www.securew2.com/products/enterpriseclient/) for earlier versions) users will have have no problems.
 
-## Support
-
-These instructions assume you are familiar with using FreeRADIUS in an 802.1X environment and if you are not you should [start with a deployment utilising static credentials](https://openschoolsolutions.org/freeradius-secure-wifi-network/) stored in a [local `users` file](https://wiki.freeradius.org/config/Users).
-
-If you run into problems getting a `users` file environment to run, then please seek support from the [FreeRADIUS community](https://freeradius.org/support/) but do *not* ask on those mailing lists for help on how to use this module.
-
-Once you are more familiar with using FreeRADIUS and have the above working, then you should try to follow these instructions. If you run into problems then do seek non-guaranteed 'best effort' help from me through a GitHub issue (including the output of `freeradius -X` with client secrets and `User-Password` obscured); I do also provide paid consultancy through [coreMem Limited](https://coremem.com/).
-
 ## Features
 
 Many of these features aim to try to *not* communicate with Azure so to hide both latency and throttling problems.
@@ -32,6 +24,14 @@ Many of these features aim to try to *not* communicate with Azure so to hide bot
      * user list is still checked so the effect of disabling an account will continue to be fast
      * if a user updates their password, the cached entry is ignored
  * group membership is populated via way of the `OAuth2-Group` attribute and optionally checked by using unlang
+
+## Support
+
+These instructions assume you are familiar with using FreeRADIUS in an 802.1X environment and if you are not you should [start with a deployment utilising static credentials](https://openschoolsolutions.org/freeradius-secure-wifi-network/) stored in a [local `users` file](https://wiki.freeradius.org/config/Users).
+
+If you run into problems getting a `users` file environment to run, then please seek support from the [FreeRADIUS community](https://freeradius.org/support/) but do *not* ask on those mailing lists for help on how to use this module.
+
+Once you are more familiar with using FreeRADIUS and have the above working, then you should try to follow these instructions. If you run into problems then do seek non-guaranteed 'best effort' help from me through a GitHub issue (including the output of `freeradius -X` with client secrets and `User-Password` obscured); I do also provide paid consultancy through [coreMem Limited](https://coremem.com/).
 
 # Preflight
 
