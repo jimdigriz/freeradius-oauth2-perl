@@ -7,11 +7,11 @@ FreeRADIUS makes working with a REST API really difficult for the following (und
      * cannot be flatten by the [Microsoft Graph API](https://docs.microsoft.com/en-us/graph/use-the-api)
  * URI handling is...peculiar
      * validation of the URL is done *before* `xlat` and as `://` cannot be found it is considered invalid
-     * host/path componments are treated differently
+     * host/path components are treated differently
      * every `xlat` evaluation in the path is URL encoded unconditionally
      * as such if you have an attribute that contains a correctly formed query string (or URI) it breaks it
          * such URLs can be found in the OAuth2 Discovery document and...
- * does not make the HTTP headers of the response avaliable
+ * does not make the HTTP headers of the response available
      * parsing [`Cache-Control`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control) headers is impossible
  * makes supporting paging impossible
      * we need to use the [full URL](https://docs.microsoft.com/en-us/graph/paging) from the response to walk through pages, unfortunately the unconditional escaping of `xlat`'s make this not possible

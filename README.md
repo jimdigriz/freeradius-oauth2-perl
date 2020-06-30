@@ -1,10 +1,16 @@
 This page describes how to set up [FreeRADIUS](https://freeradius.org/) using [`rlm_perl`](https://freeradius.org/modules/?s=perl&mod=rlm_perl) to communicate with an [OAuth2](https://oauth.net/2/) identity provider backend allowing users to connect to a wireless [802.1X](https://en.wikipedia.org/wiki/IEEE_802.1X) (WPA Enterprise) network without needing on premise systems.
 
-Your OAuth2 provider *must* support the [Resource Owner Password Credentials Grant](https://tools.ietf.org/html/rfc6749#section-4.3); this means (for now) only [Microsoft Azure Active Directory](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth-ropc) is supported.  The [Password Grant](https://oauth.net/2/grant-types/password/) is necessary as it is the only grant flows that does not require user interaction with a web browser (think "log in via Google/Facebook/LinkedIn/...") which is impossible during an 802.1X authentication as the user's workstation does not have an IP address.
+Your OAuth2 provider *must* support the [Resource Owner Password Credentials Grant](https://tools.ietf.org/html/rfc6749#section-4.3); this means (for now) only [Microsoft Azure Active Directory](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth-ropc) is supported. The [Password Grant](https://oauth.net/2/grant-types/password/) is necessary as it is the only grant flows that does not require user interaction with a web browser (think "log in via Google/Facebook/LinkedIn/...") which is impossible during an 802.1X authentication as the user's workstation does not have an IP address.
 
-For 802.1X (wired and WPA Enterprise wireless) authentication, you *must* use [EAP-TTLS/PAP](https://en.wikipedia.org/wiki/Extensible_Authentication_Protocol#EAP_Tunneled_Transport_Layer_Security_(EAP-TTLS)) so that the cleartext password is securely transported to your RADIUS server and usable with the password grant flow.  Fortunately client support is widespread and so Linux, Android, BB10, macOS/iOS (via a [`.mobileconfig`](https://support.apple.com/apple-configurator)) and [Microsoft Windows 8](https://adamsync.wordpress.com/2012/05/08/eap-ttls-on-windows-2012-build-8250/) or later (use a supplicant extension such as [SecureW2 Enterprise Client](https://www.securew2.com/products/enterpriseclient/) for earlier versions) users will have have no problems.
+For 802.1X (wired and WPA Enterprise wireless) authentication, you *must* use [EAP-TTLS/PAP](https://en.wikipedia.org/wiki/Extensible_Authentication_Protocol#EAP_Tunneled_Transport_Layer_Security_(EAP-TTLS)) so that the cleartext password is securely transported to your RADIUS server and usable with the password grant flow. Fortunately client support is widespread and so Linux, Android, BB10, macOS/iOS (via a [`.mobileconfig`](https://support.apple.com/apple-configurator)) and [Microsoft Windows 8](https://adamsync.wordpress.com/2012/05/08/eap-ttls-on-windows-2012-build-8250/) or later (use a supplicant extension such as [SecureW2 Enterprise Client](https://www.securew2.com/products/enterpriseclient/) for earlier versions) users will have have no problems.
 
-These instructions assume you are familiar with using FreeRADIUS in an 802.1X environment; if you are not you should [start with a deployment utilising static credentials](https://openschoolsolutions.org/freeradius-secure-wifi-network/) stored in a [local users file](https://wiki.freeradius.org/config/Users).
+## Support
+
+These instructions assume you are familiar with using FreeRADIUS in an 802.1X environment and if you are not you should [start with a deployment utilising static credentials](https://openschoolsolutions.org/freeradius-secure-wifi-network/) stored in a [local `users` file](https://wiki.freeradius.org/config/Users).
+
+If you run into problems getting a `users` file environment to run, then please seek support from the [FreeRADIUS community](https://freeradius.org/support/) but do *not* ask on those mailing lists for help on how to use this module.
+
+Once you are more familiar with using FreeRADIUS and have the above working, then you should try to follow these instructions. If you run into problems then do seek non-guaranteed 'best effort' help from me through a GitHub issue (including the output of `freeradius -X` with client secrets and `User-Password` obscured); I do also provide paid consultancy through [coreMem Limited](https://coremem.com/).
 
 ## Features
 
@@ -178,7 +184,7 @@ After a restart, you should be able to do an authentication against the server u
 
 The initial request will be slow as the user/group databases populate, then future requests (even on different accounts) will be fast.
 
-If your authentication fails, then you may see some `Reply-Message` attributes from Azure if there is a problem with the account.  If there is no `Reply-Message` then your next step is to stop FreeRADIUS and run it in debugging mode:
+If your authentication fails, then you may see some `Reply-Message` attributes from Azure if there is a problem with the account. If there is no `Reply-Message` then your next step is to stop FreeRADIUS and run it in debugging mode:
 
     sudo systemctl stop freeradius
     sudo freeradius -X
@@ -186,6 +192,8 @@ If your authentication fails, then you may see some `Reply-Message` attributes f
 Now from another terminal re-run `radtest` and in the debugging output from FreeRADIUS should be clues to the underlying problem.
 
 ## 802.1X
+
+**N.B.** do not try to debug an 802.1X authentication until *after* you have managed to get the much simpler `radtest` to work for you
 
 You will require a copy of [`eapol_test`](http://deployingradius.com/scripts/eapol_test/) which to build from source on your target RADIUS server you type:
 
