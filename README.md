@@ -29,7 +29,7 @@ Many of these features aim to try to *not* communicate with Azure so to hide bot
 
 These instructions assume you are familiar with using FreeRADIUS in an 802.1X environment and if you are not you should [start with a deployment utilising static credentials](https://openschoolsolutions.org/freeradius-secure-wifi-network/) stored in a [local `users` file](https://wiki.freeradius.org/config/Users).
 
-If you run into problems getting a `users` file environment to run, then please seek support from the [FreeRADIUS community](https://freeradius.org/support/) but do *not* ask on those mailing lists for help on how to use this module.
+If you run into problems getting a `users` file environment to run, then please seek support from the [FreeRADIUS community](https://freeradius.org/support/) but do *not* ask there for help on how to use this module.
 
 Once you are more familiar with using FreeRADIUS and have the above working, then you should try to follow these instructions. If you run into problems then do seek non-guaranteed 'best effort' help from me through a GitHub issue including the output of `freeradius -X` with both client secrets and `User-Password` obscured.
 
