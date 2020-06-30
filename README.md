@@ -9,8 +9,8 @@ For 802.1X (wired and WPA Enterprise wireless) authentication, you *must* use [E
 Many of these features aim to try to *not* communicate with Azure so to hide both latency and throttling problems.
 
  * updates user/group information in the background and does not delay authentications
-     * due to limitations of `rlm_perl`, the first request against a realm/domain will be slow
-         * it may even fail due to timing out
+     * due to limitations of `rlm_perl`, the first request against a realm/domain will be *very* slow
+         * it may even fail due to timing out as fetching the full user/group lists for your realm/domain takes time
          * it is recommended as part of your process of restarting FreeRADIUS, you include a 'warmup' authentication with `radtest` or `eapol_test`
      * by default this refresh occurs every 30 seconds
          * smallest value allowed is 10 seconds as it is useful for debugging
