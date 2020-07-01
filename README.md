@@ -9,10 +9,7 @@ For 802.1X (wired and WPA Enterprise wireless) authentication, you *must* use [E
 Many of these features aim to try to *not* communicate with Azure so to hide both latency and throttling problems.
 
  * updates user/group information in the background and does not delay authentications
-     * due to limitations of `rlm_perl`, the first request against a realm/domain will be *very* slow
-         * it may even fail due to timing out as fetching the full user/group lists for your realm/domain takes time
-         * it is recommended as part of your process of restarting FreeRADIUS, you include a 'warmup' authentication with `radtest` or `eapol_test`
-     * by default this refresh occurs every 30 seconds
+     * by default this refresh occurs every 30 seconds (using the `ttl` configuration parameter in [`module`](module))
          * do not go below 30 in production, as delays in the cloud make lower values mostly pointless
          * smallest value allowed is 10 seconds but going below the default should only be used if you are debugging the database replication code
          * if you require 'instant' replication then [webhooks is the answer](https://github.com/jimdigriz/freeradius-oauth2-perl/issues/9)
@@ -186,7 +183,14 @@ After a restart, you should be able to do an authentication against the server u
 
     radtest USERNAME@example.com PASSWORD 127.0.0.1 0 testing123
 
-**N.B.** the first request to each realm/domain will be very slow it takes time to populate the local copies of your user and group information, future requests (even on different user accounts) will be fast.
+Please note that due to limitations in FreeRADIUS and around `rlm_perl`:
+
+ * the first request against a realm/domain will be *very* slow
+ * it may be so slow that the request will fail due to timing out
+     * retry is necessary as depending on how large your realm/domain is it should work on the second or third try
+     * it takes time to download a list of all your users and their group memberships
+     * after this initial synchronisation, further updates are handled in the background and will not impact future requests
+ * it is *strongly* recommended as part of the process of restarting FreeRADIUS is to afterwards use `radtest` (or `eapol_test` described below) to preload and warmup the user and group replication
 
 If your authentication fails, then you may see some `Reply-Message` attributes from Azure if there is a problem with the account. If there is no `Reply-Message` then your next step is to stop FreeRADIUS and run it in debugging mode:
 
@@ -194,6 +198,16 @@ If your authentication fails, then you may see some `Reply-Message` attributes f
     sudo freeradius -X
 
 Now from another terminal re-run `radtest` and in the debugging output from FreeRADIUS should be clues to the underlying problem.
+
+Whilst FreeRADIUS is in debugging mode, you can monitor the database replication by looking for (this may be interleaved with other debug output so do use `grep oauth2 worker`):
+
+    rlm_perl: oauth2 worker (example.com): sync                   <-- process starts
+    rlm_perl: oauth2 worker (example.com): sync users             <-- starting fetch of users
+    rlm_perl: oauth2 worker (example.com): users page             <-- page of user results (initial sync has lots of these!)
+    rlm_perl: oauth2 worker (example.com): sync groups            <-- starting fetch of group memberships
+    rlm_perl: oauth2 worker (example.com): groups page            <-- page of group results (initial sync has lots of these!)
+    rlm_perl: oauth2 worker (example.com): apply                  <-- process complete new data made live
+    rlm_perl: oauth2 worker (example.com): syncing in 32 seconds  <-- next sync ('ttl' scheduled with 33% fuzz)
 
 ## 802.1X
 
