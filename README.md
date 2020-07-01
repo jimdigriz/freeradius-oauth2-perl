@@ -186,7 +186,7 @@ After a restart, you should be able to do an authentication against the server u
 
     radtest USERNAME@example.com PASSWORD 127.0.0.1 0 testing123
 
-The initial request will be slow as the user/group databases populate, then future requests (even on different accounts) will be fast.
+**N.B.** the first request to each realm/domain will be very slow it takes time to populate the local copies of your user and group information, future requests (even on different user accounts) will be fast.
 
 If your authentication fails, then you may see some `Reply-Message` attributes from Azure if there is a problem with the account. If there is no `Reply-Message` then your next step is to stop FreeRADIUS and run it in debugging mode:
 
