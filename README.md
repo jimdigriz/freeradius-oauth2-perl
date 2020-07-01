@@ -190,7 +190,7 @@ Please note that due to limitations in FreeRADIUS and around `rlm_perl`:
      * retry is necessary as depending on how large your realm/domain is it should work on the second or third try
      * it takes time to download a list of all your users and their group memberships
      * after this initial synchronisation, further updates are handled in the background and will not impact future requests
- * it is *strongly* recommended as part of the process of restarting FreeRADIUS is to afterwards use `radtest` (or `eapol_test` described below) to preload and warmup the user and group replication
+ * it is *strongly* recommended as part of the process of restarting FreeRADIUS is to afterwards loop (`while radtest ...; do sleep 0.1; done`) with `radtest` (or `eapol_test` described below) until authentication succeeds to preload and warmup the user and group replication
 
 If your authentication fails, then you may see some `Reply-Message` attributes from Azure if there is a problem with the account. If there is no `Reply-Message` then your next step is to stop FreeRADIUS and run it in debugging mode:
 
