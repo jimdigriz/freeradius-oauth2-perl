@@ -187,7 +187,7 @@ Please note that due to limitations in FreeRADIUS and around `rlm_perl`:
 
  * the first request against a realm/domain will be *very* slow
  * it may be so slow that the request will fail due to timing out
-     * retry is necessary as depending on how large your realm/domain is it should work on the second or third try
+     * please retry as depending on how large your realm/domain it may only start to work on the second or third try
      * it takes time to download a list of all your users and their group memberships
      * after this initial synchronisation, further updates are handled in the background and will not impact future requests
  * it is *strongly* recommended as part of the process of restarting FreeRADIUS is to afterwards loop using `radtest` (or `eapol_test` described below) until authentication succeeds to preload and warmup the user and group replication:
