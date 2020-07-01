@@ -13,9 +13,9 @@ Many of these features aim to try to *not* communicate with Azure so to hide bot
          * it may even fail due to timing out as fetching the full user/group lists for your realm/domain takes time
          * it is recommended as part of your process of restarting FreeRADIUS, you include a 'warmup' authentication with `radtest` or `eapol_test`
      * by default this refresh occurs every 30 seconds
-         * smallest value allowed is 10 seconds as it is useful for debugging
          * do not go below 30 in production, as delays in the cloud make lower values mostly pointless
-         * if you want faster/'instant', then [webhooks, is the answer](https://github.com/jimdigriz/freeradius-oauth2-perl/issues/9)
+         * smallest value allowed is 10 seconds but going below the default should only be used if you are debugging the database replication code
+         * if you require 'instant' replication then [webhooks is the answer](https://github.com/jimdigriz/freeradius-oauth2-perl/issues/9)
  * [supports paging](https://docs.microsoft.com/en-us/graph/paging)
      * earlier versions of this code were limited to 999 user accounts
  * [supports delta queries](https://docs.microsoft.com/en-us/graph/delta-query-overview)
