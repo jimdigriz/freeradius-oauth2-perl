@@ -219,7 +219,7 @@ You will require a copy of [`eapol_test`](http://deployingradius.com/scripts/eap
 
     sudo apt-get -y install --no-install-recommends build-essential git libdbus-1-dev libnl-3-dev libnl-genl-3-dev libnl-route-3-dev libssl-dev pkg-config
     git clone git://w1.fi/hostap.git
-    cd hostapd
+    cd hostap
     sed -e 's/^#CONFIG_EAPOL_TEST=y/CONFIG_EAPOL_TEST=y/' wpa_supplicant/defconfig > wpa_supplicant/.config
     make -C wpa_supplicant -j$(($(getconf _NPROCESSORS_ONLN)+1)) eapol_test
 
