@@ -11,7 +11,7 @@ Many of these features aim to try to *not* communicate with Azure so to hide bot
  * updates user/group information in the background and does not delay authentications
      * by default this refresh occurs every 30 seconds (using the `ttl` configuration parameter in [`module`](module))
          * do not go below 30 in production, as delays in the cloud make lower values mostly pointless
-         * smallest value allowed is 10 seconds but going below the default should only be used if you are debugging the database replication code
+         * smallest value allowed is 10 but going below the default should only be used if you are debugging the database replication code
          * if you require 'instant' replication then [webhooks is the answer](https://github.com/jimdigriz/freeradius-oauth2-perl/issues/9)
  * [supports paging](https://docs.microsoft.com/en-us/graph/paging)
      * earlier versions of this code were limited to 999 user accounts
@@ -22,7 +22,7 @@ Many of these features aim to try to *not* communicate with Azure so to hide bot
  * password caching (protected with a [`{ssha512}`](https://freeradius.org/radiusd/man/rlm_pap.html) salted hash)
      * user list is still checked so the effect of disabling an account will continue to be fast
      * if a user updates their password, the cached entry is ignored
- * group membership is populated via way of the `OAuth2-Group` attribute and optionally checked by using unlang
+ * group membership is populated by way of the `OAuth2-Group` attribute and optionally checked by using unlang
 
 ## Support
 
