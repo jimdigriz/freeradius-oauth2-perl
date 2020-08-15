@@ -201,7 +201,7 @@ If your authentication fails, then you may see some `Reply-Message` attributes f
 
 Now from another terminal re-run `radtest` and in the debugging output from FreeRADIUS should be clues to the underlying problem.
 
-Whilst FreeRADIUS is in debugging mode, you can monitor the database replication by looking for (this may be interleaved with other debug output so do use `grep oauth2 worker`):
+Whilst FreeRADIUS is in debugging mode, you can monitor the database replication by looking for (this may be interleaved with other debug output so do use `grep 'oauth2 worker'`):
 
     rlm_perl: oauth2 worker (example.com): sync                   <-- process starts
     rlm_perl: oauth2 worker (example.com): sync users             <-- starting fetch of users
