@@ -4,6 +4,8 @@ Your OAuth2 provider *must* support the [Resource Owner Password Credentials Gra
 
 For 802.1X (wired and WPA Enterprise wireless) authentication, you *must* use [EAP-TTLS/PAP](https://en.wikipedia.org/wiki/Extensible_Authentication_Protocol#EAP_Tunneled_Transport_Layer_Security_(EAP-TTLS)) so that the cleartext password is securely transported to your RADIUS server and usable with the password grant flow. Fortunately client support is widespread and so Linux, Android, BB10, macOS/iOS (via a [`.mobileconfig`](https://support.apple.com/apple-configurator)) and [Microsoft Windows 8](https://adamsync.wordpress.com/2012/05/08/eap-ttls-on-windows-2012-build-8250/) or later (use a supplicant extension such as [SecureW2 Enterprise Client](https://www.securew2.com/products/enterpriseclient/) for earlier versions) users will have have no problems. Ignore the [FUD](https://en.wikipedia.org/wiki/Fear,_uncertainty,_and_doubt) around EAP-TTLS/PAP which in practice works *identically* to how web browsers transmit credentials over HTTPS; like HTTPS though you *must* use a [valid certificate *and* configure your clients to verify the server name](https://wiki.geant.org/display/H2eduroam/How+to+support+to+end+users#Howtosupporttoendusers-ParametersforSecureDeviceConfiguration) for it to be safe.
 
+**N.B.** this will not work with [MFA enabled accounts](https://docs.microsoft.com/en-us/azure/active-directory/authentication/concept-mfa-howitworks)
+
 ## Features
 
 Many of these features aim to try to *not* communicate with Azure so to hide both latency and throttling problems.
