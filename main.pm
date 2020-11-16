@@ -9,6 +9,7 @@ use JSON::PP;
 use List::Util qw/reduce/;
 use LWP::UserAgent;
 use LWP::ConnCache;
+use POSIX qw(setlocale LC_ALL);
 use Time::Piece;
 
 use Data::Dumper;
@@ -90,19 +91,16 @@ if (defined($RAD_PERLCONF{debug}) && $RAD_PERLCONF{debug} =~ /^(?:1|true|yes)$/i
 Time::Piece->use_locale();
 use constant RADTIME_FMT => '%b %e %Y %H:%M:%S %Z';
 sub to_radtime {
-	my ($dt) = @_;
-	return gmtime->strptime($dt, '%Y-%m-%dT%H:%M:%SZ')->strftime(RADTIME_FMT);
+	my ($s) = @_;
+	return Time::Piece->strptime($s, '%Y-%m-%dT%H:%M:%SZ')->strftime(RADTIME_FMT);
 }
-sub from_radtime {
-	my ($dt) = @_;
-	return localtime->strptime($dt, RADTIME_FMT);
-}
-
 sub worker {
 	my $thr;
 	my $running = 1;
 	$SIG{'HUP'} = sub { print STDERR "worker supervisor SIGHUP\n"; $thr->kill('TERM') if (defined($thr)); };
 	$SIG{'TERM'} = sub { print STDERR "worker supervisor SIGTERM\n"; $running = 0; $thr->kill('TERM') if (defined($thr)); };
+
+	setlocale(LC_ALL, $ENV{LC_ALL});
 
 	our ($realm, $discovery_uri, $client_id, $client_secret) = @_;
 	our $ttl = int($RAD_PERLCONF{ttl} || 30);
@@ -124,6 +122,8 @@ sub worker {
 		$thr = async {
 			my $running = 1;
 			$SIG{'TERM'} = sub { print STDERR "worker SIGTERM\n"; $running = 0; };
+
+			setlocale(LC_ALL, $ENV{LC_ALL});
 
 			&radiusd::radlog(L_DBG, "oauth2 worker ($realm): started (tid=${\threads->tid()})");
 
@@ -335,7 +335,7 @@ sub authorize {
 	# try to outsource the authentication to PAP if we have a cached password and it has not been updated
 	$RAD_CHECK{'Auth-Type'} = 'oauth2'
 		unless (defined($RAD_CHECK{'OAuth2-Password-Last-Modified'})
-			&& from_radtime($state->{u}{$username}) == from_radtime($RAD_CHECK{'OAuth2-Password-Last-Modified'}));
+			&& $state->{u}{$username} eq $RAD_CHECK{'OAuth2-Password-Last-Modified'});
 
 	# technically should be done in authenticate, but we do it here as it would
 	# create a race if the user was to update their password beteen here and there
