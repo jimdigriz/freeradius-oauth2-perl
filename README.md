@@ -50,6 +50,8 @@ You now need to install FreeRADIUS 3.0.x as your target, and it is *strongly* re
 
 How to use Debian is described below, but the instructions should be adaptable with ease to Ubuntu and with not too much work for CentOS. Pull requests are welcomed from those who worked out how to get this working on other OS's (eg. *BSD, another Linux, macOS, ...) and/or a later version of FreeRADIUS.
 
+**N.B.** due to a [bug in FreeRADIUS 3.0.21](https://github.com/FreeRADIUS/freeradius-server/issues/3602), *non-English* users either need to compile FreeRADIUS from source or [workaround the problem by running FreeRADIUS setting the environment variable `LC_ALL=C`](https://github.com/jimdigriz/freeradius-oauth2-perl/issues/13#issuecomment-728279207)
+
 ### Debian
 
 Starting with a fresh empty Debian 'buster' 10.x installation, as root run the following:
@@ -64,8 +66,6 @@ Starting with a fresh empty Debian 'buster' 10.x installation, as root run the f
 You should now have a working 3.0.x FreeRADIUS installation.
 
 **N.B.** these instructions were tested using `docker run -it --rm -v $(pwd):/opt/freeradius-oauth2-perl debian:buster-slim` and with FreeRADIUS 3.0.21
-
-**N.B.** due to a [bug in FreeRADIUS 3.0.21](https://github.com/FreeRADIUS/freeradius-server/issues/3602), *non-English* users either need to compile FreeRADIUS from source or [workaround the problem by running FreeRADIUS setting the environment variable `LC_ALL=C`](https://github.com/jimdigriz/freeradius-oauth2-perl/issues/13#issuecomment-728279207)
 
 It is *strongly* recommended at this point you create a backup of the original configuration:
 
