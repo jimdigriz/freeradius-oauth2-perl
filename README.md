@@ -65,6 +65,8 @@ You should now have a working 3.0.x FreeRADIUS installation.
 
 **N.B.** these instructions were tested using `docker run -it --rm -v $(pwd):/opt/freeradius-oauth2-perl debian:buster-slim` and with FreeRADIUS 3.0.21
 
+**N.B.** due to a [bug in FreeRADIUS 3.0.21](https://github.com/FreeRADIUS/freeradius-server/issues/3602), *non-English* users either need to compile FreeRADIUS from source or [workaround the problem by running FreeRADIUS setting the environment variable `LC_ALL=C`](https://github.com/jimdigriz/freeradius-oauth2-perl/issues/13#issuecomment-728279207)
+
 It is *strongly* recommended at this point you create a backup of the original configuration:
 
     cp -a /etc/freeradius /etc/freeradius.orig
