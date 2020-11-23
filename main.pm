@@ -88,7 +88,11 @@ if (defined($RAD_PERLCONF{debug}) && $RAD_PERLCONF{debug} =~ /^(?:1|true|yes)$/i
 }
 
 # %{date:...} does not work :(
-Time::Piece->use_locale();
+if ($^V ge v5.28) {
+	Time::Piece->use_locale();
+} else {
+	warn "old version of Perl (pre-5.28) detected, non-English locale users must run FreeRADIUS with LC_ALL=C";
+}
 use constant RADTIME_FMT => '%b %e %Y %H:%M:%S %Z';
 sub to_radtime {
 	my ($s) = @_;
