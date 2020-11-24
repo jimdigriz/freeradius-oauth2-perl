@@ -34,7 +34,7 @@ If you run into problems getting a `users` file environment to run, then please 
 
 Once you are more familiar with using FreeRADIUS and have the above working, then you should try to follow these instructions. If you run into problems then do seek non-guaranteed 'best effort' help from me through a GitHub issue including the output of `freeradius -X` with both client secrets and `User-Password` obscured.
 
-**N.B.** if you are not using the packaging from Network RADIUS or compiled from source the [`v3.0.x` branch](https://github.com/FreeRADIUS/freeradius-server/tree/v3.0.x) any GitHub issue you open is likely to be *immediately* closed. The *only* support option available to you will be via paid consultancy with me. Sorry my time is precious to me.
+**N.B.** if you are not using the [packaging from Network RADIUS](https://networkradius.com/freeradius-packages/index.html) or compiled from source the [`v3.0.x` branch](https://github.com/FreeRADIUS/freeradius-server/tree/v3.0.x) any GitHub issue you open is likely to be *immediately* closed. The *only* support option available to you will be via paid consultancy with me. Sorry my time is precious to me.
 
 Consultancy services are available through [coreMem Limited](https://coremem.com/).
 
