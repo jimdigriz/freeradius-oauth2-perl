@@ -34,6 +34,8 @@ If you run into problems getting a `users` file environment to run, then please 
 
 Once you are more familiar with using FreeRADIUS and have the above working, then you should try to follow these instructions. If you run into problems then do seek non-guaranteed 'best effort' help from me through a GitHub issue including the output of `freeradius -X` with both client secrets and `User-Password` obscured.
 
+**N.B.** if you are not using the packaging from Network RADIUS or compiled from source the [`v3.0.x` branch](https://github.com/FreeRADIUS/freeradius-server/tree/v3.0.x) any GitHub issue you open is likely to be *immediately* closed. The *only* support option available to you will be via paid consultancy with me. Sorry my time is precious to me.
+
 Consultancy services are available through [coreMem Limited](https://coremem.com/).
 
 # Preflight
@@ -46,13 +48,13 @@ On the target RADIUS server, as `root` fetch a copy of the project, the recommen
 
 **N.B.** alternatively open the URL above in your browser, click on 'Clone or download' and use the 'Download ZIP'
 
-You now need to install FreeRADIUS 3.0.x as your target, and it is *strongly* recommended you use the [packages distributed by Network RADIUS](https://networkradius.com/freeradius-packages/index.html); by choosing not to the *only* support option available to you will be via paid consultancy with me. Sorry my time is precious to me.
+You now need to install FreeRADIUS 3.0.x as your target, and it is *strongly* recommended you use the [packages distributed by Network RADIUS](https://networkradius.com/freeradius-packages/index.html).
 
 How to use Debian is described below, but the instructions should be adaptable with ease to Ubuntu and with not too much work for CentOS. Pull requests are welcomed from those who worked out how to get this working on other OS's (eg. *BSD, another Linux, macOS, ...) and/or a later version of FreeRADIUS.
 
 **N.B.** due to a [bug in FreeRADIUS 3.0.21](https://github.com/FreeRADIUS/freeradius-server/issues/3602), *non-English* users either need to compile FreeRADIUS from source or [workaround the problem by running FreeRADIUS with the environment variable `LC_ALL=C`](https://github.com/jimdigriz/freeradius-oauth2-perl/issues/13#issuecomment-728279207); this can be done by adding [`Environment=LC_ALL=C` to the `[Service]` section](https://www.freedesktop.org/software/systemd/man/systemd.exec.html#Environment) of `/lib/systemd/system/freeradius.service` and running `sudo systemctl daemon-reload && sudo systemctl restart freeradius`
 
-**N.B.** there are currently no Network RADIUS packages for Ubuntu 'focal' 20.04, if you do not wish any GitHub issue you open to be *immediately* closed you must use Ubuntu 'bionic' 18.04 or Debian 'buster' 10
+**N.B.** currently there are no Network RADIUS provided packaging for Ubuntu 'focal' 20.04, it is recommended you use Ubuntu 'bionic' 18.04 or Debian 'buster' 10; or alternatively compile from source
 
 ### Debian
 
