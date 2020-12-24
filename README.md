@@ -63,7 +63,7 @@ Starting with a fresh empty Debian 'buster' 10.x (or Ubuntu 'bionic' 18.04) inst
     apt-get update
     apt-get -y install --no-install-recommends ca-certificates curl libjson-pp-perl libwww-perl
     curl -f -o /etc/apt/trusted.gpg.d/networkradius.gpg.asc http://packages.networkradius.com/pgp/packages@networkradius.com
-    ( . /etc/os-release && echo "deb [signed-by=/etc/apt/trusted.gpg.d/networkradius.gpg.asc] http://packages.networkradius.com/releases/$ID-$VERSION_CODENAME $VERSION_CODENAME main" ) > /etc/apt/sources.list.d/networkradius-freeradius.list
+    ( . /etc/os-release && echo "deb [signed-by=/etc/apt/trusted.gpg.d/networkradius.gpg.asc] http://packages.networkradius.com/releases/$ID-$VERSION_CODENAME $VERSION_CODENAME main" > /etc/apt/sources.list.d/networkradius-freeradius.list )
     apt-get update
     apt-get -y install --no-install-recommends freeradius freeradius-utils
 
