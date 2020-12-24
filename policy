@@ -2,13 +2,19 @@ oauth2.authorize {
 	# for non-oauth2 handled domains you will see and should ignore
 	# ERRROR: "Config item "realm[...].oauth2.discovery" does not exist"
 	if (&Realm && &User-Password && "%{config:realm[%{Realm}].oauth2.discovery}") {
-		if ("%{config:realm[%{Realm}].oauth2.cache_password}" =~ /^(yes)?$/i) {
+		oauth2_perl
+		if (updated && "%{config:realm[%{Realm}].oauth2.cache_password}" =~ /^(yes)?$/i) {
 			update control {
 				&Cache-Read-Only = yes
 			}
 			oauth2_cache
+			if (ok) {
+				# outsource the authentication to PAP if we have cached credentials
+				update control {
+					Auth-Type -= "oauth2"
+				}
+			}
 		}
-		oauth2_perl
 	} else {
 		noop
 	}

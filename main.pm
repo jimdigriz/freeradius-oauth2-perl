@@ -336,14 +336,11 @@ sub authorize {
 
 	$RAD_REQUEST{'OAuth2-Group'} = reduce { push @$a, $b if (exists($state->{g}{$b}{$username})); $a; } [], keys %{$state->{g}};
 
-	# try to outsource the authentication to PAP if we have a cached password and it has not been updated
-	$RAD_CHECK{'Auth-Type'} = 'oauth2'
-		unless (defined($RAD_CHECK{'OAuth2-Password-Last-Modified'})
-			&& $state->{u}{$username} eq $RAD_CHECK{'OAuth2-Password-Last-Modified'});
-
 	# technically should be done in authenticate, but we do it here as it would
 	# create a race if the user was to update their password beteen here and there
 	$RAD_CHECK{'OAuth2-Password-Last-Modified'} = $state->{u}{$username};
+
+	$RAD_CHECK{'Auth-Type'} = 'oauth2';
 
 	#$_->kill('HUP')->join() foreach @sups;
 
