@@ -56,18 +56,18 @@ How to use Debian is described below, but the instructions should be adaptable w
 
 **N.B.** currently there are no Network RADIUS provided packaging for Ubuntu 'focal' 20.04, it is recommended you use Ubuntu 'bionic' 18.04 or Debian 'buster' 10; or alternatively compile from source
 
-### Debian
+### Debian/Ubuntu
 
-Starting with a fresh empty Debian 'buster' 10.x installation, as root run the following:
+Starting with a fresh empty Debian 'buster' 10.x (or Ubuntu 'bionic' 18.04) installation, as root run the following:
 
     apt-get update
     apt-get -y install --no-install-recommends ca-certificates curl libjson-pp-perl libwww-perl
     curl -f -o /etc/apt/trusted.gpg.d/networkradius.gpg.asc http://packages.networkradius.com/pgp/packages@networkradius.com
-    echo 'deb [signed-by=/etc/apt/trusted.gpg.d/networkradius.gpg.asc] http://packages.networkradius.com/releases/debian-buster buster main' > /etc/apt/sources.list.d/networkradius-freeradius.list
+    ( . /etc/os-release && echo "deb [signed-by=/etc/apt/trusted.gpg.d/networkradius.gpg.asc] http://packages.networkradius.com/releases/$ID-$VERSION_CODENAME $VERSION_CODENAME main" ) > /etc/apt/sources.list.d/networkradius-freeradius.list
     apt-get update
     apt-get -y install --no-install-recommends freeradius freeradius-utils
 
-You should now have a working 3.0.x FreeRADIUS installation.
+You should now have a working FreeRADIUS 3.0.x installation.
 
 **N.B.** these instructions were tested using `docker run -it --rm -v $(pwd):/opt/freeradius-oauth2-perl debian:buster-slim` and with FreeRADIUS 3.0.21
 
