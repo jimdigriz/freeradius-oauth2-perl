@@ -15,7 +15,7 @@ cache oauth2_cache {
 	ttl = 864000	# 10 days
 
 	update {
-		&control:OAuth2-Password-Last-Modified := &control:OAuth2-Password-Last-Modified
+		&request:OAuth2-Password-Last-Modified := &control:OAuth2-Password-Last-Modified
 		&control:Password-With-Header := &control:Password-With-Header
 	}
 }

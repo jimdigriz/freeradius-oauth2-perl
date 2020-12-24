@@ -8,8 +8,8 @@ oauth2.authorize {
 				&Cache-Read-Only = yes
 			}
 			oauth2_cache
-			if (ok) {
-				# outsource the authentication to PAP if we have cached credentials
+			# outsource the authentication to PAP if we have valid cached credentials
+			if (ok && "%{request:OAuth2-Password-Last-Modified}" == "%{control:OAuth2-Password-Last-Modified}") {
 				update control {
 					Auth-Type -= "oauth2"
 				}
