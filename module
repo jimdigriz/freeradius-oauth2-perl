@@ -5,7 +5,7 @@ perl oauth2_perl {
 
 	config {
 		#ttl = 30	# default 30s (>10s as cloud is slow) - 33% fuzzing is applied
-		#debug = yes	# default yes
+		#debug = yes	# default no
 	}
 }
 
