@@ -44,6 +44,9 @@ use vars qw/%RAD_PERLCONF %RAD_REQUEST %RAD_REPLY %RAD_CHECK/;
 my @sups;
 my %realms :shared;
 
+# https://github.com/jimdigriz/freeradius-oauth2-perl/issues/13#issuecomment-728279207
+$ENV{LC_ALL} = 'C' unless (defined($ENV{LC_ALL}));
+
 # it would be nice to catch SIGHUP in the main thread to signal a refresh of
 # the user/group lists but rlm_perl masks out the signal so we cannot
 
