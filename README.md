@@ -137,6 +137,8 @@ Edit your `/etc/freeradius/sites-enabled/default`:
  * at the end of the `authenticate` section add the `Auth-Type oauth2` stanza with `oauth2` inside
  * in the `post-auth` section add `oauth2` after the commented out `ldap` but before the `exec` module
 
+**N.B.** start with the stock/upstream packaged [`default`](https://github.com/FreeRADIUS/freeradius-server/blob/v3.0.x/raddb/sites-available/default) and *add* to it, do *not* strip or change anything until you have a working configuration; once working then do explore customing it to fit your needs.
+
 This should look something like:
 
     authorize {
@@ -184,6 +186,8 @@ This should look something like:
 ### 802.1X
 
 You should edit your `/etc/freeradius/sites-enabled/inner-tunnel` file similarly to how you amended `/etc/freeradius/sites-enabled/default` above.
+
+**N.B.** start with the stock/upstream packaged [`inner-tunnel`](https://github.com/FreeRADIUS/freeradius-server/blob/v3.0.x/raddb/sites-available/inner-tunnel) and *add* to it, do *not* strip or change anything until you have a working configuration; once working then do explore customing it to fit your needs.
 
 # Troubleshooting
 
