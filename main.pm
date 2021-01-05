@@ -308,6 +308,7 @@ sub authorize {
 
 	my $username = $RAD_REQUEST{'User-Name'};
 	my $realm = $RAD_REQUEST{'Realm'};
+	return RLM_MODULE_INVALID unless (defined($username) && defined($realm));
 
 	{
 		lock(%realms);
