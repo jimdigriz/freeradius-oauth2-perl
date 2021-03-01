@@ -224,6 +224,12 @@ Whilst FreeRADIUS is in debugging mode, you can monitor the database replication
     rlm_perl: oauth2 worker (example.com): apply                  <-- process complete new data made live
     rlm_perl: oauth2 worker (example.com): syncing in 32 seconds  <-- next sync ('ttl' scheduled with 33% fuzz)
 
+## HTTPS Requests
+
+If you edit [`module`](./module) and set `debug = yes` for the configuration for the Perl `oauth2_perl` section, the debugging output will also include the plaintext HTTP requests and responses between the module and Azure.
+
+**N.B.** do not leave this enabled in production!
+
 ## 802.1X
 
 **N.B.** do not try to debug an 802.1X authentication until *after* you have managed to get the much simpler `radtest` to work for you
