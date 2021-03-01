@@ -226,7 +226,7 @@ Whilst FreeRADIUS is in debugging mode, you can monitor the database replication
 
 ## HTTPS Requests
 
-If you edit [`module`](./module) and set `debug = yes` for the configuration for the Perl `oauth2_perl` section, the debugging output will also include the plaintext HTTP requests and responses between the module and Azure.
+If you edit [`module`](./module) and set `debug = yes` for the configuration for the Perl `oauth2_perl` section, the debugging output will also include the plaintext HTTP requests and responses between the module and Azure; the output includes passwords and credential tokens used.
 
 **N.B.** do not leave this enabled in production!
 
