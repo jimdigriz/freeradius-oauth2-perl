@@ -147,9 +147,35 @@ This should look something like:
         -ldap
     
         oauth2
-        # uncomment this if you want to enforce the group membership 'network-users'
-        #if (updated && !(&OAuth2-Group && &OAuth2-Group[*] == "network-users")) {
-        #    reject
+        #if (updated) {
+        #
+        #    # uncomment to enforce the group membership 'network-users'
+        #    if (!(&OAuth2-Group && &OAuth2-Group[*] == "network-users")) {
+        #        reject
+        #    }
+        #
+        #    # uncomment to use group membership for VLAN assignment
+        #    update {
+        #        Tunnel-Type := VLAN
+        #        Tunnel-Medium-Type := IEEE-802
+        #        Tunnel-Private-Group-ID := 11
+        #    }
+        #    if (&OAuth2-Group) {
+        #        if (&OAuth2-Group[*] == "staff") {
+        #            update {
+        #                Tunnel-Private-Group-ID := 13
+        #            }
+        #        } elsif (&OAuth2-Group[*] == "students") {
+        #            update {
+        #                Tunnel-Private-Group-ID := 15
+        #            }
+        #        } else {
+        #            update {
+        #                Tunnel-Private-Group-ID := 17
+        #            }
+        #        }
+        #    }
+        #
         #}
     
         #daily
