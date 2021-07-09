@@ -24,7 +24,7 @@ Many of these features aim to try to *not* communicate with Azure so to hide bot
  * password caching (protected with a [`{ssha512}`](https://freeradius.org/radiusd/man/rlm_pap.html) salted hash)
      * user list is still checked so the effect of disabling an account will continue to be fast
      * if a user updates their password, the cached entry is ignored
- * group membership is populated by way of the `OAuth2-Group` attribute and optionally checked by using unlang
+ * group membership is populated by way of the `OAuth2-Group` attribute and optionally checked by using [unlang](https://freeradius.org/radiusd/man/unlang.html)
 
 ## Support
 
@@ -34,7 +34,9 @@ If you run into problems getting a `users` file environment to run, then please 
 
 Once you are more familiar with using FreeRADIUS and have the above working, then you should try to follow these instructions. If you run into problems then do seek non-guaranteed 'best effort' help from me through a GitHub issue including the output of `freeradius -X` with both client secrets and `User-Password` obscured.
 
-**N.B.** if you are not using the [packaging from Network RADIUS](https://networkradius.com/freeradius-packages/index.html) or compiled from source the [`v3.0.x` branch](https://github.com/FreeRADIUS/freeradius-server/tree/v3.0.x) any GitHub issue you open is likely to be *immediately* closed. The *only* support option available to you will be via paid consultancy with me. Sorry my time is precious to me.
+If you do open a GitHub issue you *must* be either using the [packaging from Network RADIUS (process described below)](https://networkradius.com/freeradius-packages/index.html) or have compiled from source the [`v3.0.x` branch](https://github.com/FreeRADIUS/freeradius-server/tree/v3.0.x). If you do not do this, for example instead use your distribution's (Redhat, Ubuntu, ...) packaging, your issue is likely to be closed as I am unable to provide Pro Bono consultancy for your organisation.
+
+This project is a volunteer backed effort and the volunteer (ie. me) requests when asking for *free* assistance you use a supported environment. This is a reasonable request.
 
 Consultancy services are available through [coreMem Limited](https://coremem.com/).
 
