@@ -53,7 +53,7 @@ $ENV{LC_ALL} = 'C' unless (defined($ENV{LC_ALL}));
 # BEGIN is run before anything starts so it would have been a good place
 # to do initialising...but %RAD_PERLCONF is not yet populated so we cannot
 #BEGIN {
-#	&radiusd::radlog(L_DBG, 'oauth2 begin');
+#	radiusd::radlog(L_DBG, 'oauth2 begin');
 #}
 
 # Fortunately, main calls seem to also run as a singleton before anything
@@ -62,8 +62,8 @@ $ENV{LC_ALL} = 'C' unless (defined($ENV{LC_ALL}));
 # * "example.com = ${realm[example.com].oauth2}" produces an off-by-one with an extra empty string key
 #  * using "example.com = { oauth2 = ${realm[example.com].oauth2} }" sort of works but throws a warning
 #   * this does though make configuration harder for the end user
-&radiusd::radlog(L_DBG, 'oauth2 global');
-#&radiusd::radlog(L_DBG, 'oauth2 global: ' . Dumper \%RAD_PERLCONF);
+radiusd::radlog(L_DBG, 'oauth2 global');
+#radiusd::radlog(L_DBG, 'oauth2 global: ' . Dumper \%RAD_PERLCONF);
 
 # ...instead we opt for runtime checking:
 # * %{config:...} throws a scary but ignorable ERROR if the key does not exist
@@ -77,12 +77,12 @@ $ua->agent("freeradius-oauth2-perl/0.2 (+https://github.com/jimdigriz/freeradius
 $ua->conn_cache(LWP::ConnCache->new);
 $ua->default_header('Accept-Encoding' => scalar HTTP::Message::decodable());
 if (defined($RAD_PERLCONF{debug}) && $RAD_PERLCONF{debug} =~ /^(?:1|true|yes)$/i) {
-	&radiusd::radlog(L_INFO, 'debugging enabled, you will see the HTTPS requests in the clear!');
+	radiusd::radlog(L_INFO, 'debugging enabled, you will see the HTTPS requests in the clear!');
 
 	sub handler {
 		my $r = $_[0]->clone;
 		$r->decode;
-		&radiusd::radlog(L_DBG, $_)
+		radiusd::radlog(L_DBG, $_)
 			foreach split /\n/, $r->dump;
 	}
 
@@ -113,13 +113,13 @@ sub worker {
 	our $ttl = int($RAD_PERLCONF{ttl} || 30);
 	$ttl = 10 if ($ttl < 10);
 
-	&radiusd::radlog(L_DBG, "oauth2 worker ($realm): supervisor started (tid=${\threads->tid()})");
+	radiusd::radlog(L_DBG, "oauth2 worker ($realm): supervisor started (tid=${\threads->tid()})");
 
-	&radiusd::radlog(L_DBG, "oauth2 worker ($realm): fetching discovery document");
+	radiusd::radlog(L_DBG, "oauth2 worker ($realm): fetching discovery document");
 
 	my $r = $ua->get("${discovery_uri}/.well-known/openid-configuration");
 	unless ($r->is_success) {
-		&radiusd::radlog(L_ERR, "oauth2 worker ($realm): discovery failed: ${\$r->status_line}");
+		radiusd::radlog(L_ERR, "oauth2 worker ($realm): discovery failed: ${\$r->status_line}");
 		die "discovery ($realm): ${\$r->status_line}";	# no cond_signal so we deadlock!
 	}
 	our $discovery = decode_json $r->decoded_content;
@@ -132,13 +132,13 @@ sub worker {
 
 			setlocale(LC_ALL, $ENV{LC_ALL});
 
-			&radiusd::radlog(L_DBG, "oauth2 worker ($realm): started (tid=${\threads->tid()})");
+			radiusd::radlog(L_DBG, "oauth2 worker ($realm): started (tid=${\threads->tid()})");
 
 			our ($authorization_var, $authorization_ttl);
 			sub authorization {
 				return $authorization_var if (defined($authorization_var) && $authorization_ttl > time());
 
-				&radiusd::radlog(L_DBG, "oauth2 worker ($realm): fetching token");
+				radiusd::radlog(L_DBG, "oauth2 worker ($realm): fetching token");
 
 				my $r = $ua->post($discovery->{token_endpoint}, [
 					client_id => $client_id,
@@ -147,7 +147,7 @@ sub worker {
 					grant_type => 'client_credentials'
 				]);
 				unless ($r->is_success) {
-					&radiusd::radlog(L_ERR, "oauth2 worker ($realm): token failed: ${\$r->status_line}");
+					radiusd::radlog(L_ERR, "oauth2 worker ($realm): token failed: ${\$r->status_line}");
 					die "token ($realm): ${\$r->status_line}" if (is_server_error($r->code));
 					return;
 				}
@@ -170,12 +170,12 @@ sub worker {
 						return &fetch($purpose, $uri);
 					} elsif ($r->code == HTTP::Status::HTTP_TOO_MANY_REQUESTS) {
 						my $sleep = (int($r->header('Retry-After')) || 10) + 1;
-						&radiusd::radlog(L_WARN, "oauth2 worker ($realm): $purpose throttled, sleeping for $sleep seconds");
+						radiusd::radlog(L_WARN, "oauth2 worker ($realm): $purpose throttled, sleeping for $sleep seconds");
 						sleep($sleep);
 						return &fetch($purpose, $uri);
 					}
 
-					&radiusd::radlog(L_WARN, "oauth2 worker ($realm): $purpose failed: ${\$r->status_line}");
+					radiusd::radlog(L_WARN, "oauth2 worker ($realm): $purpose failed: ${\$r->status_line}");
 					die "token ($realm): ${\$r->status_line}" if (is_server_error($r->code));
 
 					return;
@@ -189,7 +189,7 @@ sub worker {
 
 				my $delta;
 				while (defined($uri)) {
-					&radiusd::radlog(L_DBG, "oauth2 worker ($realm): $purpose page");
+					radiusd::radlog(L_DBG, "oauth2 worker ($realm): $purpose page");
 
 					my $data = &fetch($purpose, $uri);
 
@@ -208,9 +208,9 @@ sub worker {
 			my $usersUri = 'https://graph.microsoft.com/v1.0/users/delta?$select=id,userPrincipalName,isResourceAccount,accountEnabled,lastPasswordChangeDateTime';
 			my $groupsUri = 'https://graph.microsoft.com/v1.0/groups/delta?$select=id,displayName,members';
 			while ($running) {
-				&radiusd::radlog(L_INFO, "oauth2 worker ($realm): sync");
+				radiusd::radlog(L_INFO, "oauth2 worker ($realm): sync");
 
-				&radiusd::radlog(L_DBG, "oauth2 worker ($realm): sync users");
+				radiusd::radlog(L_DBG, "oauth2 worker ($realm): sync users");
 				$usersUri = &walk('users', $usersUri, sub {
 					my ($data) = @_;
 
@@ -231,7 +231,7 @@ sub worker {
 					}
 				});
 
-				&radiusd::radlog(L_DBG, "oauth2 worker ($realm): sync groups");
+				radiusd::radlog(L_DBG, "oauth2 worker ($realm): sync groups");
 				$groupsUri = &walk('groups', $groupsUri, sub {
 					my ($data) = @_;
 
@@ -263,7 +263,7 @@ sub worker {
 #				print STDERR Dumper \%users;
 #				print STDERR Dumper \%groups;
 
-				&radiusd::radlog(L_DBG, "oauth2 worker ($realm): apply");
+				radiusd::radlog(L_DBG, "oauth2 worker ($realm): apply");
 				my %db :shared;
 				$db{t} = $discovery->{token_endpoint};
 				$db{u} = shared_clone({});
@@ -286,7 +286,7 @@ sub worker {
 				$pacing = 0;
 
 				my $sleep = int($ttl - ($ttl / 3) + rand(2 * $ttl / 3));
-				&radiusd::radlog(L_INFO, "oauth2 worker ($realm): syncing in $sleep seconds");
+				radiusd::radlog(L_INFO, "oauth2 worker ($realm): syncing in $sleep seconds");
 				sleep($sleep);
 			}
 		};
@@ -297,14 +297,14 @@ sub worker {
 		last unless ($running);
 
 		my $sleep = $pacing ** 2;
-		&radiusd::radlog(L_WARN, "oauth2 worker ($realm): died, sleeping for $sleep seconds");
+		radiusd::radlog(L_WARN, "oauth2 worker ($realm): died, sleeping for $sleep seconds");
 		sleep($sleep);
 		$pacing++ if ($pacing < 10);
 	}
 }
 
 sub authorize {
-	&radiusd::radlog(L_DBG, 'oauth2 authorize');
+	radiusd::radlog(L_DBG, 'oauth2 authorize');
 
 	my $username = $RAD_REQUEST{'User-Name'};
 	my $realm = $RAD_REQUEST{'Realm'};
@@ -315,11 +315,11 @@ sub authorize {
 		unless (exists($realms{$realm})) {
 			# discovery has already been checked that it exists in policy
 			#  * %{xlat:...} does not work :(
-			my $discovery_uri = &radiusd::xlat(&radiusd::xlat("%{config:realm[$realm].oauth2.discovery}"));
+			my $discovery_uri = radiusd::xlat(radiusd::xlat("%{config:realm[$realm].oauth2.discovery}"));
 
 			# these should exist, if they do not...explode
-			my $client_id = &radiusd::xlat("%{config:realm[$realm].oauth2.client_id}");
-			my $client_secret = &radiusd::xlat("%{config:realm[$realm].oauth2.client_secret}");
+			my $client_id = radiusd::xlat("%{config:realm[$realm].oauth2.client_id}");
+			my $client_secret = radiusd::xlat("%{config:realm[$realm].oauth2.client_secret}");
 			return RLM_MODULE_FAIL if ($client_id eq '' || $client_secret eq '');
 
 			$realms{$realm} = shared_clone({});
@@ -352,7 +352,7 @@ sub authorize {
 }
 
 sub authenticate {
-	&radiusd::radlog(L_DBG, 'oauth2 authenticate');
+	radiusd::radlog(L_DBG, 'oauth2 authenticate');
 
 	my $username = $RAD_REQUEST{'User-Name'};
 	my $realm = $RAD_REQUEST{'Realm'};
@@ -362,10 +362,10 @@ sub authenticate {
 		lock(%{$realms{$realm}});
 		$state = $realms{$realm};
 	}
-	my $client_id = &radiusd::xlat("%{config:realm[$realm].oauth2.client_id}");
-	my $client_secret = &radiusd::xlat("%{config:realm[$realm].oauth2.client_secret}");
+	my $client_id = radiusd::xlat("%{config:realm[$realm].oauth2.client_id}");
+	my $client_secret = radiusd::xlat("%{config:realm[$realm].oauth2.client_secret}");
 
-	&radiusd::radlog(L_INFO, "oauth2 token");
+	radiusd::radlog(L_INFO, "oauth2 token");
 
 	# $state->{t} is static so no race
 	my $r = $ua->post($state->{t}, [
@@ -377,7 +377,7 @@ sub authenticate {
 		password => $RAD_REQUEST{'User-Password'}
 	]);
 	unless ($r->is_success) {
-		&radiusd::radlog(L_ERR, "oauth2 token failed: ${\$r->status_line}");
+		radiusd::radlog(L_ERR, "oauth2 token failed: ${\$r->status_line}");
 		return RLM_MODULE_FAIL if (is_server_error($r->code));
 		my $response = decode_json $r->decoded_content;
 		my @e = ( 'Error: ' . $response->{'error'} );
@@ -393,7 +393,7 @@ sub authenticate {
 }
 
 sub detach {
-	&radiusd::radlog(L_DBG, 'oauth2 detach');
+	radiusd::radlog(L_DBG, 'oauth2 detach');
 
 	# ...does not work
 	#$_->kill('TERM')->join() foreach @sups;
