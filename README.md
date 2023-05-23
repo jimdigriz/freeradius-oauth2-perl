@@ -32,9 +32,9 @@ These instructions assume you are familiar with using FreeRADIUS in an 802.1X en
 
 If you run into problems getting a `users` file environment to run, then please seek support from the [FreeRADIUS community](https://freeradius.org/support/) but do *not* ask there for help on how to use this module.
 
-Once you are more familiar with using FreeRADIUS and have the above working, then you should try to follow these instructions. If you run into problems then do seek non-guaranteed 'best effort' help from me through a GitHub issue including the output of `freeradius -X` with both client secrets and `User-Password` obscured.
+Once you are more familiar with using FreeRADIUS and have the above working, then you should try to follow these instructions. If you run into problems then do seek non-guaranteed 'best effort' help from me through a GitHub issue including the *full* and *complete* output of `freeradius -X | tee /tmp/radiusd.log` with both client secrets and `User-Password` obscured. Do *not* send truncated output, or the output *you* think is important, if you do, it is likely your issue will be closed.
 
-If you do open a GitHub issue you *must* be either using the [packaging from Network RADIUS (process described below)](https://networkradius.com/freeradius-packages/index.html) or have compiled from source the [`v3.0.x` branch](https://github.com/FreeRADIUS/freeradius-server/tree/v3.0.x). If you do not do this, for example instead use your distribution's (Redhat, Ubuntu, ...) packaging, your issue is likely to be closed as I am unable to provide Pro Bono consultancy for your organisation.
+If you do open a GitHub issue you *must* be either using the [packaging from Network RADIUS (process described below)](https://networkradius.com/freeradius-packages/index.html) or have compiled from source the [`v3.2.x` branch](https://github.com/FreeRADIUS/freeradius-server/tree/v3.2.x) (or [`v3.0.x` branch](https://github.com/FreeRADIUS/freeradius-server/tree/v3.0.x)). If you do not do this, for example instead use your distribution's (Redhat, Ubuntu, ...) packaging, your issue is likely to be closed as I am unable to provide Pro Bono consultancy for your organisation.
 
 This project is a volunteer backed effort and the volunteer (ie. me) requests when asking for *free* assistance you use a supported environment. This is a reasonable request.
 
