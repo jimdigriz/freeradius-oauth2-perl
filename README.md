@@ -56,18 +56,21 @@ How to use Debian is described below, but the instructions should be adaptable w
 
 ### Debian/Ubuntu
 
-Starting with a fresh empty Debian 'buster' 10.x (or Ubuntu 'bionic' 18.04) installation, as root run the following:
+Starting with a fresh empty Debian 'buster' 10.x (or Ubuntu 'bionic' 18.04) or later installation, as `root` run the following:
 
     apt-get update
     apt-get -y install --no-install-recommends ca-certificates curl libjson-pp-perl libwww-perl
-    curl -f -o /etc/apt/trusted.gpg.d/networkradius.gpg.asc http://packages.networkradius.com/pgp/packages@networkradius.com
-    ( . /etc/os-release && echo "deb [signed-by=/etc/apt/trusted.gpg.d/networkradius.gpg.asc] http://packages.networkradius.com/releases/$ID-$VERSION_CODENAME $VERSION_CODENAME main" > /etc/apt/sources.list.d/networkradius-freeradius.list )
-    apt-get update
-    apt-get -y install --no-install-recommends freeradius freeradius-utils
 
-You should now have a working FreeRADIUS 3.0.x installation.
+Now follow the instructions at the [FreeRADIUS Packages](https://networkradius.com/packages/#fr30) site to install their release of FreeRADIUS.
 
-**N.B.** these instructions were tested using `docker run -it --rm -v $(pwd):/opt/freeradius-oauth2-perl debian:buster-slim` and with FreeRADIUS 3.0.21
+You should now have a working FreeRADIUS 3.0.x installation but to verify you have done this step correctly, please run the following:
+
+    dpkg-query --showformat '${Maintainer}\n' -W freeradius
+    Network RADIUS SARL <info@networkradius.com>
+
+Confirm the output states "Network RADIUS SARL", if it lists "Debian" (or "Ubuntu") then you need to recheck what you did as it was incorrect.
+
+**N.B.** these instructions were tested a long time ago using `docker run -it --rm -v $(pwd):/opt/freeradius-oauth2-perl debian:buster-slim` and with FreeRADIUS 3.0.21, so your numbering may be different!
 
 It is *strongly* recommended at this point you create a backup of the original configuration:
 
@@ -76,6 +79,8 @@ It is *strongly* recommended at this point you create a backup of the original c
 This will let you to track the changes you made using:
 
     diff -u -N -r /etc/freeradius.orig /etc/freeradius
+
+**N.B.** if your configuration shows to have a `3.0` (or `3.2`) directory in `/etc/freeradius` then you have *not* correctly followed the instructions above so recheck!
 
 # Configuration
 
