@@ -54,10 +54,6 @@ You now need to install FreeRADIUS 3.0.x as your target, and it is *strongly* re
 
 How to use Debian is described below, but the instructions should be adaptable with ease to Ubuntu and with not too much work for CentOS. Pull requests are welcomed from those who worked out how to get this working on other OS's (eg. *BSD, another Linux, macOS, ...) and/or a later version of FreeRADIUS.
 
-**N.B.** due to a [bug in FreeRADIUS 3.0.21](https://github.com/FreeRADIUS/freeradius-server/issues/3602), *non-English* users either need to compile FreeRADIUS from source or [workaround the problem by running FreeRADIUS with the environment variable `LC_ALL=C`](https://github.com/jimdigriz/freeradius-oauth2-perl/issues/13#issuecomment-728279207); this can be done by adding [`Environment=LC_ALL=C` to the `[Service]` section](https://www.freedesktop.org/software/systemd/man/systemd.exec.html#Environment) of `/lib/systemd/system/freeradius.service` and running `sudo systemctl daemon-reload && sudo systemctl restart freeradius`
-
-**N.B.** currently there are no Network RADIUS provided packaging for Ubuntu 'focal' 20.04, it is recommended you use Ubuntu 'bionic' 18.04 or Debian 'buster' 10; or alternatively compile from source
-
 ### Debian/Ubuntu
 
 Starting with a fresh empty Debian 'buster' 10.x (or Ubuntu 'bionic' 18.04) installation, as root run the following:
