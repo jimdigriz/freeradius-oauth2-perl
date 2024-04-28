@@ -50,27 +50,27 @@ On the target RADIUS server, as `root` fetch a copy of the project, the recommen
 
 **N.B.** alternatively open the URL above in your browser, click on 'Clone or download' and use the 'Download ZIP'
 
-You now need to install FreeRADIUS 3.0.x as your target, and it is *strongly* recommended you use the [packages distributed by Network RADIUS](https://networkradius.com/freeradius-packages/index.html).
+You now need to install FreeRADIUS 3.2.x as your target, and it is *strongly* recommended you use the [packages distributed by Network RADIUS](https://networkradius.com/freeradius-packages/index.html).
 
 How to use Debian is described below, but the instructions should be adaptable with ease to Ubuntu and with not too much work for CentOS. Pull requests are welcomed from those who worked out how to get this working on other OS's (eg. *BSD, another Linux, macOS, ...) and/or a later version of FreeRADIUS.
 
 ### Debian/Ubuntu
 
-Starting with a fresh empty Debian 'buster' 10.x (or Ubuntu 'bionic' 18.04) or later installation, as `root` run the following:
+Starting with a fresh empty Debian 'bookworm' 12.x (or Ubuntu 'jammy' 22.04) or later installation, as `root` run the following:
 
     apt-get update
     apt-get -y install --no-install-recommends ca-certificates curl libjson-pp-perl libwww-perl
 
 Now follow the instructions at the [FreeRADIUS Packages](https://networkradius.com/packages/#fr30) site to install their release of FreeRADIUS.
 
-You should now have a working FreeRADIUS 3.0.x installation but to verify you have done this step correctly, please run the following:
+You should now have a working FreeRADIUS 3.2.x installation but to verify you have done this step correctly, please run the following:
 
     dpkg-query --showformat '${Maintainer}\n' -W freeradius
     Network RADIUS SARL <info@networkradius.com>
 
 Confirm the output states "Network RADIUS SARL", if it lists "Debian" (or "Ubuntu") then you need to recheck what you did as it was incorrect.
 
-**N.B.** these instructions were tested a long time ago using `docker run -it --rm -v $(pwd):/opt/freeradius-oauth2-perl debian:buster-slim` and with FreeRADIUS 3.0.21, so your numbering may be different!
+**N.B.** these instructions were tested using `docker run -it --rm -v $(pwd):/opt/freeradius-oauth2-perl debian:bookworm` (and on `ubuntu:jammy`) with FreeRADIUS 3.2.3, so your numbering may be different!
 
 It is *strongly* recommended at this point you create a backup of the original configuration:
 
@@ -80,7 +80,7 @@ This will let you to track the changes you made using:
 
     diff -u -N -r /etc/freeradius.orig /etc/freeradius
 
-**N.B.** if your configuration shows to have a `3.0` (or `3.2`) directory in `/etc/freeradius` then you have *not* correctly followed the instructions above so recheck!
+**N.B.** if your configuration shows to have a `3.2` (or `3.0`) directory in `/etc/freeradius` then you have *not* correctly followed the instructions above so recheck!
 
 # Configuration
 
@@ -142,7 +142,7 @@ Edit your `/etc/freeradius/sites-enabled/default`:
  * at the end of the `authenticate` section add the `Auth-Type oauth2` stanza with `oauth2` inside
  * in the `post-auth` section add `oauth2` after the commented out `ldap` but before the `exec` module
 
-**N.B.** start with the stock/upstream packaged [`default`](https://github.com/FreeRADIUS/freeradius-server/blob/v3.0.x/raddb/sites-available/default) and *add* to it, do *not* strip or change anything until you have a working configuration. Once you have a working configuration then do explore customising it to fit your needs but if you break something this module will return `invalid` (ie. dependency on the [`suffix` module setting the `Realm` attribute](https://freeradius.org/modules/?s=realm&mod=rlm_realm))
+**N.B.** start with the stock/upstream packaged [`default`](https://github.com/FreeRADIUS/freeradius-server/blob/v3.2.x/raddb/sites-available/default) and *add* to it, do *not* strip or change anything until you have a working configuration. Once you have a working configuration then do explore customising it to fit your needs but if you break something this module will return `invalid` (ie. dependency on the [`suffix` module setting the `Realm` attribute](https://freeradius.org/modules/?s=realm&mod=rlm_realm))
 
 This should look something like:
 
@@ -219,7 +219,7 @@ This should look something like:
 You should edit your `/etc/freeradius/sites-enabled/inner-tunnel` file similarly to how you amended `/etc/freeradius/sites-enabled/default` above.
 
 
-**N.B.** start with the stock/upstream packaged [`inner-tunnel`](https://github.com/FreeRADIUS/freeradius-server/blob/v3.0.x/raddb/sites-available/inner-tunnel) and *add* to it, do *not* strip or change anything until you have a working configuration. Once you have a working configuration then do explore customising it to fit your needs but if you break something this module will return `invalid` (ie. dependency on the [`suffix` module setting the `Realm` attribute](https://freeradius.org/modules/?s=realm&mod=rlm_realm))
+**N.B.** start with the stock/upstream packaged [`inner-tunnel`](https://github.com/FreeRADIUS/freeradius-server/blob/v3.2.x/raddb/sites-available/inner-tunnel) and *add* to it, do *not* strip or change anything until you have a working configuration. Once you have a working configuration then do explore customising it to fit your needs but if you break something this module will return `invalid` (ie. dependency on the [`suffix` module setting the `Realm` attribute](https://freeradius.org/modules/?s=realm&mod=rlm_realm))
 
 # Troubleshooting
 
