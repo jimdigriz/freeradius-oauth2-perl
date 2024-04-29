@@ -267,11 +267,11 @@ sub worker {
 				my %db :shared;
 				$db{t} = $discovery->{token_endpoint};
 				$db{u} = shared_clone({});
-				$db{u}{$users{$_}->{n}} = $users{$_}->{p}
+				$db{u}{lc $users{$_}->{n}} = $users{$_}->{p}
 					foreach grep { !$users{$_}->{R} && $users{$_}->{e} } keys %users;
 				$db{g} = shared_clone({});
 				foreach (grep { !$groups{$_}->{R} } keys %groups) {
-					my @m = map { $users{$_}->{n} } grep { $users{$_}->{e} } keys %{$groups{$_}->{m}};
+					my @m = map { lc $users{$_}->{n} } grep { $users{$_}->{e} } keys %{$groups{$_}->{m}};
 					$db{g}->{$groups{$_}->{n}} = shared_clone({ map { $_, undef } @m })
 						if (scalar @m);
 				}
@@ -336,13 +336,13 @@ sub authorize {
 	}
 #	print STDERR Dumper $state;
 
-	return RLM_MODULE_NOTFOUND unless (exists($state->{u}{$username}));
+	return RLM_MODULE_NOTFOUND unless (exists($state->{u}{lc $username}));
 
-	$RAD_REQUEST{'OAuth2-Group'} = reduce { push @$a, $b if (exists($state->{g}{$b}{$username})); $a; } [], keys %{$state->{g}};
+	$RAD_REQUEST{'OAuth2-Group'} = reduce { push @$a, $b if (exists($state->{g}{$b}{lc $username})); $a; } [], keys %{$state->{g}};
 
 	# technically should be done in authenticate, but we do it here as it would
 	# create a race if the user was to update their password beteen here and there
-	$RAD_CHECK{'OAuth2-Password-Last-Modified'} = $state->{u}{$username};
+	$RAD_CHECK{'OAuth2-Password-Last-Modified'} = $state->{u}{lc $username};
 
 	$RAD_CHECK{'Auth-Type'} = 'oauth2';
 
@@ -373,7 +373,7 @@ sub authenticate {
 		client_secret => $client_secret,
 		scope => 'openid email',
 		grant_type => 'password',
-		username => $RAD_REQUEST{'User-Name'},
+		username => $username,
 		password => $RAD_REQUEST{'User-Password'}
 	]);
 	unless ($r->is_success) {
