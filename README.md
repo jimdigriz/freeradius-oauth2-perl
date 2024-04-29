@@ -52,7 +52,7 @@ On the target RADIUS server, as `root` fetch a copy of the project, the recommen
 
 You now need to install FreeRADIUS 3.2.x as your target, and it is *strongly* recommended you use the [packages distributed by Network RADIUS](https://networkradius.com/freeradius-packages/index.html).
 
-How to use Debian is described below, but the instructions should be adaptable with ease to Ubuntu and with not too much work for CentOS. Pull requests are welcomed from those who worked out how to get this working on other OS's (eg. *BSD, another Linux, macOS, ...) and/or a later version of FreeRADIUS.
+How to use Debian is described below, but the instructions should be adaptable with ease to Ubuntu and with not too much work for CentOS. Pull requests are welcomed from those who worked out how to get this working on other OS's (eg. \*BSD, another Linux, macOS, ...) and/or a later version of FreeRADIUS.
 
 ### Debian/Ubuntu
 
