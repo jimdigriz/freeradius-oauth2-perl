@@ -218,8 +218,25 @@ This should look something like:
 
 You should edit your `/etc/freeradius/sites-enabled/inner-tunnel` file similarly to how you amended `/etc/freeradius/sites-enabled/default` above.
 
-
 **N.B.** start with the stock/upstream packaged [`inner-tunnel`](https://github.com/FreeRADIUS/freeradius-server/blob/v3.2.x/raddb/sites-available/inner-tunnel) and *add* to it, do *not* strip or change anything until you have a working configuration. Once you have a working configuration then do explore customising it to fit your needs but if you break something this module will return `invalid` (ie. dependency on the [`suffix` module setting the `Realm` attribute](https://freeradius.org/modules/?s=realm&mod=rlm_realm))
+
+#### Group Membership
+
+Not a problem specific to the module, and more a FreeRADIUS gotcha, an administrator will find themselves authenticating devices using the `inner-tunnel` virtual service but require the `OAuth2-Group` attributes to be present on the (outer) `default` virtual server to assign VLANs or `Filter-Id`.
+
+This is best done by adding the following to the `post-auth` section of your `inner-tunnel` virtual server:
+
+    post-auth {
+        ...
+
+        update {
+            &outer.control:OAuth2-Group := &control:OAuth2-Group[*]
+        }
+
+        ....
+    }
+
+Then from the `post-auth` section of your (outer) `default` virtual server you should find the `OAuth2-Group` attributes are accessible.
 
 # Troubleshooting
 
