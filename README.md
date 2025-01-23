@@ -229,8 +229,8 @@ This is best done by adding the following to the `post-auth` section of your `in
     post-auth {
         ...
 
-        update {
-            &outer.control:OAuth2-Group := &control:OAuth2-Group[*]
+        update outer.request {
+            &OAuth2-Group := &OAuth2-Group[*]
         }
 
         ....
