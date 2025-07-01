@@ -116,7 +116,13 @@ Add the following to `/etc/freeradius/proxy.conf`:
 
     realm example.com {
         oauth2 {
+            ## you may need to pick your discovery URL based on the Azure sovereign cloud you are using
+            # Global - if you do not know, use this one
             discovery = "https://login.microsoftonline.com/%{Realm}/v2.0"
+            # USGov - https://learn.microsoft.com/en-us/azure/azure-government/compare-azure-government-global-azure#guidance-for-developers
+            #discovery = "https://login.microsoftonline.us/%{Realm}/v2.0"
+            # China - https://learn.microsoft.com/en-us/azure/china/concepts-service-availability#azure-in-china-rest-endpoints
+            #discovery = "https://login.chinacloudapi.cn/%{Realm}/v2.0"
             client_id = "..."
             client_secret = "..."
             cache_password = yes
