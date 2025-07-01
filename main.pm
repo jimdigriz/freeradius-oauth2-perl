@@ -113,6 +113,13 @@ sub worker {
 	our $ttl = int($RAD_PERLCONF{ttl} || 30);
 	$ttl = 10 if ($ttl < 10);
 
+	our $graph_origin;
+	if (rindex($discovery_uri, 'https://login.chinacloudapi.cn/', 0) == 0) {
+		$graph_origin = 'microsoftgraph.chinacloudapi.cn';
+	} else {
+		$graph_origin = 'graph.microsoft.com';
+	}
+
 	radiusd::radlog(L_DBG, "oauth2 worker ($realm): supervisor started (tid=${\threads->tid()})");
 
 	radiusd::radlog(L_DBG, "oauth2 worker ($realm): fetching discovery document");
@@ -143,7 +150,7 @@ sub worker {
 				my $r = $ua->post($discovery->{token_endpoint}, [
 					client_id => $client_id,
 					client_secret => $client_secret,
-					scope => 'https://graph.microsoft.com/.default',
+					scope => "https://${graph_origin}/.default",
 					grant_type => 'client_credentials'
 				]);
 				unless ($r->is_success) {
@@ -205,8 +212,8 @@ sub worker {
 			# delta queries can be seen as a database replication stream so we have to retain everything
 			# unless explictly told that it can be deleted via @remove->reason->'deleted'
 			my (%users, %groups);
-			my $usersUri = 'https://graph.microsoft.com/v1.0/users/delta?$select=id,userPrincipalName,isResourceAccount,accountEnabled,lastPasswordChangeDateTime';
-			my $groupsUri = 'https://graph.microsoft.com/v1.0/groups/delta?$select=id,displayName,members';
+			my $usersUri = "https://${graph_origin}/v1.0/users/delta?$select=id,userPrincipalName,isResourceAccount,accountEnabled,lastPasswordChangeDateTime";
+			my $groupsUri = "https://${graph_origin}/v1.0/groups/delta?$select=id,displayName,members";
 			while ($running) {
 				radiusd::radlog(L_INFO, "oauth2 worker ($realm): sync");
 
