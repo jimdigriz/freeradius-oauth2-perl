@@ -113,8 +113,11 @@ sub worker {
 	our $ttl = int($RAD_PERLCONF{ttl} || 30);
 	$ttl = 10 if ($ttl < 10);
 
+	# https://learn.microsoft.com/en-us/graph/deployments#microsoft-graph-and-graph-explorer-service-root-endpoints
 	our $graph_origin;
-	if (rindex($discovery_uri, 'https://login.chinacloudapi.cn/', 0) == 0) {
+	if (rindex($discovery_uri, 'https://login.microsoftonline.us/', 0) == 0) {
+		$graph_origin = 'graph.microsoft.us';
+	} elsif (rindex($discovery_uri, 'https://login.chinacloudapi.cn/', 0) == 0) {
 		$graph_origin = 'microsoftgraph.chinacloudapi.cn';
 	} else {
 		$graph_origin = 'graph.microsoft.com';
