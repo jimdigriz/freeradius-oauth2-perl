@@ -215,8 +215,8 @@ sub worker {
 			# delta queries can be seen as a database replication stream so we have to retain everything
 			# unless explictly told that it can be deleted via @remove->reason->'deleted'
 			my (%users, %groups);
-			my $usersUri = "https://${graph_origin}/v1.0/users/delta?$select=id,userPrincipalName,isResourceAccount,accountEnabled,lastPasswordChangeDateTime";
-			my $groupsUri = "https://${graph_origin}/v1.0/groups/delta?$select=id,displayName,members";
+			my $usersUri = "https://${graph_origin}/v1.0/users/delta?\$select=id,userPrincipalName,isResourceAccount,accountEnabled,lastPasswordChangeDateTime";
+			my $groupsUri = "https://${graph_origin}/v1.0/groups/delta?\$select=id,displayName,members";
 			while ($running) {
 				radiusd::radlog(L_INFO, "oauth2 worker ($realm): sync");
 
