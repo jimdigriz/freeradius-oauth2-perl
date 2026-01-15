@@ -1,12 +1,20 @@
 This page describes how to set up [FreeRADIUS](https://freeradius.org/) using [`rlm_perl`](https://freeradius.org/modules/?s=perl&mod=rlm_perl) to communicate with an [OAuth2](https://oauth.net/2/) identity provider backend allowing users to connect to a wireless [802.1X](https://en.wikipedia.org/wiki/IEEE_802.1X) (WPA Enterprise) network without needing on premise systems.
 
+## Azure Marketplace Alternative
+
+[RADNAC](https://www.radnac.com/?utm_source=freeradius-oauth2-perl&utm_medium=site) is now published as an [Azure Marketplace solution](https://marketplace.microsoft.com/product/azure-application/corememlimited.radnac?tab=Overview) that provides a complete RADIUS service running in your own subscription.
+
+It is currently in [preview and thus free](https://www.radnac.com/#preview), with the [expected pricing](https://www.radnac.com/#pricing) and [comparison to other solutions](https://www.radnac.com/resources/compare) available. Your [feedback would be great to have](https://www.radnac.com/contact).
+
+## Overview
+
 Your OAuth2 provider *must* support the [Resource Owner Password Credentials Grant](https://tools.ietf.org/html/rfc6749#section-4.3); this means (for now) only [Microsoft Azure Active Directory](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth-ropc) is supported. The [Password Grant](https://oauth.net/2/grant-types/password/) is necessary as it is the only grant flows that does not require user interaction with a web browser (think "log in via Google/Facebook/LinkedIn/...") which is impossible during an 802.1X authentication as the user's workstation does not have an IP address.
 
 For 802.1X (wired and WPA Enterprise wireless) authentication, you *must* use [EAP-TTLS/PAP](https://en.wikipedia.org/wiki/Extensible_Authentication_Protocol#EAP_Tunneled_Transport_Layer_Security_(EAP-TTLS)) so that the cleartext password is securely transported to your RADIUS server and usable with the password grant flow. Fortunately client support is widespread and so Linux, Android, BB10, macOS/iOS (via a [`.mobileconfig`](https://support.apple.com/apple-configurator)) and [Microsoft Windows 8](https://adamsync.wordpress.com/2012/05/08/eap-ttls-on-windows-2012-build-8250/) or later (use a supplicant extension such as [SecureW2 Enterprise Client](https://www.securew2.com/products/enterpriseclient/) for earlier versions) users will have have no problems. Ignore the [FUD](https://en.wikipedia.org/wiki/Fear,_uncertainty,_and_doubt) around EAP-TTLS/PAP which in practice works *identically* to how web browsers transmit credentials over HTTPS ([PEAP/MSCHAPv2 is similarly vulnerable](https://github.com/tehrhart/challenger)); like HTTPS though you *must* use a [valid certificate *and* configure your clients to verify the server name](https://wiki.geant.org/display/H2eduroam/How+to+support+to+end+users#Howtosupporttoendusers-ParametersforSecureDeviceConfiguration) for it to be safe.
 
 **N.B.** this will not work with [MFA enabled accounts](https://docs.microsoft.com/en-us/azure/active-directory/authentication/concept-mfa-howitworks) but you can workaround this with a [conditional access policy](https://github.com/jimdigriz/freeradius-oauth2-perl/issues/12)
 
-## Features
+### Features
 
 Many of these features aim to try to *not* communicate with Azure so to hide both latency and throttling problems.
 
@@ -26,7 +34,7 @@ Many of these features aim to try to *not* communicate with Azure so to hide bot
      * if a user updates their password, the cached entry is ignored
  * group membership is populated by way of the `OAuth2-Group` attribute and optionally checked by using [unlang](https://freeradius.org/radiusd/man/unlang.html)
 
-## Support
+### Support
 
 These instructions assume you are familiar with using FreeRADIUS in an 802.1X environment and if you are not you should [start with a EAP-TTLS/PAP 802.1X deployment using static credentials](https://openschoolsolutions.org/freeradius-secure-wifi-network/) stored in a [local `users` file](https://wiki.freeradius.org/config/Users).
 
