@@ -4,7 +4,7 @@ This page describes how to set up [FreeRADIUS](https://freeradius.org/) using [`
 
 [RADNAC](https://www.radnac.com/?utm_source=freeradius-oauth2-perl&utm_medium=site) is now published as an [Azure Marketplace solution](https://marketplace.microsoft.com/product/azure-application/corememlimited.radnac?tab=Overview) that provides a complete RADIUS service running in your own subscription.
 
-It is currently in [preview and thus free](https://www.radnac.com/#preview), with the [expected pricing](https://www.radnac.com/#pricing) and [comparison to other solutions](https://www.radnac.com/resources/compare) available. Your [feedback would be great to have](https://www.radnac.com/contact).
+It is currently in [preview and thus free](https://www.radnac.com/?utm_source=freeradius-oauth2-perl&utm_medium=site#preview), with the [expected pricing](https://www.radnac.com/?utm_source=freeradius-oauth2-perl&utm_medium=site#pricing) and [comparison to other solutions](https://www.radnac.com/resources/compare?utm_source=freeradius-oauth2-perl&utm_medium=site) available. Your [feedback would be great to have](https://www.radnac.com/contact?utm_source=freeradius-oauth2-perl&utm_medium=site).
 
 ## Overview
 
