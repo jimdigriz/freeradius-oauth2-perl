@@ -18,13 +18,10 @@ jobs:
       - name: Examine build step output
         id: artifacts
         run: |
-          echo "${{ steps.build_step.outputs.ARTIFACTS }}" | grep '\.deb$'
           echo "deb=$( echo "${{ steps.build_step.outputs.ARTIFACTS }}" | grep '\.deb$' )" >> "$GITHUB_OUTPUT"
           echo "version=$( grep -m 1 '^freeradius-oauth2-perl ' debian/changelog | sed -e 's/.*(//' -e 's/).*//' )" >> "$GITHUB_OUTPUT"
           echo "GITHUB_OUTPUT:"
           cat "$GITHUB_OUTPUT" | sed -e 's/^/    /'
-          echo "All files:"
-          find . | grep -v '\.git'
 
       - name: Validate that the version matches the tag
         if: github.ref_type == 'tag' && github.ref_name != steps.artifacts.outputs.version
