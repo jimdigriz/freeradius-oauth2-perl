@@ -16,6 +16,8 @@ jobs:
         run: |
           echo "${{ steps.build_step.outputs.ARTIFACTS }}" | grep '\.deb$'
           echo "deb=$( echo "${{ steps.build_step.outputs.ARTIFACTS }}" | grep '\.deb$' )" >> "$GITHUB_OUTPUT"
+          ls -al
+          find debian/ 
 
       - name: Upload package as a Release Asset
         # Use a community action to upload the artifact to the GitHub Release
