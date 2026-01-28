@@ -6,7 +6,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: jtdor/build-deb-action@v1
+        id: build_step
         env:
           DEB_BUILD_OPTIONS: noautodbgsym
         with:
           docker-image: debian:bookworm
+      - name: Examine build step output
+        run: |
+          echo "${{ steps.build_step.outputs }}"
+
+#      - name: Upload package as a Release Asset
+#        # Use a community action to upload the artifact to the GitHub Release
+#        uses: softprops/action-gh-release@v2
+#        with:
+#          files: |
+#            $i {{ steps.build_step.outputs.filename }} # Path to the generated .deb file
+#          # The GITHUB_TOKEN is automatically provided to workflows triggered by a release
