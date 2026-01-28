@@ -9,4 +9,4 @@ jobs:
         env:
           DEB_BUILD_OPTIONS: noautodbgsym
         with:
-          docker-image: debian-bookworm:latest
+          docker-image: debian:bookworm
