@@ -17,6 +17,7 @@ jobs:
 
   extract-build-information:
     name: Extract information from the build process
+    needs: build-debs
     runs-on: ubuntu-latest
     steps:
       - name: Examine build step output
@@ -32,7 +33,7 @@ jobs:
     name: Publish package to release
     if: github.ref_type == 'tag'
     runs-on: ubuntu-latest
-    needs: build-debs
+    needs: extract-build-information
     steps:
       - name: Validate that the version matches the tag
         if: github.ref_name != steps.artifacts.outputs.version
