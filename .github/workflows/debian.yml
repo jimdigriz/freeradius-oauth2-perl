@@ -4,8 +4,6 @@ jobs:
   build_debs:
     name: Build package
     runs-on: ubuntu-latest
-    outputs:
-      artifacts: ${{ steps.build_step.outputs.ARTIFACTS }}
     steps:
       - uses: actions/checkout@v4
         name: Source Checkout
@@ -17,42 +15,28 @@ jobs:
         with:
           docker-image: debian:bookworm
 
-  buildinfo:
-    name: Extract information from the build process
-    needs: build_debs
-    runs-on: ubuntu-latest
-    outputs:
-      deb: ${{ steps.artifacts.outputs.deb }}
-      version: ${{ steps.artifacts.outputs.version }}
-    steps:
       - name: Examine build step output
         id: artifacts
         run: |
-          echo "${{ needs.build_debs.outputs.artifacts }}" | grep '\.deb$'
-          echo "deb=$( echo "${{ needs.build_debs.outputs.artifacts }}" | grep '\.deb$' )" >> "$GITHUB_OUTPUT"
+          echo "${{ steps.build_step.outputs.ARTIFACTS }}" | grep '\.deb$'
+          echo "deb=$( echo "${{ steps.build_step.outputs.ARTIFACTS }}" | grep '\.deb$' )" >> "$GITHUB_OUTPUT"
           echo "version=$( grep -m 1 '^freeradius-oauth2-perl ' debian/changelog | sed -e 's/.*(//' -e 's/).*//' )" >> "$GITHUB_OUTPUT"
           echo "GITHUB_OUTPUT:"
           cat "$GITHUB_OUTPUT" | sed -e 's/^/    /'
           echo "All files:"
           find . | grep -v '\.git'
 
-  publish:
-    name: Publish package to release
-    if: github.ref_type == 'tag'
-    runs-on: ubuntu-latest
-    needs: buildinfo
-    steps:
       - name: Validate that the version matches the tag
-        if: github.ref_name != needs.buildinfo.outputs.version
+        if: github.ref_type == 'tag' && github.ref_name != steps.artifacts.outputs.version
         run: |
-          echo "::error Debian package version ${{ needs.buildinfo.outputs.version }} does not match tag ${{ github.ref_name }}"
+          echo "::error Debian package version ${{ steps.artifacts.outputs.version }} does not match tag ${{ github.ref_name }}"
           exit 1
 
       - name: Upload package as a Release Asset
         # Use a community action to upload the artifact to the GitHub Release
         uses: softprops/action-gh-release@v2
-        if: github.ref_name == needs.buildinfo.outputs.version
+        if: github.ref_type == 'tag' && github.ref_name == steps.artifacts.outputs.version
         with:
           files: |
-            ${{ needs.buildinfo.outputs.deb }}
+            ${{ steps.artifacts.outputs.deb }}
           # The GITHUB_TOKEN is automatically provided to workflows triggered by a release
