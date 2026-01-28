@@ -1,0 +1,35 @@
+#!/bin/sh
+set -e
+
+if [ -d /etc/freeradius/3.0 ]; then
+    RADDB_DIR=/etc/freeradius/3.0
+elif [ -d /etc/freeradius ]; then
+    RADDB_DIR=/etc/freeradius
+else
+    echo "ERROR: Could not find the FreeRADIUS configuration directory"
+    exit 2
+fi
+
+case "$1" in
+    remove|upgrade|deconfigure)
+        rm -f ${RADDB_DIR}/mods-available/oauth2 \
+              ${RADDB_DIR}/mods-enabled/oauth2 \
+              ${RADDB_DIR}/policy.d/oauth2
+        temp=$(tempfile)
+        cp ${RADDB_DIR}/dictionary ${temp}
+        grep -v "INCLUDE /usr/share/freeradius-oauth2-perl/dictionary" ${temp} > ${RADDB_DIR}/dictionary
+    ;;
+
+    failed-upgrade)
+    ;;
+
+    *)
+        echo "prerm called with unknown argument \`$1'" >&2
+        exit 1
+    ;;
+esac
+
+
+#DEBHELPER#
+
+exit 0

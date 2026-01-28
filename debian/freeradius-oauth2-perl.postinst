@@ -1,0 +1,52 @@
+#!/bin/sh
+set -e
+
+ROOT=/usr/share/freeradius-oauth2-perl
+
+symlink_files() {
+    if [ -d /etc/freeradius/3.0/mods-available ]; then
+        RADDB_DIR=/etc/freeradius/3.0
+    elif [ -d /etc/freeradius/mods-available ]; then
+        RADDB_DIR=/etc/freeradius
+    else
+        echo "ERROR: Could not find the FreeRADIUS configuration directory"
+        exit 2
+    fi
+
+    ln -s ${ROOT}/module ${RADDB_DIR}/mods-available/oauth2
+    ln -s ${ROOT}/policy ${RADDB_DIR}/policy.d/oauth2
+}
+
+include_dictionary() {
+    if [ -d /etc/freeradius/3.0/mods-available ]; then
+        RADDB_DIR=/etc/freeradius/3.0
+    elif [ -d /etc/freeradius/mods-available ]; then
+        RADDB_DIR=/etc/freeradius
+    else
+        exit 2
+    fi
+
+    echo "\$INCLUDE ${ROOT}/dictionary" >> ${RADDB_DIR}/dictionary
+}
+
+case "$1" in
+    configure)
+        symlink_files
+        include_dictionary
+    ;;
+
+    abort-upgrade|abort-remove|abort-deconfigure)
+        symlink_files
+        include_dictionary
+    ;;
+
+    *)
+        echo "postinst called with unknown argument \`$1'" >&2
+        exit 1
+    ;;
+esac
+
+
+#DEBHELPER#
+
+exit 0
