@@ -25,5 +25,5 @@ jobs:
         if: github.ref_type == 'tag'
         with:
           files: |
-            ${{ steps.artifacts.outputs.deb }} # Path to the generated .deb file
+            ${{ steps.artifacts.outputs.deb }}
           # The GITHUB_TOKEN is automatically provided to workflows triggered by a release
