@@ -20,6 +20,7 @@ jobs:
       - name: Upload package as a Release Asset
         # Use a community action to upload the artifact to the GitHub Release
         uses: softprops/action-gh-release@v2
+        if: github.ref_type == 'tag'
         with:
           files: |
             ${{ steps.artifacts.outputs.deb }} # Path to the generated .deb file
