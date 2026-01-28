@@ -13,7 +13,7 @@ jobs:
           docker-image: debian:bookworm
       - name: Examine build step output
         run: |
-          echo "${{ steps.build_step.outputs }}"
+          echo "${{ steps.build_step.outputs.ARTIFACTS }}"
 
 #      - name: Upload package as a Release Asset
 #        # Use a community action to upload the artifact to the GitHub Release
