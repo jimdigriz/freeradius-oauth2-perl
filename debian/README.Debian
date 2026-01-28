@@ -1,0 +1,5 @@
+freeradius-oauth2-perl for Debian
+
+Packaging of a FreeRADIUS module to authenticate users via Azure EntraID OAuth2.
+
+ -- Mark Donnelly <mark@painless-security.com>  Thu, 22 Jan 2026 21:03:51 -0500

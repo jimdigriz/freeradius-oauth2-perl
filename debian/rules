@@ -1,0 +1,9 @@
+#!/usr/bin/make -f
+# You must remove unused comment lines for the released package.
+export DH_VERBOSE = 1
+
+%:
+	dh $@
+
+override_dh_perl:
+	dh_perl usr/share/freeradius-oauth2-perl

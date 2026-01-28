@@ -1,0 +1,23 @@
+#!/bin/sh
+set -e
+
+case "$1" in
+    remove|upgrade|deconfigure)
+		rm -f /etc/freeradius/mods-enabled/oauth2 /etc/freeradius/3.0/mods-enabled/oauth2 \
+		      /etc/freeradius/mods-available/oauth2 /etc/freeradius/3.0/mods-available/oauth2 \
+			  /etc/freeradius/policy.d/oauth2 /etc/freeradius/3.0/policy.d/oauth2
+    ;;
+
+    failed-upgrade)
+    ;;
+
+    *)
+        echo "prerm called with unknown argument \`$1'" >&2
+        exit 1
+    ;;
+esac
+
+
+#DEBHELPER#
+
+exit 0

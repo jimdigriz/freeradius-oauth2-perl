@@ -1,0 +1,5 @@
+freeradius-oauth2-perl (0.1-1) UNRELEASED; urgency=low
+
+  * Initial release. 
+
+ -- Mark Donnelly <mark@painless-security.com>  Thu, 22 Jan 2026 21:03:51 -0500
