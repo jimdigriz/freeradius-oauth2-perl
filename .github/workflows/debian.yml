@@ -29,10 +29,12 @@ jobs:
         id: artifacts
         run: |
           echo "${{ needs.build_debs.outputs.artifacts }}" | grep '\.deb$'
-          echo "deb=$( echo "${{ steps.build_step.outputs.artifacts }}" | grep '\.deb$' )" >> "$GITHUB_OUTPUT"
+          echo "deb=$( echo "${{ needs.build_debs.outputs.artifacts }}" | grep '\.deb$' )" >> "$GITHUB_OUTPUT"
           echo "version=$( grep -m 1 '^freeradius-oauth2-perl ' debian/changelog | sed -e 's/.*(//' -e 's/).*//' )" >> "$GITHUB_OUTPUT"
           echo "GITHUB_OUTPUT:"
           cat "$GITHUB_OUTPUT" | sed -e 's/^/    /'
+          echo "All files:"
+          find . | grep -v '\.git'
 
   publish:
     name: Publish package to release
