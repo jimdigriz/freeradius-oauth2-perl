@@ -1,1 +1,2 @@
-# You must remove unused comment lines for the released package.
+renumber-dictionary.patch
+rewrite-paths.patch

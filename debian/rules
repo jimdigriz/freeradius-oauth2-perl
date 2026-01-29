@@ -7,3 +7,7 @@ export DH_VERBOSE = 1
 
 override_dh_perl:
 	dh_perl usr/share/freeradius-oauth2-perl
+
+execute_before_dh_install:
+	for p in debian/patches/*.patch; do patch -p1 < $$p; done
+

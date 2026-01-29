@@ -1,0 +1,11 @@
+From: Mark Donnelly <mark@painless-security.com>
+Description: Renumber the supplied RADIUS dictionary
+diff --git a/dictionary b/dictionary
+index 33774da..d327d94 100644
+--- a/dictionary
++++ b/dictionary
+@@ -1,2 +1,2 @@
+-ATTRIBUTE	OAuth2-Password-Last-Modified	3000	date
+-ATTRIBUTE	OAuth2-Group			3001	string
++ATTRIBUTE	OAuth2-Password-Last-Modified	3830	date
++ATTRIBUTE	OAuth2-Group			3831	string
