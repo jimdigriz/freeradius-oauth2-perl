@@ -1,5 +1,13 @@
-freeradius-oauth2-perl for Debian
+This page describes how to use the Debian packaging for freeradius-oauth2-perl with [FreeRADIUS](https://freeradius.org).  It highlights the differences from the [README](README.md) file included in this directory.
 
-Packaging of a FreeRADIUS module to authenticate users via Azure EntraID OAuth2.
+The point of difference introduced in the Debian packaging is the file locations.  Whereas the README directs users to install to `/opt/freeradius-oauth2-perl`, this package follows Debian standards and installs to `/usr/share/freeradius-oauth2-perl` instead.  Further, some of the configuration files that the README asks you to link into the FreeRADIUS configuration underneath `/etc/freeradius` have already been linked.  After installing this package, the steps left for an installation are:
+- Enable the `oauth2` module by:
+```bash
+# Navigate to the FreeRADIUS config directory.  Some packages put it in /etc/freeradius/3.0, and some put it in /etc/freeradius.
+cd /etc/freeradius/3.0 || cd /etc/freeradius
+cd mods-enabled
+ln -s ../mods-available/oauth2 .
+```
+- Define the realm and OAuth configuration as described in the [FreeRADIUS section of the README](README.md#freeradius)
+- Edit your site in `/etc/freeradius/[3.0/]sites-enabled/ as described in the [FreeRADIUS section of the README](README.md#freeradius) to add `oauth2` to the `authorize`, `authenticate`, and `post-auth` sections.
 
- -- Mark Donnelly <mark@painless-security.com>  Thu, 22 Jan 2026 21:03:51 -0500
