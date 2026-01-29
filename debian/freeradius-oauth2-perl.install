@@ -1,0 +1,4 @@
+main.pm /usr/share/freeradius-oauth2-perl/
+module  /usr/share/freeradius-oauth2-perl/
+policy  /usr/share/freeradius-oauth2-perl/
+dictionary /usr/share/freeradius-oauth2-perl/
