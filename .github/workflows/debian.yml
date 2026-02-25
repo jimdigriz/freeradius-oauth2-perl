@@ -1,0 +1,39 @@
+on: push
+
+jobs:
+  build_debs:
+    name: Build package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        name: Source Checkout
+      - uses: jtdor/build-deb-action@v1
+        name: Build Debian Packages
+        id: build_step
+        env:
+          DEB_BUILD_OPTIONS: noautodbgsym
+        with:
+          docker-image: debian:bookworm
+
+      - name: Examine build step output
+        id: artifacts
+        run: |
+          echo "deb=$( echo "${{ steps.build_step.outputs.ARTIFACTS }}" | grep '\.deb$' )" >> "$GITHUB_OUTPUT"
+          echo "version=$( grep -m 1 '^freeradius-oauth2-perl ' debian/changelog | sed -e 's/.*(//' -e 's/).*//' )" >> "$GITHUB_OUTPUT"
+          echo "GITHUB_OUTPUT:"
+          cat "$GITHUB_OUTPUT" | sed -e 's/^/    /'
+
+      - name: Validate that the version matches the tag
+        if: github.ref_type == 'tag' && github.ref_name != steps.artifacts.outputs.version
+        run: |
+          echo "::error Debian package version ${{ steps.artifacts.outputs.version }} does not match tag ${{ github.ref_name }}"
+          exit 1
+
+      - name: Upload package as a Release Asset
+        # Use a community action to upload the artifact to the GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: github.ref_type == 'tag' && github.ref_name == steps.artifacts.outputs.version
+        with:
+          files: |
+            ${{ steps.artifacts.outputs.deb }}
+          # The GITHUB_TOKEN is automatically provided to workflows triggered by a release
